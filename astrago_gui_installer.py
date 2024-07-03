@@ -148,7 +148,8 @@ class CommandRunner:
         if Path.exists(Path.joinpath(Path.cwd(), "kubespray/inventory/mycluster/artifacts/admin.conf")):
             os.putenv('KUBECONFIG', Path.joinpath(Path.cwd(), "kubespray/inventory/mycluster/artifacts/admin.conf"))
         return self._run_command([Path.joinpath(Path.cwd(), "tools/ubuntu/helmfile"), "-b",
-                                  Path.joinpath(Path.cwd(), "tools/ubuntu/helm"), "-e", "astrago", "sync"])
+                                  Path.joinpath(Path.cwd(), "tools/ubuntu/helm"), "-e", "astrago", "--timeout",
+                                  "600" "sync"])
 
     def _save_nfs_inventory(self):
         inventory = {
