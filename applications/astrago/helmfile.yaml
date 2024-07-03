@@ -12,6 +12,7 @@ releases:
   namespace: astrago
   chart: astrago
   wait: true
+  timeout: 600
   labels:
     app: astrago
   values:
