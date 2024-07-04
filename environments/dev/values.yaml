@@ -35,15 +35,15 @@ astrago:
   core:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/core"
-    imageTag: "dev-121f"
+    imageTag: "dev-6edf"
   batch:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/batch"
-    imageTag: "dev-121f"
+    imageTag: "dev-6edf"
   monitor:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/monitor"
-    imageTag: "dev-121f"
+    imageTag: "dev-6edf"
   frontend:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/frontend"
