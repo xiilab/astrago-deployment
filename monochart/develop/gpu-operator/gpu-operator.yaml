@@ -5529,7 +5529,7 @@ spec:
       - name: DEVICE_ID_STRATEGY
         value: uuid
       - name: NVIDIA_VISIBLE_DEVICES
-        value: "2"
+        value: all
       - name: NVIDIA_DRIVER_CAPABILITIES
         value: all
     config:
