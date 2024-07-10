@@ -244,7 +244,7 @@ devicePlugin:
     - name: DEVICE_ID_STRATEGY
       value: uuid
     - name: NVIDIA_VISIBLE_DEVICES
-      value: 2
+      value: "2"
     - name: NVIDIA_DRIVER_CAPABILITIES
       value: all
   resources: {}
