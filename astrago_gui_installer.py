@@ -1,5 +1,6 @@
 import curses
 import os
+import pathlib
 import re
 import subprocess
 from datetime import datetime, timezone, timedelta
@@ -145,10 +146,13 @@ class CommandRunner:
         os.makedirs('environments/astrago', exist_ok=True)
         with open('environments/astrago/values.yaml', 'w') as file:
             yaml.dump(helmfile_env, file, default_flow_style=False, sort_keys=False)
-        if Path.exists(Path.joinpath(Path.cwd(), "kubespray/inventory/mycluster/artifacts/admin.conf")):
-            os.putenv('KUBECONFIG', Path.joinpath(Path.cwd(), "kubespray/inventory/mycluster/artifacts/admin.conf"))
-        return self._run_command([Path.joinpath(Path.cwd(), "tools/ubuntu/helmfile"), "-b",
-                                  Path.joinpath(Path.cwd(), "tools/ubuntu/helm"), "-e", "astrago", "sync"])
+
+        origin_config_path = pathlib.Path(Path.joinpath(Path.cwd(), "kubespray/inventory/mycluster/artifacts/admin.conf"))
+        if origin_config_path.exists():
+            kubeconfig_path = pathlib.Path("~/.kube/config")
+            kubeconfig_path.parent.mkdir(parents=True, exist_ok=True)
+            kubeconfig_path.write_bytes(origin_config_path.read_bytes())
+        return self._run_command(["helmfile", "-e", "astrago", "sync"])
 
     def _save_nfs_inventory(self):
         inventory = {
