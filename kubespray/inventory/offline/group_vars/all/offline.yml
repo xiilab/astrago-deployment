@@ -1,3 +1,5 @@
+containerd_use_config_path: true
+
 # Insecure registries for containerd
 containerd_registries_mirrors:
   - prefix: "{{ registry_host }}"
