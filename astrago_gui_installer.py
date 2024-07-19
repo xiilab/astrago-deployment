@@ -129,7 +129,7 @@ class CommandRunner:
                                   "--become", "--become-user=root",
                                   "cluster.yml",
                                   "--extra-vars",
-                                  "ansible_user={} ansible_password={}".format(username, password)],
+                                  "ansible_user={} ansible_password={} ansible_sudo_pass={}".format(username, password, password)],
                                  cwd='kubespray')
 
     def _run_command(self, cmd, cwd="."):
