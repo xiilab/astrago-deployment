@@ -151,7 +151,7 @@ class CommandRunner:
         origin_config_path = pathlib.Path(
             Path.joinpath(Path.cwd(), "kubespray/inventory/mycluster/artifacts/admin.conf"))
         if origin_config_path.exists():
-            kubeconfig_path = pathlib.Path("~/.kube/config")
+            kubeconfig_path = pathlib.Path(Path.joinpath(Path.home(), '.kube', 'config'))
             kubeconfig_path.parent.mkdir(parents=True, exist_ok=True)
             kubeconfig_path.write_bytes(origin_config_path.read_bytes())
         return self._run_command(["helmfile", "-e", "astrago", "sync"])
