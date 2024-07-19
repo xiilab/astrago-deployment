@@ -129,7 +129,8 @@ class CommandRunner:
                                   "--become", "--become-user=root",
                                   "cluster.yml",
                                   "--extra-vars",
-                                  "ansible_user={} ansible_password={} ansible_sudo_pass={}".format(username, password, password)],
+                                  "ansible_user={} ansible_password={} ansible_sudo_pass={}".format(username, password,
+                                                                                                    password)],
                                  cwd='kubespray')
 
     def _run_command(self, cmd, cwd="."):
@@ -147,7 +148,8 @@ class CommandRunner:
         with open('environments/astrago/values.yaml', 'w') as file:
             yaml.dump(helmfile_env, file, default_flow_style=False, sort_keys=False)
 
-        origin_config_path = pathlib.Path(Path.joinpath(Path.cwd(), "kubespray/inventory/mycluster/artifacts/admin.conf"))
+        origin_config_path = pathlib.Path(
+            Path.joinpath(Path.cwd(), "kubespray/inventory/mycluster/artifacts/admin.conf"))
         if origin_config_path.exists():
             kubeconfig_path = pathlib.Path("~/.kube/config")
             kubeconfig_path.parent.mkdir(parents=True, exist_ok=True)
@@ -178,7 +180,8 @@ class CommandRunner:
                                   "--become", "--become-user=root",
                                   "ansible/install-nfs.yml",
                                   "--extra-vars",
-                                  "ansible_user={} ansible_password={}".format(username, password)])
+                                  "ansible_user={} ansible_password={} ansible_sudo_pass={}".format(username, password,
+                                                                                                    password)])
 
     def _save_gpudriver_inventory(self):
         inventory = {
@@ -207,7 +210,7 @@ class CommandRunner:
              "--become", "--become-user=root",
              "ansible/install-gpu-driver.yml",
              "--extra-vars",
-             "ansible_user={} ansible_password={}".format(username, password)])
+             "ansible_user={} ansible_password={} ansible_sudo_pass={}".format(username, password, passwordd)])
 
 
 class AstragoInstaller:
