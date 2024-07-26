@@ -210,7 +210,7 @@ class CommandRunner:
              "--become", "--become-user=root",
              "ansible/install-gpu-driver.yml",
              "--extra-vars",
-             "ansible_user={} ansible_password={} ansible_sudo_pass={}".format(username, password, passwordd)])
+             "ansible_user={} ansible_password={} ansible_sudo_pass={}".format(username, password, password)])
 
 
 class AstragoInstaller:
