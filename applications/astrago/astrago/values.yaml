@@ -155,7 +155,7 @@ frontend:
   image:
     registry: docker.io
     repository: xiilab/astrago
-    tag: frontend-v1.0.11
+    tag: frontend-v1.0.12
   podAnnotations: {}
   podSecurityContext: {}
   # fsGroup: 2000
