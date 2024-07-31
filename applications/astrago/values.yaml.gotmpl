@@ -109,6 +109,27 @@ monitor:
     - name: PROMETHEUS_URL
       value: http://prometheus-kube-prometheus-prometheus.prometheus.svc.cluster.local:9090
 
+experiment:
+  image:
+    registry: "{{ .Values.astrago.experiment.registry }}"
+    repository: "{{ .Values.astrago.experiment.repository }}"
+    tag: "{{ .Values.astrago.experiment.imageTag }}"
+  env:
+    - name: SPRING_DATASOURCE_JDBC-URL
+      value: jdbc:mariadb://astrago-mariadb:3306/astrago
+    - name: SPRING_DATASOURCE_USERNAME
+      value: {{ .Values.astrago.mariadb.username }}
+    - name: SPRING_DATASOURCE_PASSWORD
+      value: {{ .Values.astrago.mariadb.password }}
+    - name: SPRING_DATASOURCE_HIKARI_MAX-LIFETIME
+      value: {{ .Values.astrago.mariadb.maxLifetime | quote }}
+    - name: SPRING_MVC_PATHMATCH_MATCHING-STRATEGY
+      value: ant_path_matcher
+    - name: SPRING_DATA_MONGODB_URL
+      value: {{ .Values.astrago.mongodb.url }}
+    - name: SPRING_DATA_AUTHENTICATION-DATABASE
+      value: admin
+
 frontend:
   image:
     registry: "{{ .Values.astrago.frontend.registry }}"

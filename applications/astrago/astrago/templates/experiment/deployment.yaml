@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: astrago-backend-experiment
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: astrago-backend-experiment
+spec:
+  {{- if not .Values.experiment.autoscaling.enabled }}
+  replicas: {{ .Values.experiment.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: astrago-backend-experiment
+  template:
+    metadata:
+      {{- with .Values.experiment.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/name: astrago-backend-experiment
+    spec:
+      {{- with .Values.experiment.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "common.serviceAccountName" . }}      
+      securityContext:
+        {{- toYaml .Values.experiment.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.experiment.securityContext | nindent 12 }}
+          image: "{{ default .Values.experiment.image.registry .Values.global.imageRegistry }}/{{ .Values.experiment.image.repository }}:{{ .Values.experiment.image.tag }}"
+          env:
+          {{- range $key, $obj := .Values.experiment.env }}
+          - name: {{ $obj.name }}
+            value: {{ $obj.value | quote }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.experiment.service.port }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.experiment.resources | nindent 12 }}
+      {{- with .Values.experiment.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.experiment.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.experiment.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

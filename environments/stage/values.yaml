@@ -44,6 +44,10 @@ astrago:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/monitor"
     imageTag: "stag-bbf5"
+  experiment:
+    registry: "harbor.xiilab.com:32443"
+    repository: "astrago/experiment"
+    imageTag: "stag-bbf5"
   frontend:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/frontend"
