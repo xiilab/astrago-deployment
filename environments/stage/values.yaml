@@ -37,15 +37,15 @@ astrago:
   core:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/core"
-    imageTag: "stag-bbf5"
+    imageTag: "stag-74a6"
   batch:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/batch"
-    imageTag: "stag-bbf5"
+    imageTag: "stag-74a6"
   monitor:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/monitor"
-    imageTag: "stag-bbf5"
+    imageTag: "stag-74a6"
   experiment:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/experiment"
