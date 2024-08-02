@@ -4,3 +4,5 @@ releases:
   wait: true
   labels:
     app: mpi-operator
+  values:
+  - values.yaml.gotmpl    
