@@ -1,36 +1,26 @@
 all:
   vars:
-    http_server: "http://192.168.56.11"
-    registry_host: "192.168.56.11:35000"
+    http_server: "http://10.61.3.19"
+    registry_host: "10.61.3.19:35000"
   hosts:
-    node1:
-      ansible_host: 192.168.56.11
-      ip: 192.168.56.11
-      access_ip: 192.168.56.11
-    node2:
-      ansible_host: 192.168.56.12
-      ip: 192.168.56.12
-      access_ip: 192.168.56.12
-    node3:
-      ansible_host: 192.168.56.13
-      ip: 192.168.56.13
-      access_ip: 192.168.56.13
+    master:
+      ansible_host: 10.61.3.8
+      ip: 10.61.3.8
+      access_ip: 10.61.3.8
+    worker:
+      ansible_host: 10.61.3.19
+      ip: 10.61.3.19
+      access_ip: 10.61.3.19
   children:
     kube-master:
       hosts:
-        node1:
-        node2:
-        node3:
+        master:
     kube-node:
       hosts:
-        node1:
-        node2:
-        node3:
+        worker:
     etcd:
       hosts:
-        node1:
-        node2:
-        node3:              
+        master:
     k8s-cluster:
       children:
         kube-master:
