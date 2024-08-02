@@ -6,9 +6,9 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the "master" branch
   push:
-    branches: [ "master" ]
+    branches: [ "develop" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "develop" ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -44,14 +44,6 @@ jobs:
           helmfile -e dev -l app=nfs-provisioner template > monochart/develop/nfs-provisioner/nfs-provisioner.yaml
           helmfile -e dev -l app=gpu-operator -n gpu-operator template --include-crds > monochart/develop/gpu-operator/gpu-operator.yaml
 
-      - name: Run stage monochart template script
-        run: |
-          helmfile -e stage -l app=astrago template > monochart/stage/astrago/astrago.yaml
-          helmfile -e stage -l app=prometheus template --include-crds > monochart/stage/prometheus/prometheus.yaml
-          helmfile -e stage -l app=keycloak template > monochart/stage/keycloak/keycloak.yaml
-          helmfile -e stage -l app=nfs-provisioner template > monochart/stage/nfs-provisioner/nfs-provisioner.yaml
-          helmfile -e stage -l app=gpu-operator -n gpu-operator template --include-crds > monochart/stage/gpu-operator/gpu-operator.yaml
-          
       # Runs a set of commands using the runners shell
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
