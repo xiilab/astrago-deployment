@@ -209,10 +209,6 @@ data:
           proxy_pass http://astrago-backend-monitor:8080/api/v1/core/monitor/;
         }
 
-        location /api/v1/experiment/ {
-          proxy_pass http://astrago-backend-experiment:8080/api/v1/experiment/;
-        }
-
         location /api/v1/batch/ {
           proxy_pass http://astrago-backend-batch:8080/api/v1/batch/;
         }
@@ -474,29 +470,6 @@ spec:
       name: http
   selector: 
     app.kubernetes.io/name: astrago-backend-core
----
-# Source: astrago/templates/experiment/service.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: astrago-backend-experiment
-  namespace: astrago
-  labels:
-    helm.sh/chart: astrago-0.1.0
-    app.kubernetes.io/name: astrago
-    app.kubernetes.io/instance: astrago
-    app.kubernetes.io/version: "1.16.0"
-    app.kubernetes.io/managed-by: Helm
-spec:
-  type: NodePort
-  ports:
-    - port: 8080
-      targetPort: 8080
-      nodePort: 30084
-      protocol: TCP
-      name: http
-  selector: 
-    app.kubernetes.io/name: astrago-backend-experiment
 ---
 # Source: astrago/templates/frontend/service.yaml
 apiVersion: v1
@@ -799,54 +772,6 @@ spec:
           persistentVolumeClaim:
             claimName: workload-log-pvc
       terminationGracePeriodSeconds: 10
----
-# Source: astrago/templates/experiment/deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: astrago-backend-experiment
-  namespace: astrago
-  labels:
-    app.kubernetes.io/name: astrago-backend-experiment
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: astrago-backend-experiment
-  template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: astrago-backend-experiment
-    spec:
-      serviceAccountName: astrago-sa      
-      securityContext:
-        {}
-      containers:
-        - name: astrago
-          securityContext:
-            {}
-          image: "harbor.xiilab.com:32443/astrago/experiment:stag-bbf5"
-          env:
-          - name: SPRING_DATASOURCE_JDBC-URL
-            value: "jdbc:mariadb://astrago-mariadb:3306/astrago"
-          - name: SPRING_DATASOURCE_USERNAME
-            value: "astrago"
-          - name: SPRING_DATASOURCE_PASSWORD
-            value: "xiirocks"
-          - name: SPRING_DATASOURCE_HIKARI_MAX-LIFETIME
-            value: "3595000"
-          - name: SPRING_MVC_PATHMATCH_MATCHING-STRATEGY
-            value: "ant_path_matcher"
-          - name: SPRING_DATA_MONGODB_URL
-            value: "mongodb://astrago:xiirocks@astrago-mongodb:27017/astrago?authSource=admin"
-          - name: SPRING_DATA_AUTHENTICATION-DATABASE
-            value: "admin"
-          ports:
-            - name: http
-              containerPort: 8080
-              protocol: TCP
-          resources:
-            {}
 ---
 # Source: astrago/templates/frontend/deployment.yaml
 apiVersion: apps/v1
