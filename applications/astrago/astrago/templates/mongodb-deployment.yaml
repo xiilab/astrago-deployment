@@ -2,7 +2,7 @@ apiVersion: mongodbcommunity.mongodb.com/v1
 kind: MongoDBCommunity
 metadata:
   name: mongodb
-  namespace: astrago
+  namespace: {{ .Release.Namespace }}
 spec:
   members: 1
   type: ReplicaSet
@@ -66,7 +66,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: external-mongo-service-0
-  namespace: astrago
+  namespace: {{ .Release.Namespace }}
 spec:
   type: NodePort
   selector:
@@ -82,7 +82,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: admin-password
-  namespace: astrago
+  namespace: {{ .Release.Namespace }}
 type: Opaque
 data:
   password: eGlpcm9ja3M=
@@ -91,7 +91,13 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: astrago-password
-  namespace: astrago
+  namespace: {{ .Release.Namespace }}
 type: Opaque
 data:
   password: eGlpcm9ja3M=
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mongodb-database
+  namespace: {{ .Release.Namespace }}
