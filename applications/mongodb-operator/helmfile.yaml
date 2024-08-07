@@ -1,6 +1,6 @@
 releases:
 - name: mongodb-operator
-  namespace: astrago
+  namespace: mongodb-operator
   #chart: mongodb/community-operator
   chart: community-operator
   wait: true
