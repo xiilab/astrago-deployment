@@ -571,6 +571,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: external-mongo-service-0
+  namespace: astrago
 spec:
   type: NodePort
   selector:
