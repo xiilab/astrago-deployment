@@ -129,7 +129,7 @@ class CommandRunner:
                                   "--become", "--become-user=root",
                                   "cluster.yml",
                                   "--extra-vars",
-                                  "ansible_user={} ansible_password={}".format(username, password)],
+                                  "ansible_user={} ansible_password={} ansible_become_pass={}".format(username, password, password)],
                                  cwd='kubespray')
 
     def _run_command(self, cmd, cwd="."):
@@ -179,7 +179,7 @@ class CommandRunner:
                                   "--become", "--become-user=root",
                                   "ansible/install-nfs.yml",
                                   "--extra-vars",
-                                  "ansible_user={} ansible_password={}".format(username, password)])
+                                  "ansible_user={} ansible_password={} ansible_become_pass={}".format(username, password, password)])
 
     def _save_gpudriver_inventory(self):
         inventory = {
@@ -208,7 +208,7 @@ class CommandRunner:
              "--become", "--become-user=root",
              "ansible/install-gpu-driver.yml",
              "--extra-vars",
-             "ansible_user={} ansible_password={}".format(username, password)])
+             "ansible_user={} ansible_password={} ansible_become_pass={}".format(username, password, password)])
 
 
 class AstragoInstaller:
