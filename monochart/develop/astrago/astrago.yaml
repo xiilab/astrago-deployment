@@ -69,6 +69,26 @@ data:
   mariadb-root-password: "cm9vdA=="
   mariadb-password: "eGlpcm9ja3M="
 ---
+# Source: astrago/templates/mongodb-deployment.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: admin-password
+  namespace: astrago
+type: Opaque
+data:
+  password: eGlpcm9ja3M=
+---
+# Source: astrago/templates/mongodb-deployment.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: astrago-password
+  namespace: astrago
+type: Opaque
+data:
+  password: eGlpcm9ja3M=
+---
 # Source: astrago/charts/mariadb/templates/primary/configmap.yaml
 apiVersion: v1
 kind: ConfigMap
@@ -545,6 +565,24 @@ spec:
     targetPort: https
   selector:
     k8s-app: metrics-server
+---
+# Source: astrago/templates/mongodb-deployment.yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: external-mongo-service-0
+  annotations:
+    kube-linter.io/ignore-all: "used for sample"
+spec:
+  type: NodePort
+  selector:
+    app: mongodb-svc
+    statefulset.kubernetes.io/pod-name: mongodb-0
+  ports:
+    - protocol: TCP
+      nodePort: 30011
+      port: 30011
+      targetPort: 27017
 ---
 # Source: astrago/templates/monitor/service.yaml
 apiVersion: v1
@@ -1263,4 +1301,69 @@ spec:
     namespace: kube-system
   version: v1beta1
   versionPriority: 100
+---
+# Source: astrago/templates/mongodb-deployment.yaml
+apiVersion: mongodbcommunity.mongodb.com/v1
+kind: MongoDBCommunity
+metadata:
+  name: mongodb
+  namespace: astrago
+spec:
+  members: 1
+  type: ReplicaSet
+  version: "6.0.5"
+  security:
+    authentication:
+      modes: ["SCRAM"]
+  users:
+    - name: admin
+      db: admin
+      passwordSecretRef:
+        name: admin-password
+      roles:
+        - name: clusterAdmin
+          db: admin
+        - name: userAdminAnyDatabase
+          db: admin
+      scramCredentialsSecretName: admin-scram
+    - name: astrago
+      db: admin
+      passwordSecretRef:
+        name: astrago-password
+      roles:
+        - name: readWrite
+          db: astrago
+      scramCredentialsSecretName: astrago-scram
+  additionalMongodConfig:
+    storage.wiredTiger.engineConfig.journalCompressor: zlib
+  statefulSet:
+    spec:
+      volumeClaimTemplates:
+        - metadata:
+            name: data-volume
+          spec:
+            accessModes: [ "ReadWriteOnce" ]
+            storageClassName: astrago-nfs-csi
+            resources:
+              requests:
+                storage: 10Gi
+        - metadata:
+            name: logs-volume
+          spec:
+            accessModes: [ "ReadWriteOnce" ]
+            storageClassName: astrago-nfs-csi
+            resources:
+              requests:
+                storage: 5Gi
+      template:
+        spec:
+          containers:
+            - name: mongod
+              resources:
+                requests:
+                  cpu: "500m"
+                  memory: "2Gi"
+                limits:
+                  cpu: "1"
+                  memory: "4Gi"
 
