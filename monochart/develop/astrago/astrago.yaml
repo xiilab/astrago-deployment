@@ -53,7 +53,7 @@ metadata:
   name: metrics-server
   namespace: kube-system
 ---
-# Source: astrago/templates/mongodb-deployment.yaml
+# Source: astrago/templates/mongodb/rbac.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -76,7 +76,7 @@ data:
   mariadb-root-password: "cm9vdA=="
   mariadb-password: "eGlpcm9ja3M="
 ---
-# Source: astrago/templates/mongodb-deployment.yaml
+# Source: astrago/templates/mongodb/mongodb-deployment.yaml
 apiVersion: v1
 kind: Secret
 metadata:
@@ -86,7 +86,7 @@ type: Opaque
 data:
   password: eGlpcm9ja3M=
 ---
-# Source: astrago/templates/mongodb-deployment.yaml
+# Source: astrago/templates/mongodb/mongodb-deployment.yaml
 apiVersion: v1
 kind: Secret
 metadata:
@@ -411,6 +411,28 @@ subjects:
   name: metrics-server
   namespace: kube-system
 ---
+# Source: astrago/templates/mongodb/rbac.yaml
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: mongodb-database
+  namespace: astrago
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - patch
+      - delete
+      - get
+---
 # Source: astrago/templates/metric-server.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -427,6 +449,20 @@ subjects:
 - kind: ServiceAccount
   name: metrics-server
   namespace: kube-system
+---
+# Source: astrago/templates/mongodb/rbac.yaml
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: mongodb-database
+  namespace: astrago
+subjects:
+- kind: ServiceAccount
+  name: mongodb-database
+roleRef:
+  kind: Role
+  name: mongodb-database
+  apiGroup: rbac.authorization.k8s.io
 ---
 # Source: astrago/charts/mariadb/templates/primary/svc.yaml
 apiVersion: v1
@@ -573,7 +609,7 @@ spec:
   selector:
     k8s-app: metrics-server
 ---
-# Source: astrago/templates/mongodb-deployment.yaml
+# Source: astrago/templates/mongodb/mongodb-deployment.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -1308,7 +1344,7 @@ spec:
   version: v1beta1
   versionPriority: 100
 ---
-# Source: astrago/templates/mongodb-deployment.yaml
+# Source: astrago/templates/mongodb/mongodb-deployment.yaml
 apiVersion: mongodbcommunity.mongodb.com/v1
 kind: MongoDBCommunity
 metadata:
