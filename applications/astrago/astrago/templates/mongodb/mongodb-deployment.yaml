@@ -95,9 +95,3 @@ metadata:
 type: Opaque
 data:
   password: eGlpcm9ja3M=
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: mongodb-database
-  namespace: {{ .Release.Namespace }}
