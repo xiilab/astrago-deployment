@@ -62,12 +62,10 @@ spec:
                   cpu: "1"
                   memory: "4Gi"
 ---
-kind: Service
 apiVersion: v1
+kind: Service
 metadata:
   name: external-mongo-service-0
-  annotations:
-    kube-linter.io/ignore-all: "used for sample"
 spec:
   type: NodePort
   selector:
