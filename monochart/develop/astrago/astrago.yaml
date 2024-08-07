@@ -53,6 +53,13 @@ metadata:
   name: metrics-server
   namespace: kube-system
 ---
+# Source: astrago/templates/mongodb-deployment.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mongodb-database
+  namespace: astrago
+---
 # Source: astrago/charts/mariadb/templates/secrets.yaml
 apiVersion: v1
 kind: Secret
