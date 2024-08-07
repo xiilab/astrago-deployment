@@ -785,6 +785,8 @@ spec:
             value: "astrago"
           - name: PROMETHEUS_URL
             value: "http://prometheus-kube-prometheus-prometheus.prometheus.svc.cluster.local:9090"
+          - name: ASTRAGO_PRIVATE-REGISTRY-URL
+            value: ""
           volumeMounts:
             - name: astrago-workload-log
               mountPath: /root/astrago
