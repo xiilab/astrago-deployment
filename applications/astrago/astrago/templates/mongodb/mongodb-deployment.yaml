@@ -1,7 +1,7 @@
 apiVersion: mongodbcommunity.mongodb.com/v1
 kind: MongoDBCommunity
 metadata:
-  name: mongodb
+  name: astrago-mongodb
   namespace: {{ .Release.Namespace }}
 spec:
   members: 1
