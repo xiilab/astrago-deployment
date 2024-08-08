@@ -91,6 +91,8 @@ batch:
       value: {{ .Values.keycloak.adminPassword }}
     - name: ADMIN_INIT-PASSWORD
       value: {{ .Values.astrago.userInitPassword }}
+    - name: ASTRAGO_PRIVATE-REGISTRY-URL
+      value: "{{ .Values.offline.registry | default "" }}"
 
 monitor:
   image:
