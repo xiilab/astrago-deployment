@@ -622,8 +622,8 @@ metadata:
 spec:
   type: NodePort
   selector:
-    app: mongodb-svc
-    statefulset.kubernetes.io/pod-name: mongodb-0
+    app: astrago-mongodb-svc
+    statefulset.kubernetes.io/pod-name: astrago-mongodb-0
   ports:
     - protocol: TCP
       nodePort: 30011
