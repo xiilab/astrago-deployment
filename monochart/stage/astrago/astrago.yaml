@@ -663,7 +663,7 @@ spec:
         - name: astrago
           securityContext:
             {}          
-          image: "harbor.xiilab.com:32443/astrago/batch:stag-729f"          
+          image: "harbor.xiilab.com:32443/astrago/batch:stag-23f4"          
           env:
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:mariadb://astrago-mariadb:3306/astrago"
@@ -729,7 +729,7 @@ spec:
         - name: astrago
           securityContext:
             {}          
-          image: "harbor.xiilab.com:32443/astrago/core:stag-729f"
+          image: "harbor.xiilab.com:32443/astrago/core:stag-23f4"
           imagePullPolicy: Always
           env:
           - name: SPRING_DATASOURCE_URL
@@ -758,6 +758,8 @@ spec:
             value: "astrago"
           - name: PROMETHEUS_URL
             value: "http://prometheus-kube-prometheus-prometheus.prometheus.svc.cluster.local:9090"
+          - name: ASTRAGO_PRIVATE-REGISTRY-URL
+            value: ""
           volumeMounts:
             - name: astrago-workload-log
               mountPath: /root/astrago
@@ -955,7 +957,7 @@ spec:
         - name: astrago
           securityContext:
             {}
-          image: "harbor.xiilab.com:32443/astrago/monitor:stag-729f"            
+          image: "harbor.xiilab.com:32443/astrago/monitor:stag-23f4"            
           env:
           - name: SPRING_DATASOURCE_URL
             value: "jdbc:mariadb://astrago-mariadb:3306/astrago"
