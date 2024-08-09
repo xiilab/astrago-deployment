@@ -34,13 +34,13 @@ astrago:
     maxLifetime: "3595000"
   core:
     repository: "xiilab/astrago"
-    imageTag: "core-seoultech-2de7"
+    imageTag: "core-seoultech-f29d"
   batch:
     repository: "xiilab/astrago"
-    imageTag: "batch-seoultech-2de7"
+    imageTag: "batch-seoultech-f29d"
   monitor:
     repository: "xiilab/astrago"
-    imageTag: "monitor-seoultech-2de7"
+    imageTag: "monitor-seoultech-f29d"
   frontend:
     repository: "xiilab/astrago"
     imageTag: frontend-seoultech-8654
