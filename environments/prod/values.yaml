@@ -35,19 +35,19 @@ astrago:
   core:
     registry: "docker.io"
     repository: "xiilab/astrago"
-    imageTag: "core-v1.0.17"
+    imageTag: "core-v1.0.18"
   batch:
     registry: "docker.io"
     repository: "xiilab/astrago"
-    imageTag: "batch-v1.0.17"
+    imageTag: "batch-v1.0.18"
   monitor:
     registry: "docker.io"
     repository: "xiilab/astrago"
-    imageTag: "monitor-v1.0.17"
+    imageTag: "monitor-v1.0.18"
   frontend:
     registry: "docker.io"
     repository: "xiilab/astrago"
-    imageTag: frontend-v1.0.12
+    imageTag: frontend-v1.0.14
 offline:
   registry: # 192.168.56.11:35000
   httpServer: # http://192.168.56.11

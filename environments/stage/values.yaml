@@ -35,19 +35,19 @@ astrago:
   core:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/core"
-    imageTag: "stag-23f4"
+    imageTag: "stag-872d"
   batch:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/batch"
-    imageTag: "stag-23f4"
+    imageTag: "stag-872d"
   monitor:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/monitor"
-    imageTag: "stag-23f4"
+    imageTag: "stag-872d"
   frontend:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/frontend"
-    imageTag: stag-e2a7
+    imageTag: stag-20b3
 offline:
   registry: # 192.168.56.11:35000
   httpServer: # http://192.168.56.11

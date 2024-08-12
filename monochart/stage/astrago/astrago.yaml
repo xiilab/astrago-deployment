@@ -663,7 +663,7 @@ spec:
         - name: astrago
           securityContext:
             {}          
-          image: "harbor.xiilab.com:32443/astrago/batch:stag-23f4"          
+          image: "harbor.xiilab.com:32443/astrago/batch:stag-872d"          
           env:
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:mariadb://astrago-mariadb:3306/astrago"
@@ -689,6 +689,8 @@ spec:
               value: "xiirocks"
             - name: ADMIN_INIT-PASSWORD
               value: "astrago"
+            - name: ASTRAGO_PRIVATE-REGISTRY-URL
+              value: ""
           volumeMounts:
             - name: astrago-workload-log
               mountPath: /root/astrago
@@ -729,7 +731,7 @@ spec:
         - name: astrago
           securityContext:
             {}          
-          image: "harbor.xiilab.com:32443/astrago/core:stag-23f4"
+          image: "harbor.xiilab.com:32443/astrago/core:stag-872d"
           imagePullPolicy: Always
           env:
           - name: SPRING_DATASOURCE_URL
@@ -800,7 +802,7 @@ spec:
         - name: astrago
           securityContext:
             {}          
-          image: "harbor.xiilab.com:32443/astrago/frontend:stag-e2a7"          
+          image: "harbor.xiilab.com:32443/astrago/frontend:stag-20b3"          
           env:
           - name: KEYCLOAK_HOST
             value: "http://59.10.103.94:42253"
@@ -957,7 +959,7 @@ spec:
         - name: astrago
           securityContext:
             {}
-          image: "harbor.xiilab.com:32443/astrago/monitor:stag-23f4"            
+          image: "harbor.xiilab.com:32443/astrago/monitor:stag-872d"            
           env:
           - name: SPRING_DATASOURCE_URL
             value: "jdbc:mariadb://astrago-mariadb:3306/astrago"
