@@ -81,6 +81,8 @@ class CommandRunner:
         self.kubespray_inventory_path = Path.joinpath(Path.cwd(), 'kubespray/inventory/mycluster/astrago.yaml')
         self.nfs_inventory_path = '/tmp/nfs_inventory'
         self.gpu_inventory_path = '/tmp/gpu_inventory'
+        self.ansible_extra_values = 'reset_confirmation=yes ansible_ssh_timeout=30 ansible_user={username}' \
+                                    ' ansible_password={password} ansible_become_pass={password}'
 
     def _save_kubespray_inventory(self):
         inventory = {
@@ -129,7 +131,21 @@ class CommandRunner:
                                   "--become", "--become-user=root",
                                   "cluster.yml",
                                   "--extra-vars",
-                                  "ansible_user={} ansible_password={} ansible_become_pass={}".format(username, password, password)],
+                                  self.ansible_extra_values.format(
+                                      username=username,
+                                      password=password)],
+                                 cwd='kubespray')
+
+    def run_kubespray_reset(self, username, password):
+        self._save_kubespray_inventory()
+        return self._run_command(["ansible-playbook",
+                                  "-i", self.kubespray_inventory_path,
+                                  "--become", "--become-user=root",
+                                  "reset.yml",
+                                  "--extra-vars",
+                                  self.ansible_extra_values.format(
+                                      username=username,
+                                      password=password)],
                                  cwd='kubespray')
 
     def _run_command(self, cmd, cwd="."):
@@ -179,7 +195,9 @@ class CommandRunner:
                                   "--become", "--become-user=root",
                                   "ansible/install-nfs.yml",
                                   "--extra-vars",
-                                  "ansible_user={} ansible_password={} ansible_become_pass={}".format(username, password, password)])
+                                  self.ansible_extra_values.format(
+                                      username=username,
+                                      password=password)])
 
     def _save_gpudriver_inventory(self):
         inventory = {
@@ -208,7 +226,9 @@ class CommandRunner:
              "--become", "--become-user=root",
              "ansible/install-gpu-driver.yml",
              "--extra-vars",
-             "ansible_user={} ansible_password={} ansible_become_pass={}".format(username, password, password)])
+             self.ansible_extra_values.format(
+                 username=username,
+                 password=password)])
 
 
 class AstragoInstaller:
@@ -561,6 +581,10 @@ class AstragoInstaller:
         self.install_ansible_query("Check the Node Table. Install Kubernetes? [y/N]: ",
                                    self.command_runner.run_kubespray_install, self.print_nodes_table)
 
+    def reset_kubernetes(self):
+        self.install_ansible_query("Check the Node Table. Reset Kubernetes? [y/N]: ",
+                                   self.command_runner.run_kubespray_reset, self.print_nodes_table)
+
     def setting_node_menu(self):
         self.stdscr.clear()
         menu = ["1. Add Node", "2. Remove Node", "3. Edit Node", "4. Back"]
@@ -598,11 +622,13 @@ class AstragoInstaller:
         })
 
     def install_kubernetes_menu(self):
-        menu = ["1. Set Nodes", "2. Install Kubernetes", "3. Install GPU Driver (Optional)", "4. Back"]
+        menu = ["1. Set Nodes", "2. Install Kubernetes", "3. Reset Kubernetes", "4. Install GPU Driver (Optional)",
+                "5. Back"]
         self.navigate_menu(menu, {
             0: self.setting_node_menu,
             1: self.install_kubernetes,
-            2: self.install_gpu_driver
+            2: self.reset_kubernetes,
+            3: self.install_gpu_driver
         })
 
     def navigate_sub_menu(self, menu, handlers, table_handler=None):
