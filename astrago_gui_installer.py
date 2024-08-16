@@ -163,12 +163,6 @@ class CommandRunner:
         with open('environments/astrago/values.yaml', 'w') as file:
             yaml.dump(helmfile_env, file, default_flow_style=False, sort_keys=False)
 
-        origin_config_path = pathlib.Path(
-            Path.joinpath(Path.cwd(), "kubespray/inventory/mycluster/artifacts/admin.conf"))
-        if origin_config_path.exists():
-            kubeconfig_path = pathlib.Path(Path.joinpath(Path.home(), '.kube', 'config'))
-            kubeconfig_path.parent.mkdir(parents=True, exist_ok=True)
-            kubeconfig_path.write_bytes(origin_config_path.read_bytes())
         return self._run_command(["helmfile", "-e", "astrago", "sync"])
 
     def _save_nfs_inventory(self):
@@ -580,6 +574,12 @@ class AstragoInstaller:
     def install_kubernetes(self):
         self.install_ansible_query("Check the Node Table. Install Kubernetes? [y/N]: ",
                                    self.command_runner.run_kubespray_install, self.print_nodes_table)
+        origin_config_path = pathlib.Path(
+            Path.joinpath(Path.cwd(), "kubespray/inventory/mycluster/artifacts/admin.conf"))
+        if origin_config_path.exists():
+            kubeconfig_path = pathlib.Path(Path.joinpath(Path.home(), '.kube', 'config'))
+            kubeconfig_path.parent.mkdir(parents=True, exist_ok=True)
+            kubeconfig_path.write_bytes(origin_config_path.read_bytes())
 
     def reset_kubernetes(self):
         self.install_ansible_query("Check the Node Table. Reset Kubernetes? [y/N]: ",
