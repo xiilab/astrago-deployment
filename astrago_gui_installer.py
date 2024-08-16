@@ -165,6 +165,9 @@ class CommandRunner:
 
         return self._run_command(["helmfile", "-e", "astrago", "sync"])
 
+    def run_uninstall_astrago(self):
+        return self._run_command(["helmfile", "-e", "astrago", "destroy"])
+
     def _save_nfs_inventory(self):
         inventory = {
             'all': {
@@ -549,6 +552,12 @@ class AstragoInstaller:
             return None
         self.read_and_display_output(self.command_runner.run_install_astrago(connected_url))
 
+    def uninstall_astrago(self):
+        self.stdscr.clear()
+        check_uninstall = self.make_query(0, 0, "Are you sure want to uninstall astrago? [y/N]: ", default_value='N')
+        if check_uninstall == 'Y' or check_uninstall == 'y':
+            self.read_and_display_output(self.command_runner.run_uninstall_astrago())
+
     def install_ansible_query(self, query, install_method, show_table):
         self.stdscr.clear()
         if show_table is not None:
@@ -615,10 +624,11 @@ class AstragoInstaller:
         }, self.print_nfs_server_table)
 
     def install_astrago_menu(self):
-        menu = ["1. Set NFS Server", "2. Install Astrago", "3. Back"]
+        menu = ["1. Set NFS Server", "2. Install Astrago", "3. Uninstall Astrago", "4. Back"]
         self.navigate_menu(menu, {
             0: self.setting_nfs_menu,
-            1: self.install_astrago
+            1: self.install_astrago,
+            2: self.uninstall_astrago
         })
 
     def install_kubernetes_menu(self):
