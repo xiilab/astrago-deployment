@@ -49,7 +49,7 @@ astrago:
   frontend:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/frontend"
-    imageTag: dev-cc06
+    imageTag: dev-6bc8
   experiment:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/experiment"
