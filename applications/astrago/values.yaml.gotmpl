@@ -19,12 +19,16 @@ core:
     - name: SPRING_SECURITY_OAUTH2_RESOURCE-SERVER_JWT_ISSUER-URI
       {{ if .Values.astrago.keycloak.externalKeycloakUrl }}
       value: {{ .Values.astrago.keycloak.externalKeycloakUrl }}/realms/{{ .Values.astrago.keycloak.realm }}
+      {{ else if .Values.astrago.proxyUrl }}
+      value: {{ .Values.astrago.proxyUrl }}/auth/realms/{{ .Values.astrago.keycloak.realm }}
       {{ else }}
       value: http://{{ .Values.externalIP }}:{{ .Values.astrago.servicePort }}/auth/realms/{{ .Values.astrago.keycloak.realm }}
       {{ end }}
     - name: SPRING_SECURITY_OAUTH2_RESOURCE-SERVER_JWT_JWK-SET-URI
       {{ if .Values.astrago.keycloak.externalKeycloakUrl }}
       value: {{ .Values.astrago.keycloak.externalKeycloakUrl }}/realms/{{ .Values.astrago.keycloak.realm }}/protocol/openid-connect/certs
+      {{ else if .Values.astrago.proxyUrl }}
+      value: {{ .Values.astrago.proxyUrl }}/auth/realms/{{ .Values.astrago.keycloak.realm }}/protocol/openid-connect/certs
       {{ else }}
       value: http://{{ .Values.externalIP }}:{{ .Values.astrago.servicePort }}/auth/realms/{{ .Values.astrago.keycloak.realm }}/protocol/openid-connect/certs
       {{ end }}
@@ -33,6 +37,8 @@ core:
     - name: KEYCLOAK_AUTH-SERVER-URL
       {{ if .Values.astrago.keycloak.externalKeycloakUrl }}
       value: {{ .Values.astrago.keycloak.externalKeycloakUrl }}
+      {{ else if .Values.astrago.proxyUrl }}
+      value: {{ .Values.astrago.proxyUrl }}/auth/
       {{ else }}
       value: http://{{ .Values.externalIP }}:{{ .Values.astrago.servicePort }}/auth/
       {{ end }}
@@ -66,12 +72,16 @@ batch:
     - name: SPRING_SECURITY_OAUTH2_RESOURCE-SERVER_JWT_ISSUER-URI
       {{ if .Values.astrago.keycloak.externalKeycloakUrl }}
       value: {{ .Values.astrago.keycloak.externalKeycloakUrl }}/realms/{{ .Values.astrago.keycloak.realm }}
+      {{ else if .Values.astrago.proxyUrl }}
+      value: {{ .Values.astrago.proxyUrl }}/auth/realms/{{ .Values.astrago.keycloak.realm }}
       {{ else }}
       value: http://{{ .Values.externalIP }}:{{ .Values.astrago.servicePort }}/auth/realms/{{ .Values.astrago.keycloak.realm }}
       {{ end }}
     - name: SPRING_SECURITY_OAUTH2_RESOURCE-SERVER_JWT_JWK-SET-URI
       {{ if .Values.astrago.keycloak.externalKeycloakUrl }}
       value: {{ .Values.astrago.keycloak.externalKeycloakUrl }}/realms/{{ .Values.astrago.keycloak.realm }}/protocol/openid-connect/certs
+      {{ else if .Values.astrago.proxyUrl }}
+      value: {{ .Values.astrago.proxyUrl }}/auth/realms/{{ .Values.astrago.keycloak.realm }}/protocol/openid-connect/certs
       {{ else }}
       value: http://{{ .Values.externalIP }}:{{ .Values.astrago.servicePort }}/auth/realms/{{ .Values.astrago.keycloak.realm }}/protocol/openid-connect/certs
       {{ end }}
@@ -80,6 +90,8 @@ batch:
     - name: KEYCLOAK_AUTH-SERVER-URL
       {{ if .Values.astrago.keycloak.externalKeycloakUrl }}
       value: {{ .Values.astrago.keycloak.externalKeycloakUrl }}
+      {{ else if .Values.astrago.proxyUrl }}
+      value: {{ .Values.astrago.proxyUrl }}/auth/
       {{ else }}
       value: http://{{ .Values.externalIP }}:{{ .Values.astrago.servicePort }}/auth/
       {{ end }}
@@ -123,6 +135,8 @@ frontend:
     - name: KEYCLOAK_HOST
       {{ if .Values.astrago.keycloak.externalKeycloakUrl }}
       value: {{ .Values.astrago.keycloak.externalKeycloakUrl }}
+      {{ else if .Values.astrago.proxyUrl }}
+      value: {{ .Values.astrago.proxyUrl }}/auth/
       {{ else }}
       value: http://{{ .Values.externalIP }}:{{ .Values.astrago.servicePort }}/auth/
       {{ end }}
