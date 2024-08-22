@@ -2751,11 +2751,11 @@ spec:
                 - -c
                 - |
                   echo "Starting postStart script" > /opt/bitnami/keycloak/poststart.log
-                  until curl -sSf http://localhost:8080/realms/master > /dev/null; do
+                  until curl -sSf http://localhost:8080/auth/realms/master > /dev/null; do
                     echo "Waiting for Keycloak to be ready..." >> /opt/bitnami/keycloak/poststart.log
                     sleep 5
                   done
-                  /opt/bitnami/keycloak/bin/kcadm.sh update realms/master -s sslRequired=NONE --server http://localhost:8080 --realm master --user admin --password "xiirocks" >> /opt/bitnami/keycloak/poststart.log 2>&1
+                  /opt/bitnami/keycloak/bin/kcadm.sh update realms/master -s sslRequired=NONE --server http://localhost:8080/auth/ --realm master --user admin --password "xiirocks" >> /opt/bitnami/keycloak/poststart.log 2>&1
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -2786,7 +2786,7 @@ spec:
                   name: keycloak-postgresql
                   key: password
             - name: KEYCLOAK_HTTP_RELATIVE_PATH
-              value: "/"
+              value: "/auth/"
             - name: KEYCLOAK_EXTRA_ARGS
               value: --import-realm --spi-login-protocol-openid-connect-legacy-logout-redirect-uri=true
           envFrom:
@@ -2809,7 +2809,7 @@ spec:
             successThreshold: 1
             timeoutSeconds: 5
             httpGet:
-              path: /
+              path: /auth/
               port: http
           readinessProbe:
             failureThreshold: 3
@@ -2818,7 +2818,7 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
             httpGet:
-              path: /realms/master
+              path: /auth/realms/master
               port: http
           volumeMounts:
             - mountPath: /opt/bitnami/keycloak/providers/keycloak-theme.jar
