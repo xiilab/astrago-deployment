@@ -1,4 +1,3 @@
-{{- if .Values.local.enabled }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -9,14 +8,9 @@ metadata:
 spec:
   resources:
     requests:
-      storage: {{ .Values.local.size | quote }}
+      storage: {{ .Values.nfs.size | quote }}
   accessModes:
-    {{- range .Values.local.accessModes }}
+    {{- range .Values.nfs.accessModes }}
     - {{ . | quote }}
     {{- end }}
-  storageClassName: {{ .Values.local.storageClassName }}
-  selector:
-    matchLabels:
-      type: workload-log 
-{{- end }}
-
+  storageClassName: {{ .Values.nfs.storageClassName }}
