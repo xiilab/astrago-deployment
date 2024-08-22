@@ -1,14 +1,4 @@
 releases:
-- name: keycloak-local-volume
-  namespace: keycloak
-  chart: local-volume
-  condition: local.enabled
-  wait: true
-  labels:
-    app: keycloak
-  values:
-  - local-volume.yaml.gotmpl
-
 - name: keycloak
   namespace: keycloak
   # chart: oci://registry-1.docker.io/bitnamicharts/keycloak

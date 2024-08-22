@@ -69,8 +69,4 @@ postgresql:
   primary:
     persistence:
       enabled: true
-{{ if .Values.nfs.enabled }}
       storageClass: "{{ .Values.nfs.storageClassName }}"
-{{ else if .Values.local.enabled }}
-      existingClaim: data-keycloak-postgresql-0
-{{ end }}
