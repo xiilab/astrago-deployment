@@ -685,9 +685,9 @@ spec:
             - name: SPRING_DATASOURCE_HIKARI_MAX-LIFETIME
               value: "3595000"
             - name: SPRING_SECURITY_OAUTH2_RESOURCE-SERVER_JWT_ISSUER-URI
-              value: "http://59.10.103.94:41277/auth//realms/astrago"
+              value: "http://59.10.103.94:41277/auth/realms/astrago"
             - name: SPRING_SECURITY_OAUTH2_RESOURCE-SERVER_JWT_JWK-SET-URI
-              value: "http://59.10.103.94:41277/auth//realms/astrago/protocol/openid-connect/certs"
+              value: "http://59.10.103.94:41277/auth/realms/astrago/protocol/openid-connect/certs"
             - name: KEYCLOAK_REALM
               value: "astrago"
             - name: KEYCLOAK_AUTH-SERVER-URL
@@ -754,9 +754,9 @@ spec:
           - name: SPRING_DATASOURCE_HIKARI_MAX-LIFETIME
             value: "3595000"
           - name: SPRING_SECURITY_OAUTH2_RESOURCE-SERVER_JWT_ISSUER-URI
-            value: "http://59.10.103.94:41277/auth//realms/astrago"
+            value: "http://59.10.103.94:41277/auth/realms/astrago"
           - name: SPRING_SECURITY_OAUTH2_RESOURCE-SERVER_JWT_JWK-SET-URI
-            value: "http://59.10.103.94:41277/auth//realms/astrago/protocol/openid-connect/certs"
+            value: "http://59.10.103.94:41277/auth/realms/astrago/protocol/openid-connect/certs"
           - name: KEYCLOAK_REALM
             value: "astrago"
           - name: KEYCLOAK_AUTH-SERVER-URL
