@@ -76,6 +76,27 @@ data:
           proxy_pass http://astrago-time-prediction:8000/api/v1/predict/;
         }
 
+        location /auth/ {  # '/auth/'로 경로를 명확히 지정
+          proxy_pass http://keycloak.keycloak.svc/auth/;
+
+          # 요청의 Host 헤더에서 포트를 추출하여 X-Forwarded-Port로 설정
+          set $forwarded_port "";
+          if ($http_host ~* ":(\d+)$") {
+            set $forwarded_port $1;
+          }
+
+          proxy_set_header X-Forwarded-Host $host;
+          proxy_set_header X-Forwarded-Port $forwarded_port;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # '/auth'로 요청이 들어오면 '/auth/'로 리디렉션
+        location = /auth {
+          return 301 $scheme://$http_host/auth/;                
+        }
+
         # 웹소켓 프록시 설정
         location /ws/workload/ {
             proxy_pass http://astrago-backend-core:8080/ws/workload/;

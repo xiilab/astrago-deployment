@@ -22,7 +22,7 @@ astrago:
   servicePort: 30080
   userInitPassword: astrago
   keycloak:
-    externalKeycloakUrl: http://59.10.103.94:42253
+    externalKeycloakUrl:
     realm: astrago
     client: astrago-client
     clientSecret: astragosecret
@@ -35,19 +35,19 @@ astrago:
   core:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/core"
-    imageTag: "stag-872d"
+    imageTag: "stag-cad6"
   batch:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/batch"
-    imageTag: "stag-872d"
+    imageTag: "stag-cad6"
   monitor:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/monitor"
-    imageTag: "stag-872d"
+    imageTag: "stag-cad6"
   frontend:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/frontend"
-    imageTag: stag-6fc9
+    imageTag: stag-dcb8
 offline:
   registry: # 192.168.56.11:35000
   httpServer: # http://192.168.56.11

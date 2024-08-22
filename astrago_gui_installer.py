@@ -81,6 +81,8 @@ class CommandRunner:
         self.kubespray_inventory_path = Path.joinpath(Path.cwd(), 'kubespray/inventory/mycluster/astrago.yaml')
         self.nfs_inventory_path = '/tmp/nfs_inventory'
         self.gpu_inventory_path = '/tmp/gpu_inventory'
+        self.ansible_extra_values = 'reset_confirmation=yes ansible_ssh_timeout=30 ansible_user={username}' \
+                                    ' ansible_password={password} ansible_become_pass={password}'
 
     def _save_kubespray_inventory(self):
         inventory = {
@@ -129,7 +131,21 @@ class CommandRunner:
                                   "--become", "--become-user=root",
                                   "cluster.yml",
                                   "--extra-vars",
-                                  "ansible_user={} ansible_password={} ansible_become_pass={}".format(username, password, password)],
+                                  self.ansible_extra_values.format(
+                                      username=username,
+                                      password=password)],
+                                 cwd='kubespray')
+
+    def run_kubespray_reset(self, username, password):
+        self._save_kubespray_inventory()
+        return self._run_command(["ansible-playbook",
+                                  "-i", self.kubespray_inventory_path,
+                                  "--become", "--become-user=root",
+                                  "reset.yml",
+                                  "--extra-vars",
+                                  self.ansible_extra_values.format(
+                                      username=username,
+                                      password=password)],
                                  cwd='kubespray')
 
     def _run_command(self, cmd, cwd="."):
@@ -147,13 +163,10 @@ class CommandRunner:
         with open('environments/astrago/values.yaml', 'w') as file:
             yaml.dump(helmfile_env, file, default_flow_style=False, sort_keys=False)
 
-        origin_config_path = pathlib.Path(
-            Path.joinpath(Path.cwd(), "kubespray/inventory/mycluster/artifacts/admin.conf"))
-        if origin_config_path.exists():
-            kubeconfig_path = pathlib.Path(Path.joinpath(Path.home(), '.kube', 'config'))
-            kubeconfig_path.parent.mkdir(parents=True, exist_ok=True)
-            kubeconfig_path.write_bytes(origin_config_path.read_bytes())
         return self._run_command(["helmfile", "-e", "astrago", "sync"])
+
+    def run_uninstall_astrago(self):
+        return self._run_command(["helmfile", "-e", "astrago", "destroy"])
 
     def _save_nfs_inventory(self):
         inventory = {
@@ -179,7 +192,9 @@ class CommandRunner:
                                   "--become", "--become-user=root",
                                   "ansible/install-nfs.yml",
                                   "--extra-vars",
-                                  "ansible_user={} ansible_password={} ansible_become_pass={}".format(username, password, password)])
+                                  self.ansible_extra_values.format(
+                                      username=username,
+                                      password=password)])
 
     def _save_gpudriver_inventory(self):
         inventory = {
@@ -208,7 +223,9 @@ class CommandRunner:
              "--become", "--become-user=root",
              "ansible/install-gpu-driver.yml",
              "--extra-vars",
-             "ansible_user={} ansible_password={} ansible_become_pass={}".format(username, password, password)])
+             self.ansible_extra_values.format(
+                 username=username,
+                 password=password)])
 
 
 class AstragoInstaller:
@@ -535,6 +552,12 @@ class AstragoInstaller:
             return None
         self.read_and_display_output(self.command_runner.run_install_astrago(connected_url))
 
+    def uninstall_astrago(self):
+        self.stdscr.clear()
+        check_uninstall = self.make_query(0, 0, "Are you sure want to uninstall astrago? [y/N]: ", default_value='N')
+        if check_uninstall == 'Y' or check_uninstall == 'y':
+            self.read_and_display_output(self.command_runner.run_uninstall_astrago())
+
     def install_ansible_query(self, query, install_method, show_table):
         self.stdscr.clear()
         if show_table is not None:
@@ -560,6 +583,16 @@ class AstragoInstaller:
     def install_kubernetes(self):
         self.install_ansible_query("Check the Node Table. Install Kubernetes? [y/N]: ",
                                    self.command_runner.run_kubespray_install, self.print_nodes_table)
+        origin_config_path = pathlib.Path(
+            Path.joinpath(Path.cwd(), "kubespray/inventory/mycluster/artifacts/admin.conf"))
+        if origin_config_path.exists():
+            kubeconfig_path = pathlib.Path(Path.joinpath(Path.home(), '.kube', 'config'))
+            kubeconfig_path.parent.mkdir(parents=True, exist_ok=True)
+            kubeconfig_path.write_bytes(origin_config_path.read_bytes())
+
+    def reset_kubernetes(self):
+        self.install_ansible_query("Check the Node Table. Reset Kubernetes? [y/N]: ",
+                                   self.command_runner.run_kubespray_reset, self.print_nodes_table)
 
     def setting_node_menu(self):
         self.stdscr.clear()
@@ -591,18 +624,21 @@ class AstragoInstaller:
         }, self.print_nfs_server_table)
 
     def install_astrago_menu(self):
-        menu = ["1. Set NFS Server", "2. Install Astrago", "3. Back"]
+        menu = ["1. Set NFS Server", "2. Install Astrago", "3. Uninstall Astrago", "4. Back"]
         self.navigate_menu(menu, {
             0: self.setting_nfs_menu,
-            1: self.install_astrago
+            1: self.install_astrago,
+            2: self.uninstall_astrago
         })
 
     def install_kubernetes_menu(self):
-        menu = ["1. Set Nodes", "2. Install Kubernetes", "3. Install GPU Driver (Optional)", "4. Back"]
+        menu = ["1. Set Nodes", "2. Install Kubernetes", "3. Reset Kubernetes", "4. Install GPU Driver (Optional)",
+                "5. Back"]
         self.navigate_menu(menu, {
             0: self.setting_node_menu,
             1: self.install_kubernetes,
-            2: self.install_gpu_driver
+            2: self.reset_kubernetes,
+            3: self.install_gpu_driver
         })
 
     def navigate_sub_menu(self, menu, handlers, table_handler=None):

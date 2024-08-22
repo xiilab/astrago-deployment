@@ -221,6 +221,27 @@ data:
           proxy_pass http://astrago-time-prediction:8000/api/v1/predict/;
         }
 
+        location /auth/ {  # '/auth/'로 경로를 명확히 지정
+          proxy_pass http://keycloak.keycloak.svc/auth/;
+
+          # 요청의 Host 헤더에서 포트를 추출하여 X-Forwarded-Port로 설정
+          set $forwarded_port "";
+          if ($http_host ~* ":(\d+)$") {
+            set $forwarded_port $1;
+          }
+
+          proxy_set_header X-Forwarded-Host $host;
+          proxy_set_header X-Forwarded-Port $forwarded_port;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # '/auth'로 요청이 들어오면 '/auth/'로 리디렉션
+        location = /auth {
+          return 301 $scheme://$http_host/auth/;                
+        }
+
         # 웹소켓 프록시 설정
         location /ws/workload/ {
             proxy_pass http://astrago-backend-core:8080/ws/workload/;
@@ -492,16 +513,6 @@ spec:
   selector:
     app.kubernetes.io/name: astrago-frontend
 ---
-# Source: astrago/templates/gitlab-external-service.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: gitlab-service
-  namespace: astrago
-spec:
-  type: ExternalName
-  externalName: gitlab-webservice-default.gitlab.svc.cluster.local
----
 # Source: astrago/templates/metric-server.yaml
 apiVersion: v1
 kind: Service
@@ -663,7 +674,7 @@ spec:
         - name: astrago
           securityContext:
             {}          
-          image: "harbor.xiilab.com:32443/astrago/batch:stag-872d"          
+          image: "harbor.xiilab.com:32443/astrago/batch:stag-cad6"          
           env:
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:mariadb://astrago-mariadb:3306/astrago"
@@ -674,13 +685,13 @@ spec:
             - name: SPRING_DATASOURCE_HIKARI_MAX-LIFETIME
               value: "3595000"
             - name: SPRING_SECURITY_OAUTH2_RESOURCE-SERVER_JWT_ISSUER-URI
-              value: "http://59.10.103.94:42253/realms/astrago"
+              value: "http://59.10.103.94:41277/auth/realms/astrago"
             - name: SPRING_SECURITY_OAUTH2_RESOURCE-SERVER_JWT_JWK-SET-URI
-              value: "http://59.10.103.94:42253/realms/astrago/protocol/openid-connect/certs"
+              value: "http://59.10.103.94:41277/auth/realms/astrago/protocol/openid-connect/certs"
             - name: KEYCLOAK_REALM
               value: "astrago"
             - name: KEYCLOAK_AUTH-SERVER-URL
-              value: "http://59.10.103.94:42253"
+              value: "http://59.10.103.94:41277/auth/"
             - name: KEYCLOAK_RESOURCE
               value: "astrago-client"
             - name: ADMIN_NAME
@@ -731,7 +742,7 @@ spec:
         - name: astrago
           securityContext:
             {}          
-          image: "harbor.xiilab.com:32443/astrago/core:stag-872d"
+          image: "harbor.xiilab.com:32443/astrago/core:stag-cad6"
           imagePullPolicy: Always
           env:
           - name: SPRING_DATASOURCE_URL
@@ -743,13 +754,13 @@ spec:
           - name: SPRING_DATASOURCE_HIKARI_MAX-LIFETIME
             value: "3595000"
           - name: SPRING_SECURITY_OAUTH2_RESOURCE-SERVER_JWT_ISSUER-URI
-            value: "http://59.10.103.94:42253/realms/astrago"
+            value: "http://59.10.103.94:41277/auth/realms/astrago"
           - name: SPRING_SECURITY_OAUTH2_RESOURCE-SERVER_JWT_JWK-SET-URI
-            value: "http://59.10.103.94:42253/realms/astrago/protocol/openid-connect/certs"
+            value: "http://59.10.103.94:41277/auth/realms/astrago/protocol/openid-connect/certs"
           - name: KEYCLOAK_REALM
             value: "astrago"
           - name: KEYCLOAK_AUTH-SERVER-URL
-            value: "http://59.10.103.94:42253"
+            value: "http://59.10.103.94:41277/auth/"
           - name: KEYCLOAK_RESOURCE
             value: "astrago-client"
           - name: ADMIN_NAME
@@ -802,10 +813,10 @@ spec:
         - name: astrago
           securityContext:
             {}          
-          image: "harbor.xiilab.com:32443/astrago/frontend:stag-6fc9"          
+          image: "harbor.xiilab.com:32443/astrago/frontend:stag-dcb8"          
           env:
           - name: KEYCLOAK_HOST
-            value: "http://59.10.103.94:42253"
+            value: "http://59.10.103.94:41277/auth/"
           - name: KEYCLOAK_REALME
             value: "astrago"
           - name: KEYCLOAK_CLIENT_ID
@@ -959,7 +970,7 @@ spec:
         - name: astrago
           securityContext:
             {}
-          image: "harbor.xiilab.com:32443/astrago/monitor:stag-872d"            
+          image: "harbor.xiilab.com:32443/astrago/monitor:stag-cad6"            
           env:
           - name: SPRING_DATASOURCE_URL
             value: "jdbc:mariadb://astrago-mariadb:3306/astrago"
