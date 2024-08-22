@@ -6,7 +6,6 @@ releases:
 - name: nfs-provisioner
   namespace: nfs-provisioner
   chart: csi-driver-nfs
-  condition: nfs.enabled
   wait: true
   labels:
     app: nfs-provisioner
