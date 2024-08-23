@@ -83,48 +83,22 @@ main() {
             # Get the external IP address from the user
             get_ip_address external_ip "Enter the connection URL (e.g. 10.61.3.12)"
 
-            # Get the volume type from the user
-            get_volume_type volume_type
+            # Get the NFS server IP address from the user
+            get_ip_address nfs_server_ip "Enter the NFS server IP address"
 
-            if [ "$volume_type" == "nfs" ]; then
-                # Get the NFS server IP address from the user
-                get_ip_address nfs_server_ip "Enter the NFS server IP address"
+            # Get the base path of NFS from the user
+            get_base_path nfs_base_path "Enter the base path of NFS"
 
-                # Get the base path of NFS from the user
-                get_base_path nfs_base_path "Enter the base path of NFS"
+            values_file="environments/$environment_name/values.yaml"
 
-                values_file="environments/$environment_name/values.yaml"
+            create_environment_directory
+            # Modify externalIP
+            yq -i ".externalIP = \"$external_ip\"" "$values_file"
 
-                create_environment_directory
-                # Modify externalIP
-                yq -i ".externalIP = \"$external_ip\"" "$values_file"
-
-                # Modify nfs server IP address and base path
-                yq -i ".nfs.enabled = true" "$values_file"
-                yq -i ".nfs.server = \"$nfs_server_ip\"" "$values_file"
-                yq -i ".nfs.server = \"$nfs_server_ip\"" "$values_file"
-                yq -i ".nfs.basePath = \"$nfs_base_path\"" "$values_file"
-            elif [ "$volume_type" == "local" ]; then
-                # Get the node name from the user
-                echo -n "Enter the K8S node name to store data: "
-                read -r node_name
-
-                # Get the base path from the user
-                echo -n "Enter the base path to store data: "
-                read -r local_base_path
-
-                values_file="environments/$environment_name/values.yaml"
-
-                create_environment_directory
-                # Modify externalIP
-                yq -i ".externalIP = \"$external_ip\"" "$values_file"
-
-                # Modify node name and base path
-                yq -i ".local.enabled = true" "$values_file"
-                yq -i ".local.nodeName = \"$node_name\"" "$values_file"
-                yq -i ".local.basePath = \"$local_base_path\"" "$values_file"
-            fi
-
+            # Modify nfs server IP address and base path
+            yq -i ".nfs.server = \"$nfs_server_ip\"" "$values_file"
+            yq -i ".nfs.server = \"$nfs_server_ip\"" "$values_file"
+            yq -i ".nfs.basePath = \"$nfs_base_path\"" "$values_file"
             echo "values.yaml file has been modified."
             ;;
         "sync" | "destroy")

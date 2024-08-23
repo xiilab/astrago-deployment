@@ -1,8 +1,0 @@
-enabled: true
-name: keycloak-volume
-size: 10Gi
-storageClassName: local-storage
-accessModes:
-- ReadWriteOnce
-basePath: /data
-nodeName: worker-1

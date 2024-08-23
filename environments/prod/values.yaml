@@ -2,14 +2,8 @@
 externalIP:
 # Volume Settings
 nfs:
-  enabled: false
   storageClassName: astrago-nfs-csi
   server:
-  basePath:
-local:
-  enabled: false
-  storageClassName: astrago-local-storage
-  nodeName:
   basePath:
 # Keycloak Settings
 keycloak:

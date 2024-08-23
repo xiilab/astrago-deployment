@@ -6,19 +6,8 @@ releases:
 - name: nfs-provisioner
   namespace: nfs-provisioner
   chart: csi-driver-nfs
-  condition: nfs.enabled
   wait: true
   labels:
     app: nfs-provisioner
   values:
   - values.yaml.gotmpl
-
-- name: local-provisioner
-  namespace: nfs-provisioner
-  chart: local-provisioner
-  condition: local.enabled
-  wait: true
-  labels:
-    app: nfs-provisioner
-  values:
-  - values.yaml.gotmpl  

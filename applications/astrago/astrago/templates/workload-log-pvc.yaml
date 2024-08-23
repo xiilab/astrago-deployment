@@ -1,18 +1,16 @@
-{{- if .Values.enabled }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: data-keycloak-postgresql-0
+  name: workload-log-pvc
   namespace: {{ .Release.Namespace | quote }}
   annotations:
     helm.sh/resource-policy: keep
 spec:
   resources:
     requests:
-      storage: {{ .Values.size | quote }}
+      storage: {{ .Values.nfs.size | quote }}
   accessModes:
-    {{- range .Values.accessModes }}
+    {{- range .Values.nfs.accessModes }}
     - {{ . | quote }}
     {{- end }}
-  storageClassName: {{ .Values.storageClassName }} 
-{{- end }}
+  storageClassName: {{ .Values.nfs.storageClassName }}

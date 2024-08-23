@@ -46,7 +46,3 @@ storageClass:
   volumeBindingMode: Immediate
   mountOptions:
     - nfsvers=4.1
-local:
-  storageClassName: {{ .Values.local.storageClassName }}
-  nodeName: {{ .Values.local.nodeName }}
-  basePath: {{ .Values.local.basePath }}  

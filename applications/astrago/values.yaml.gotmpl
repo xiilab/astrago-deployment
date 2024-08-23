@@ -209,11 +209,7 @@ mariadb:
       nodePorts: 
         mysql: 30010
     persistence:
-{{ if .Values.nfs.enabled }}
       storageClass: "{{ .Values.nfs.storageClassName }}"
-{{ else if .Values.local.enabled }}
-      existingClaim: data-astrago-mariadb-0
-{{ end }}
 
     configuration: |-
       [mysqld]
@@ -256,3 +252,8 @@ mariadb:
       socket=/opt/bitnami/mariadb/tmp/mysql.sock
       pid-file=/opt/bitnami/mariadb/tmp/mysqld.pid
 
+nfs:
+  size: 10Gi
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: {{ .Values.nfs.storageClassName }}

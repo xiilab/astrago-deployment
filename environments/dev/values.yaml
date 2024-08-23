@@ -2,15 +2,9 @@
 externalIP: 10.61.3.12
 # Volume Settings
 nfs:
-  enabled: true
   storageClassName: astrago-nfs-csi
   server: 10.61.3.2
   basePath: /kube_storage/develop-astrago
-local:
-  enabled: false
-  storageClassName: astrago-local-storage
-  nodeName:
-  basePath:
 # Keycloak Settings
 keycloak:
   adminUser: admin

@@ -52,11 +52,7 @@ prometheus:
     storageSpec:
       volumeClaimTemplate:
         spec:
-{{ if .Values.nfs.enabled }}
           storageClassName: "{{ .Values.nfs.storageClassName }}"
-{{ else if .Values.local.enabled }}
-          storageClassName: "{{ .Values.local.storageClassName }}"
-{{ end }}
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
