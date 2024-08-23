@@ -155,7 +155,6 @@ class CommandRunner:
         with open('environments/prod/values.yaml') as f:
             helmfile_env = yaml.load(f, Loader=yaml.FullLoader)
             helmfile_env['externalIP'] = connected_url
-            helmfile_env['nfs']['enabled'] = True
             helmfile_env['nfs']['server'] = self.data_manager.nfs_server['ip']
             helmfile_env['nfs']['basePath'] = self.data_manager.nfs_server['path']
 
