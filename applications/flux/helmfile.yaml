@@ -1,7 +1,6 @@
 releases:
 - name: flux
   namespace: flux
-  # chart: oci://registry-1.docker.io/bitnamicharts/keycloak
   chart: flux2
   wait: true
   labels:
