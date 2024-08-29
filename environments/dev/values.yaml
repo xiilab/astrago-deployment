@@ -31,15 +31,15 @@ astrago:
   core:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/core"
-    imageTag: "dev-8a47"
+    imageTag: "dev-03cf"
   batch:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/batch"
-    imageTag: "dev-8a47"
+    imageTag: "dev-03cf"
   monitor:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/monitor"
-    imageTag: "dev-8a47"
+    imageTag: "dev-03cf"
   frontend:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/frontend"
@@ -47,7 +47,7 @@ astrago:
   experiment:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/experiment"
-    imageTag: "dev-8a47"
+    imageTag: "dev-03cf"
 offline:
   registry: # 192.168.56.11:35000
   httpServer: # http://192.168.56.11
