@@ -43,7 +43,7 @@ astrago:
   frontend:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/frontend"
-    imageTag: dev-d1b0
+    imageTag: dev-73e4
   experiment:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/experiment"
