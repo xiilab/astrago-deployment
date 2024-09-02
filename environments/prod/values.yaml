@@ -41,7 +41,7 @@ astrago:
   frontend:
     registry: "docker.io"
     repository: "xiilab/astrago"
-    imageTag: frontend-v1.0.15
+    imageTag: frontend-v1.0.16
 offline:
   registry: # 192.168.56.11:35000
   httpServer: # http://192.168.56.11
