@@ -1,0 +1,4 @@
+xiilab/astrago:batch-v1.0.19
+xiilab/astrago:core-v1.0.19
+xiilab/astrago:monitor-v1.0.19
+xiilab/astrago:frontend-v1.0.14

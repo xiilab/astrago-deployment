@@ -4,6 +4,25 @@ export LANG=en_US.UTF-8
 # Fixing the environment name
 environment_name="astrago"
 
+CURRENT_DIR=$(dirname "$(realpath "$0")")
+
+# Function to check and install binaries
+install_binary() {
+    local cmd=$1
+    if ! command -v $cmd &> /dev/null; then
+        echo "===> Installing $cmd"
+        if [[ -f "$CURRENT_DIR/tools/linux/$cmd" ]]; then
+            sudo cp "$CURRENT_DIR/tools/linux/$cmd" /usr/local/bin/
+            sudo chmod +x /usr/local/bin/$cmd
+        else
+            echo "FATAL: $cmd binary not found in tools folder."
+            exit 1
+        fi
+    else
+        echo "$cmd is already installed."
+    fi
+}
+
 # Function to print usage
 print_usage() {
     echo "Usage: $0 [env|sync|destroy]"
@@ -119,5 +138,8 @@ main() {
 }
 
 # Script execution
+for cmd in helm helmfile kubectl; do
+    install_binary $cmd
+done
 main "$@"
 
