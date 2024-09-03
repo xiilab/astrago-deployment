@@ -8,6 +8,8 @@ core:
     repository: "{{ .Values.astrago.core.repository }}"
     tag: "{{ .Values.astrago.core.imageTag }}"
   env:
+    - name: SPRING_JPA_HIBERNATE_DDL-AUTO
+      value: none
     - name: SPRING_DATASOURCE_URL
       value: jdbc:mariadb://astrago-mariadb:3306/astrago
     - name: SPRING_DATASOURCE_USERNAME
@@ -61,6 +63,8 @@ batch:
     repository: "{{ .Values.astrago.batch.repository }}"
     tag: "{{ .Values.astrago.batch.imageTag }}"
   env:
+    - name: SPRING_JPA_HIBERNATE_DDL-AUTO
+      value: none
     - name: SPRING_DATASOURCE_URL
       value: jdbc:mariadb://astrago-mariadb:3306/astrago
     - name: SPRING_DATASOURCE_USERNAME
@@ -112,6 +116,8 @@ monitor:
     repository: "{{ .Values.astrago.monitor.repository }}"
     tag: "{{ .Values.astrago.monitor.imageTag }}" 
   env:
+    - name: SPRING_JPA_HIBERNATE_DDL-AUTO
+      value: none
     - name: SPRING_DATASOURCE_URL
       value: jdbc:mariadb://astrago-mariadb:3306/astrago
     - name: SPRING_DATASOURCE_USERNAME
