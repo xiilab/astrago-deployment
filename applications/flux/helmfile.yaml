@@ -1,0 +1,7 @@
+releases:
+- name: flux
+  namespace: flux
+  chart: flux2
+  wait: true
+  labels:
+    app: flux
