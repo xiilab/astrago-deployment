@@ -673,7 +673,7 @@ spec:
         - name: astrago
           securityContext:
             {}          
-          image: "harbor.xiilab.com:32443/astrago/batch:stag-dfd8"          
+          image: "harbor.xiilab.com:32443/astrago/batch:stag-4beb"          
           env:
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:mariadb://astrago-mariadb:3306/astrago"
@@ -741,7 +741,7 @@ spec:
         - name: astrago
           securityContext:
             {}          
-          image: "harbor.xiilab.com:32443/astrago/core:stag-dfd8"
+          image: "harbor.xiilab.com:32443/astrago/core:stag-4beb"
           imagePullPolicy: Always
           env:
           - name: SPRING_DATASOURCE_URL
@@ -969,7 +969,7 @@ spec:
         - name: astrago
           securityContext:
             {}
-          image: "harbor.xiilab.com:32443/astrago/monitor:stag-dfd8"            
+          image: "harbor.xiilab.com:32443/astrago/monitor:stag-4beb"            
           env:
           - name: SPRING_DATASOURCE_URL
             value: "jdbc:mariadb://astrago-mariadb:3306/astrago"
