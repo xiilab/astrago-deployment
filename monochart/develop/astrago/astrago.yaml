@@ -784,7 +784,7 @@ spec:
         - name: astrago
           securityContext:
             {}          
-          image: "harbor.xiilab.com:32443/astrago/batch:dev-7e76"          
+          image: "harbor.xiilab.com:32443/astrago/batch:dev-2517"          
           env:
             - name: SPRING_JPA_HIBERNATE_DDL-AUTO
               value: "none"
@@ -854,7 +854,7 @@ spec:
         - name: astrago
           securityContext:
             {}          
-          image: "harbor.xiilab.com:32443/astrago/core:dev-7e76"
+          image: "harbor.xiilab.com:32443/astrago/core:dev-2517"
           imagePullPolicy: Always
           env:
           - name: SPRING_JPA_HIBERNATE_DDL-AUTO
@@ -927,7 +927,7 @@ spec:
         - name: astrago
           securityContext:
             {}
-          image: "harbor.xiilab.com:32443/astrago/experiment:dev-7e76"
+          image: "harbor.xiilab.com:32443/astrago/experiment:dev-2517"
           env:
           - name: SPRING_DATASOURCE_JDBC-URL
             value: "jdbc:mariadb://astrago-mariadb:3306/astrago"
@@ -1132,7 +1132,7 @@ spec:
         - name: astrago
           securityContext:
             {}
-          image: "harbor.xiilab.com:32443/astrago/monitor:dev-7e76"            
+          image: "harbor.xiilab.com:32443/astrago/monitor:dev-2517"            
           env:
           - name: SPRING_JPA_HIBERNATE_DDL-AUTO
             value: "none"
