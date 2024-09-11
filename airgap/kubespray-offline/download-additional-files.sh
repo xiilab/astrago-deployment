@@ -51,4 +51,4 @@ get_url() {
 #    exit 1
 #}
 
-get_url https://github.com/xiilab/uyuni-login-theme/releases/download/v1.1.4/keycloak-theme.jar
+get_url https://github.com/xiilab/uyuni-login-theme/releases/download/v1.1.5/keycloak-theme.jar
