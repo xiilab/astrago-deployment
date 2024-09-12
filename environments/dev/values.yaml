@@ -48,6 +48,8 @@ astrago:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/experiment"
     imageTag: "dev-2517"
+  oneview:
+    enabled: true
 offline:
   registry: # 192.168.56.11:35000
   httpServer: # http://192.168.56.11
