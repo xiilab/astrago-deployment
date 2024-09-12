@@ -673,8 +673,10 @@ spec:
         - name: astrago
           securityContext:
             {}          
-          image: "harbor.xiilab.com:32443/astrago/batch:stag-4beb"          
+          image: "harbor.xiilab.com:32443/astrago/batch:stag-7a35"          
           env:
+            - name: SPRING_JPA_HIBERNATE_DDL-AUTO
+              value: "none"
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:mariadb://astrago-mariadb:3306/astrago"
             - name: SPRING_DATASOURCE_USERNAME
@@ -741,9 +743,11 @@ spec:
         - name: astrago
           securityContext:
             {}          
-          image: "harbor.xiilab.com:32443/astrago/core:stag-4beb"
+          image: "harbor.xiilab.com:32443/astrago/core:stag-7a35"
           imagePullPolicy: Always
           env:
+          - name: SPRING_JPA_HIBERNATE_DDL-AUTO
+            value: "none"
           - name: SPRING_DATASOURCE_URL
             value: "jdbc:mariadb://astrago-mariadb:3306/astrago"
           - name: SPRING_DATASOURCE_USERNAME
@@ -812,7 +816,7 @@ spec:
         - name: astrago
           securityContext:
             {}          
-          image: "harbor.xiilab.com:32443/astrago/frontend:stag-b9e6"          
+          image: "harbor.xiilab.com:32443/astrago/frontend:stag-8e30"          
           env:
           - name: KEYCLOAK_HOST
             value: "http://59.10.103.94:41277/auth/"
@@ -969,8 +973,10 @@ spec:
         - name: astrago
           securityContext:
             {}
-          image: "harbor.xiilab.com:32443/astrago/monitor:stag-4beb"            
+          image: "harbor.xiilab.com:32443/astrago/monitor:stag-7a35"            
           env:
+          - name: SPRING_JPA_HIBERNATE_DDL-AUTO
+            value: "none"
           - name: SPRING_DATASOURCE_URL
             value: "jdbc:mariadb://astrago-mariadb:3306/astrago"
           - name: SPRING_DATASOURCE_USERNAME
