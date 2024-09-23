@@ -31,15 +31,15 @@ astrago:
   core:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/core"
-    imageTag: "dev-2517"
+    imageTag: "dev-033e"
   batch:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/batch"
-    imageTag: "dev-2517"
+    imageTag: "dev-033e"
   monitor:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/monitor"
-    imageTag: "dev-2517"
+    imageTag: "dev-033e"
   frontend:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/frontend"
@@ -47,7 +47,7 @@ astrago:
   experiment:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/experiment"
-    imageTag: "dev-2517"
+    imageTag: "dev-033e"
   oneview:
     enabled: true
 offline:
