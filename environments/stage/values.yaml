@@ -41,7 +41,7 @@ astrago:
   frontend:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/frontend"
-    imageTag: stag-1a04
+    imageTag: stag-49e1
   oneview:
     enabled: true
 offline:
