@@ -1,0 +1,33 @@
+cli:
+  image: "{{ .Values.offline.registry | default "ghcr.io" }}/fluxcd/flux-cli"
+  tag: v2.3.0
+
+helmController:
+  create: true
+  image: "{{ .Values.offline.registry | default "ghcr.io" }}/fluxcd/helm-controller"
+  tag: v1.0.1
+
+imageAutomationController:
+  create: true
+  image: "{{ .Values.offline.registry | default "ghcr.io" }}/fluxcd/image-automation-controller"
+  tag: v0.38.0
+
+imageReflectionController:
+  create: true
+  image: "{{ .Values.offline.registry | default "ghcr.io" }}/fluxcd/image-reflector-controller"
+  tag: v0.32.0
+
+kustomizeController:
+  create: true
+  image: "{{ .Values.offline.registry | default "ghcr.io" }}/fluxcd/kustomize-controller"
+  tag: v1.3.0
+
+notificationController:
+  create: true
+  image: "{{ .Values.offline.registry | default "ghcr.io" }}/fluxcd/notification-controller"
+  tag: v1.3.0
+
+sourceController:
+  create: true
+  image: "{{ .Values.offline.registry | default "ghcr.io" }}/fluxcd/source-controller"
+  tag: v1.3.0

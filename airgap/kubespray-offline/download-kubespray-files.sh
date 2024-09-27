@@ -104,4 +104,4 @@ for i in $files; do
 done
 
 # download images
-./download-images.sh || exit 1
+#./download-images.sh || exit 1

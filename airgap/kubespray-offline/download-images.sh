@@ -14,7 +14,8 @@ if [ ! -e "${IMAGES_DIR}/images.list" ]; then
 fi
 
 # download images
-images=$(cat ${IMAGES_DIR}/images.list)
+#images=$(cat ${IMAGES_DIR}/images.list)
+images=$(cat imagelists/images.txt)
 for i in $images; do
     get_image $i
 done

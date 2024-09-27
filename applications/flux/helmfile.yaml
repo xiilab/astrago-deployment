@@ -5,3 +5,6 @@ releases:
   wait: true
   labels:
     app: flux
+  values:
+  - values.yaml.gotmpl    
+

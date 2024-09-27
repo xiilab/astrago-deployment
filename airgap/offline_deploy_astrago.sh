@@ -146,7 +146,7 @@ main() {
 }
 
 # Script execution
-for cmd in helm helmfile kubectl; do
+for cmd in helm helmfile kubectl yq; do
     install_binary $cmd
 done
 main "$@"
