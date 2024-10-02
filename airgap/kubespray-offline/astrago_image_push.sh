@@ -7,114 +7,6 @@ LOCAL_REGISTRY=localhost:${REGISTRY_PORT}
 # Exit the script if any command fails
 set -e
 
-# Function to detect OS, version, and OS family
-detect_os() {
-    if [ -f /etc/os-release ]; then
-        . /etc/os-release
-        OS=$ID
-        VERSION=$VERSION_ID
-    elif [ -f /etc/lsb-release ]; then
-        . /etc/lsb-release
-        OS=$DISTRIB_ID
-        VERSION=$DISTRIB_RELEASE
-    elif [ -f /etc/redhat-release ]; then
-        OS=$(cat /etc/redhat-release | awk '{print tolower($1)}')
-        VERSION=$(cat /etc/redhat-release | grep -oE '[0-9]+\.[0-9]+' | cut -d . -f1)
-    else
-        OS=$(uname -s)
-        VERSION=$(uname -r)
-    fi
-
-    OS=$(echo $OS | tr '[:upper:]' '[:lower:]')
-
-    # Determine OS family
-    case $OS in
-        ubuntu|debian)
-            OS_FAMILY="debian"
-            ;;
-        centos|rhel|fedora|rocky|almalinux|ol|amzn)
-            OS_FAMILY="rhel"
-            # Handle CentOS Stream separately
-            if [ "$OS" = "centos" ] && grep -q "Stream" /etc/centos-release 2>/dev/null; then
-                OS="centosstream"
-            fi
-            ;;
-        *)
-            OS_FAMILY="unknown"
-            ;;
-    esac
-
-    echo "Detected OS: $OS"
-    echo "Detected Version: $VERSION"
-    echo "OS Family: $OS_FAMILY"
-}
-
-# Function to install containerd and nerdctl
-install_containerd_and_nerdctl() {
-    # Check if containerd is already installed
-    if command -v containerd &> /dev/null; then
-        echo "containerd is already installed. Skipping installation."
-    else
-        echo "Starting containerd installation..."
-
-        if [ "$OS_FAMILY" = "debian" ]; then
-            sudo apt-get update
-            sudo apt-get install -y ca-certificates curl gnupg
-            sudo install -m 0755 -d /etc/apt/keyrings
-            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-            sudo chmod a+r /etc/apt/keyrings/docker.gpg
-            echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-            sudo apt-get update
-            sudo apt-get install -y containerd.io
-        elif [ "$OS_FAMILY" = "rhel" ]; then
-            # Check CentOS version
-            if [ "$(. /etc/os-release && echo "$VERSION_ID")" -ge "8" ]; then
-                # CentOS 8 or later
-                sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-                sudo dnf install -y containerd.io --allowerasing
-            else
-                # CentOS 7 or earlier
-                sudo yum install -y yum-utils
-                sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-                sudo yum install -y containerd.io
-            fi
-        else
-            echo "Unsupported OS for automatic installation. Please install containerd manually."
-            exit 1
-        fi
-
-	#cni plugin install
-	export ARCH_CNI=$( [ $(uname -m) = aarch64 ] && echo arm64 || echo amd64)
-        export CNI_PLUGIN_VERSION=v1.5.1
-        curl -L -o cni-plugins.tgz "https://github.com/containernetworking/plugins/releases/download/${CNI_PLUGIN_VERSION}/cni-plugins-linux-${ARCH_CNI}-${CNI_PLUGIN_VERSION}".tgz
-        sudo mkdir -p /opt/cni/bin
-        sudo tar -C /opt/cni/bin -xzf cni-plugins.tgz
-
-        # Create default configuration file
-        sudo mkdir -p /etc/containerd
-        sudo containerd config default | sudo tee /etc/containerd/config.toml
-
-        # Start containerd service and enable it to start on boot
-        sudo systemctl restart containerd
-        sudo systemctl enable containerd
-
-        echo "containerd has been successfully installed and configured."
-    fi
-
-    # Check if nerdctl is already installed
-    if command -v nerdctl &> /dev/null; then
-        echo "nerdctl is already installed. Skipping installation."
-    else
-        echo "Starting nerdctl installation..."
-        NERDCTL_VERSION=$(curl -s https://api.github.com/repos/containerd/nerdctl/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
-        curl -LO https://github.com/containerd/nerdctl/releases/download/${NERDCTL_VERSION}/nerdctl-${NERDCTL_VERSION#v}-linux-amd64.tar.gz
-        sudo tar Cxzvf /usr/local/bin nerdctl-${NERDCTL_VERSION#v}-linux-amd64.tar.gz
-        rm nerdctl-${NERDCTL_VERSION#v}-linux-amd64.tar.gz
-
-        echo "nerdctl has been successfully installed."
-    fi
-}
-
 # Function to run private Docker registry
 run_private_registry() {
     echo "Running private Docker registry..."
@@ -160,6 +52,7 @@ check_image_exists() {
 }
 
 pull_and_push_images() {
+    cat imagelists/*.txt | sed "s/#.*$//g" | sort -u > outputs/images/additional-images.list	
     images=$(cat outputs/images/*.list)
     for image in $images; do
         # Removes specific repo parts from each image for kubespray
@@ -207,7 +100,6 @@ stop_and_remove_registry() {
 }
 
 # Function calls
-detect_os
 run_private_registry
 pull_and_push_images
 stop_and_remove_registry
