@@ -1,7 +1,7 @@
 # app
-xiilab/astrago:batch-v1.0.39
-xiilab/astrago:core-v1.0.39
-xiilab/astrago:monitor-v1.0.39
+xiilab/astrago:batch-v1.0.41
+xiilab/astrago:core-v1.0.41
+xiilab/astrago:monitor-v1.0.41
 xiilab/astrago:frontend-v1.0.19
 
 #built-in
@@ -17,8 +17,8 @@ xiilab/astrago:hub-yolov8-1.1
 #xiilab/astrago:pytorch-22.08-cuda11.7
 #xiilab/astrago:tensorflow-22.12-cuda11.8
 #xiilab/astrago:pytorch-22.12-cuda11.8
-#xiilab/astrago:tensorflow-23.07-cuda12.1
-#xiilab/astrago:pytorch-23.07-cuda12.1
+xiilab/astrago:tensorflow-23.07-cuda12.1
+xiilab/astrago:pytorch-23.07-cuda12.1
 
 #etc
 xiilab/astrago-dataset-nginx:latest
