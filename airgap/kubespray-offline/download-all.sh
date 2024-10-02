@@ -10,7 +10,7 @@ run() {
 
 source ./config.sh
 
-#run ./install-docker.sh
+run ./install-containerd.sh
 #run ./install-nerdctl.sh
 run ./precheck.sh
 run ./prepare-pkgs.sh || exit 1
@@ -22,8 +22,7 @@ else
     run ./pypi-mirror.sh
 fi
 run ./download-kubespray-files.sh
-#run ./download-additional-containers.sh
-run ./download-images.sh
+run ./download-additional-containers.sh
 run ./astrago_image_push.sh
 run ./download-additional-files.sh
 run ./download-gpu-driver.sh

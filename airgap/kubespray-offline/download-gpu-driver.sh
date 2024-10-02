@@ -43,6 +43,6 @@ get_url() {
 # 535.161.08(CUDA 12.2)
 # 470.239.06(CUDA 11.4)
 # Data Center / Tesla
-get_url https://kr.download.nvidia.com/tesla/550.54.15/NVIDIA-Linux-x86_64-550.54.15.run
+#get_url https://kr.download.nvidia.com/tesla/550.54.15/NVIDIA-Linux-x86_64-550.54.15.run
 get_url https://kr.download.nvidia.com/tesla/535.161.08/NVIDIA-Linux-x86_64-535.161.08.run
-get_url https://kr.download.nvidia.com/tesla/470.239.06/NVIDIA-Linux-x86_64-470.239.06.run
+#get_url https://kr.download.nvidia.com/tesla/470.239.06/NVIDIA-Linux-x86_64-470.239.06.run

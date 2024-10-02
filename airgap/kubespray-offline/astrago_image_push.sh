@@ -7,6 +7,48 @@ LOCAL_REGISTRY=localhost:${REGISTRY_PORT}
 # Exit the script if any command fails
 set -e
 
+# Function to detect OS, version, and OS family
+detect_os() {
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        OS=$ID
+        VERSION=$VERSION_ID
+    elif [ -f /etc/lsb-release ]; then
+        . /etc/lsb-release
+        OS=$DISTRIB_ID
+        VERSION=$DISTRIB_RELEASE
+    elif [ -f /etc/redhat-release ]; then
+        OS=$(cat /etc/redhat-release | awk '{print tolower($1)}')
+        VERSION=$(cat /etc/redhat-release | grep -oE '[0-9]+\.[0-9]+' | cut -d . -f1)
+    else
+        OS=$(uname -s)
+        VERSION=$(uname -r)
+    fi
+
+    OS=$(echo $OS | tr '[:upper:]' '[:lower:]')
+
+    # Determine OS family
+    case $OS in
+        ubuntu|debian)
+            OS_FAMILY="debian"
+            ;;
+        centos|rhel|fedora|rocky|almalinux|ol|amzn)
+            OS_FAMILY="rhel"
+            # Handle CentOS Stream separately
+            if [ "$OS" = "centos" ] && grep -q "Stream" /etc/centos-release 2>/dev/null; then
+                OS="centosstream"
+            fi
+            ;;
+        *)
+            OS_FAMILY="unknown"
+            ;;
+    esac
+
+    echo "Detected OS: $OS"
+    echo "Detected Version: $VERSION"
+    echo "OS Family: $OS_FAMILY"
+}
+
 # Function to install containerd and nerdctl
 install_containerd_and_nerdctl() {
     # Check if containerd is already installed
@@ -15,21 +57,38 @@ install_containerd_and_nerdctl() {
     else
         echo "Starting containerd installation..."
 
-        # Update and install necessary packages
-        sudo apt-get update
-        # Add Docker's official GPG key:
-        sudo apt-get install ca-certificates curl
-        sudo install -m 0755 -d /etc/apt/keyrings
-        sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-        sudo chmod a+r /etc/apt/keyrings/docker.asc
+        if [ "$OS_FAMILY" = "debian" ]; then
+            sudo apt-get update
+            sudo apt-get install -y ca-certificates curl gnupg
+            sudo install -m 0755 -d /etc/apt/keyrings
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+            sudo chmod a+r /etc/apt/keyrings/docker.gpg
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+            sudo apt-get update
+            sudo apt-get install -y containerd.io
+        elif [ "$OS_FAMILY" = "rhel" ]; then
+            # Check CentOS version
+            if [ "$(. /etc/os-release && echo "$VERSION_ID")" -ge "8" ]; then
+                # CentOS 8 or later
+                sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+                sudo dnf install -y containerd.io --allowerasing
+            else
+                # CentOS 7 or earlier
+                sudo yum install -y yum-utils
+                sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+                sudo yum install -y containerd.io
+            fi
+        else
+            echo "Unsupported OS for automatic installation. Please install containerd manually."
+            exit 1
+        fi
 
-        # Add the repository to Apt sources:
-        echo \
-          "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-          $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-        sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-        sudo apt-get update
-        sudo apt-get install -y containerd.io
+	#cni plugin install
+	export ARCH_CNI=$( [ $(uname -m) = aarch64 ] && echo arm64 || echo amd64)
+        export CNI_PLUGIN_VERSION=v1.5.1
+        curl -L -o cni-plugins.tgz "https://github.com/containernetworking/plugins/releases/download/${CNI_PLUGIN_VERSION}/cni-plugins-linux-${ARCH_CNI}-${CNI_PLUGIN_VERSION}".tgz
+        sudo mkdir -p /opt/cni/bin
+        sudo tar -C /opt/cni/bin -xzf cni-plugins.tgz
 
         # Create default configuration file
         sudo mkdir -p /etc/containerd
@@ -67,7 +126,7 @@ run_private_registry() {
     fi
 
     # Run private registry using nerdctl
-    sudo nerdctl run -d \
+    nerdctl run -d \
         --name registry \
         -p $REGISTRY_PORT:5000 \
         -e REGISTRY_HTTP_HEADERS_Access-Control-Allow-Origin="[http://registry.example.com]" \
@@ -126,23 +185,29 @@ pull_and_push_images() {
         newImage=${LOCAL_REGISTRY}/${newImage}
 
         echo "===> Pull ${image}"
-        sudo nerdctl pull ${image} || exit 1
+        nerdctl pull ${image} || exit 1
 
         echo "===> Tag ${image} -> ${newImage}"
-        sudo nerdctl tag ${image} ${newImage} || exit 1
+        nerdctl tag ${image} ${newImage} || exit 1
 
         echo "===> Push ${newImage}"
-        sudo nerdctl push ${newImage} || exit 1
+        nerdctl push ${newImage} || exit 1
 
         if [[ $image != *$REGISTRY_IMAGE ]]; then
             echo "===> Remove ${image} and ${newImage}"
-            sudo nerdctl rmi ${image} ${newImage}
+            nerdctl rmi ${image} ${newImage}
         fi
     done
 }
 
+stop_and_remove_registry() {
+    echo "Stopping and removing the registry container..."
+    nerdctl stop registry && nerdctl rm registry
+    echo "Registry container has been stopped and removed."
+}
+
 # Function calls
-cat imagelists/*.txt | sed "s/#.*$//g" | sort -u > outputs/images/additional-images.list
-install_containerd_and_nerdctl
+detect_os
 run_private_registry
 pull_and_push_images
+stop_and_remove_registry

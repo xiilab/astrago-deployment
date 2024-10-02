@@ -1,3 +1,21 @@
+- name: Disable all yum repositories
+  block:
+    - name: Echo message
+      ansible.builtin.debug:
+        msg: "===> Disable all yum repositories"
+
+    - name: Find all .repo files
+      ansible.builtin.find:
+        paths: /etc/yum.repos.d
+        patterns: "*.repo"
+      register: repo_files
+
+    - name: Rename .repo files to .repo.original
+      ansible.builtin.command:
+        cmd: "mv {{ item.path }} {{ item.path }}.original"
+      loop: "{{ repo_files.files }}"
+      become: true
+
 - name: Install offline yum repo
   yum_repository:
     file: offline

@@ -6,7 +6,9 @@ source ./config.sh
 source scripts/common.sh
 source scripts/images.sh
 
-cat imagelists/*.txt | sed "s/#.*$//g" | sort -u > $IMAGES_DIR/additional-images.list
+docker=nerdctl
+
+cat imagelists/images.txt | sed "s/#.*$//g" | sort -u > $IMAGES_DIR/additional-images.list
 cat $IMAGES_DIR/additional-images.list
 
 IMAGES=$(cat $IMAGES_DIR/additional-images.list)

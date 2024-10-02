@@ -10,7 +10,7 @@ if [ -e /etc/redhat-release ]; then
     echo "==> Install required packages"
     $sudo dnf check-update
 
-    $sudo dnf install -y rsync gcc libffi-devel createrepo git podman || exit 1
+    $sudo dnf install -y rsync gcc libffi-devel createrepo git || exit 1
 
     case "$VERSION_ID" in
         7*)
