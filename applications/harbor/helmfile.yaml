@@ -1,0 +1,10 @@
+releases:
+- name: harbor
+  namespace: harbor
+  chart: harbor
+  wait: true
+  condition: harbor.enabled
+  labels:
+    app: harbor
+  values:
+  - values.yaml.gotmpl

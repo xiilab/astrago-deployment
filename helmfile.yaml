@@ -49,3 +49,7 @@ helmfiles:
 - path: applications/astrago/helmfile.yaml
   values:
   - {{ toYaml .Values | nindent 4 }}
+
+- path: applications/harbor/helmfile.yaml
+  values:
+  - {{ toYaml .Values | nindent 4 }}

@@ -23,7 +23,7 @@ else
 fi
 run ./download-kubespray-files.sh
 run ./download-additional-containers.sh
-run ./astrago_image_push.sh
+#run ./astrago_image_push.sh
 run ./download-additional-files.sh
 run ./download-gpu-driver.sh
 run ./create-repo.sh
