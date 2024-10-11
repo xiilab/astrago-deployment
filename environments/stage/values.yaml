@@ -44,6 +44,8 @@ astrago:
     imageTag: stag-e0d7
   oneview:
     enabled: true
+harbor:
+  enabled: true
 offline:
   registry: # 192.168.56.11:35000
   httpServer: # http://192.168.56.11
