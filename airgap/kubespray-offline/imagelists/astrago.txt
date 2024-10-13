@@ -1,8 +1,8 @@
 # app
-xiilab/astrago:batch-v1.0.41
-xiilab/astrago:core-v1.0.41
-xiilab/astrago:monitor-v1.0.41
-xiilab/astrago:frontend-v1.0.19
+xiilab/astrago:batch-v1.0.42
+xiilab/astrago:core-v1.0.42
+xiilab/astrago:monitor-v1.0.42
+xiilab/astrago:frontend-v1.0.22
 
 #built-in
 xiilab/horovod:latest
