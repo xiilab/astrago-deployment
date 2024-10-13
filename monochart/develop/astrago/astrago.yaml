@@ -975,7 +975,7 @@ spec:
         - name: astrago
           securityContext:
             {}          
-          image: "harbor.xiilab.com:32443/astrago/frontend:dev-05db"          
+          image: "harbor.xiilab.com:32443/astrago/frontend:dev-e77b"          
           env:
           - name: KEYCLOAK_HOST
             value: "http://10.61.3.12:30080/auth/"
