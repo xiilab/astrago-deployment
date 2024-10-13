@@ -29,15 +29,15 @@ astrago:
   core:
     registry: "docker.io"
     repository: "xiilab/astrago"
-    imageTag: "core-v1.0.41"
+    imageTag: "core-v1.0.42"
   batch:
     registry: "docker.io"
     repository: "xiilab/astrago"
-    imageTag: "batch-v1.0.41"
+    imageTag: "batch-v1.0.42"
   monitor:
     registry: "docker.io"
     repository: "xiilab/astrago"
-    imageTag: "monitor-v1.0.41"
+    imageTag: "monitor-v1.0.42"
   frontend:
     registry: "docker.io"
     repository: "xiilab/astrago"
@@ -45,7 +45,7 @@ astrago:
   oneview:
     enabled: false
 harbor:
-  enabled: true    
+  enabled: true
 offline:
   registry: # 192.168.56.11:35000
   httpServer: # http://192.168.56.11
