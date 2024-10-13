@@ -24,4 +24,4 @@ run ./setup-py.sh
 run ./start-registry.sh
 
 # load and push all images to registry
-#run ./load-push-all-images.sh
+run ./load-push-all-images.sh

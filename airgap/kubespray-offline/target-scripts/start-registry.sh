@@ -3,8 +3,8 @@
 source ./config.sh
 
 REGISTRY_IMAGE=${REGISTRY_IMAGE:-registry:2.8.2}
-#REGISTRY_DIR=${REGISTRY_DIR:-/var/lib/registry}
-REGISTRY_DIR="$(pwd)/registry-volume"
+REGISTRY_DIR=${REGISTRY_DIR:-/var/lib/registry}
+#REGISTRY_DIR="$(pwd)/registry-volume"
 
 if [ ! -e $REGISTRY_DIR ]; then
     sudo mkdir $REGISTRY_DIR
