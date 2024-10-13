@@ -29,15 +29,15 @@ astrago:
   core:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/core"
-    imageTag: "stag-64f8"
+    imageTag: "stag-b92e"
   batch:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/batch"
-    imageTag: "stag-64f8"
+    imageTag: "stag-b92e"
   monitor:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/monitor"
-    imageTag: "stag-64f8"
+    imageTag: "stag-b92e"
   frontend:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/frontend"
