@@ -8,7 +8,7 @@ echo "==> Load registry, nginx images"
 NERDCTL=/usr/local/bin/nerdctl
 cd ./images
 
-for f in docker.io_library_registry_*.tar.gz docker.io_library_nginx_*.tar.gz; do
+for f in docker.io\$library\$registry\$*.tar.gz docker.io\$library\$nginx\$*.tar.gz; do
     sudo $NERDCTL load -i $f || exit 1
 done
 

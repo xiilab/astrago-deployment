@@ -6,6 +6,7 @@
 # python3 (non version specific)
 python3-minimal
 python3-selinux
+python3-cryptography
 python-cryptography
 
 # kubespray: required_pkgs

@@ -35,7 +35,7 @@ process_image() {
     local name_without_extension=${filename%.tar.gz}
     
     # Split the filename into parts
-    IFS='_' read -ra parts <<< "$name_without_extension"
+    IFS='$' read -ra parts <<< "$name_without_extension"
     
     local registry="${parts[0]}"
     local tag="${parts[-1]}"
@@ -49,6 +49,11 @@ process_image() {
         # Case: registry_repository_image_tag
         local repository="${parts[1]}"
         local image_name="${parts[2]}"
+        local full_image_name="${registry}/${repository}/${image_name}"
+        local new_image_name="${LOCAL_REGISTRY}/${repository}/${image_name}"
+    elif [ ${#parts[@]} -eq 5 ]; then
+        local repository="${parts[1]}/${parts[2]}"
+        local image_name="${parts[3]}"
         local full_image_name="${registry}/${repository}/${image_name}"
         local new_image_name="${LOCAL_REGISTRY}/${repository}/${image_name}"
     else
