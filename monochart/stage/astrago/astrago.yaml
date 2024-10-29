@@ -673,7 +673,7 @@ spec:
         - name: astrago
           securityContext:
             {}          
-          image: "harbor.xiilab.com:32443/astrago/batch:stag-27a7"          
+          image: "harbor.xiilab.com:32443/astrago/batch:stag-32c6"          
           env:
             - name: SPRING_JPA_HIBERNATE_DDL-AUTO
               value: "none"
@@ -743,7 +743,7 @@ spec:
         - name: astrago
           securityContext:
             {}          
-          image: "harbor.xiilab.com:32443/astrago/core:stag-27a7"
+          image: "harbor.xiilab.com:32443/astrago/core:stag-32c6"
           imagePullPolicy: Always
           env:
           - name: SPRING_JPA_HIBERNATE_DDL-AUTO
@@ -975,7 +975,7 @@ spec:
         - name: astrago
           securityContext:
             {}
-          image: "harbor.xiilab.com:32443/astrago/monitor:stag-27a7"            
+          image: "harbor.xiilab.com:32443/astrago/monitor:stag-32c6"            
           env:
           - name: SPRING_JPA_HIBERNATE_DDL-AUTO
             value: "none"
