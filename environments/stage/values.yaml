@@ -27,15 +27,15 @@ astrago:
     password: xiirocks
     maxLifetime: "3595000"
   core:
-    registry: "harbor.xiilab.com:32443"
+    registry: "10.61.3.161:30002"
     repository: "astrago/core"
     imageTag: "stag-131d"
   batch:
-    registry: "harbor.xiilab.com:32443"
+    registry: "10.61.3.161:30002"
     repository: "astrago/batch"
     imageTag: "stag-131d"
   monitor:
-    registry: "harbor.xiilab.com:32443"
+    registry: "10.61.3.161:30002"
     repository: "astrago/monitor"
     imageTag: "stag-131d"
   frontend:
