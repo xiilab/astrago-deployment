@@ -39,7 +39,7 @@ astrago:
     repository: "astrago/monitor"
     imageTag: "stag-131d"
   frontend:
-    registry: "harbor.xiilab.com:32443"
+    registry: "10.61.3.161:30002"
     repository: "astrago/frontend"
     imageTag: stag-3a70
   oneview:
