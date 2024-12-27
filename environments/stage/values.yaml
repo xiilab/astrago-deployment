@@ -29,15 +29,15 @@ astrago:
   core:
     registry: "10.61.3.161:30002"
     repository: "astrago/core"
-    imageTag: "stag-131d"
+    imageTag: "stag-100c"
   batch:
     registry: "10.61.3.161:30002"
     repository: "astrago/batch"
-    imageTag: "stag-131d"
+    imageTag: "stag-100c"
   monitor:
     registry: "10.61.3.161:30002"
     repository: "astrago/monitor"
-    imageTag: "stag-131d"
+    imageTag: "stag-100c"
   frontend:
     registry: "10.61.3.161:30002"
     repository: "astrago/frontend"
