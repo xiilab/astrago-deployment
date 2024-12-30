@@ -41,7 +41,7 @@ astrago:
   frontend:
     registry: "10.61.3.161:30002"
     repository: "astrago/frontend"
-    imageTag: stag-5314
+    imageTag: stag-0cff
   oneview:
     enabled: true
 harbor:
