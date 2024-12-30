@@ -816,7 +816,7 @@ spec:
         - name: astrago
           securityContext:
             {}          
-          image: "10.61.3.161:30002/astrago/frontend:stag-8c85"          
+          image: "10.61.3.161:30002/astrago/frontend:stag-00fa"          
           env:
           - name: KEYCLOAK_HOST
             value: "http://10.61.3.161:30080/auth/"
