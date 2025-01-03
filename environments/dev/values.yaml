@@ -29,24 +29,24 @@ astrago:
   mongodb:
     url: mongodb://astrago:xiirocks@astrago-mongodb:27017/astrago?authSource=admin
   core:
-    registry: "harbor.xiilab.com:32443"
-    repository: "astrago/core"
+    registry: "docker.io"
+    repository: "xiilab/astrago"
     imageTag: "dev-3eff"
   batch:
-    registry: "harbor.xiilab.com:32443"
-    repository: "astrago/batch"
+    registry: "docker.io"
+    repository: "xiilab/astrago"
     imageTag: "dev-3eff"
   monitor:
-    registry: "harbor.xiilab.com:32443"
-    repository: "astrago/monitor"
+    registry: "docker.io"
+    repository: "xiilab/astrago"
     imageTag: "dev-3eff"
   frontend:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/frontend"
     imageTag: dev-889b
   experiment:
-    registry: "harbor.xiilab.com:32443"
-    repository: "astrago/experiment"
+    registry: "docker.io"
+    repository: "xiilab/astrago"
     imageTag: "dev-3eff"
 harbor:
   enabled: true    
