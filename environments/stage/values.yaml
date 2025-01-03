@@ -27,16 +27,16 @@ astrago:
     password: xiirocks
     maxLifetime: "3595000"
   core:
-    registry: "10.61.3.161:30002"
-    repository: "astrago/core"
+    registry: "docker.io"
+    repository: "xiilab/astrago"
     imageTag: "stag-6021"
   batch:
-    registry: "10.61.3.161:30002"
-    repository: "astrago/batch"
+    registry: "docker.io"
+    repository: "xiilab/astrago"
     imageTag: "stag-6021"
   monitor:
-    registry: "10.61.3.161:30002"
-    repository: "astrago/monitor"
+    registry: "docker.io"
+    repository: "xiilab/astrago"
     imageTag: "stag-6021"
   frontend:
     registry: "10.61.3.161:30002"
