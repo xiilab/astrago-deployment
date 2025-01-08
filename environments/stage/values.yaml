@@ -1,6 +1,6 @@
 # externalIP:
-#externalIP: 10.61.3.161
-externalIP: 59.10.103.94
+externalIP: 10.61.3.161
+#externalIP: 59.10.103.94
 # Volume Settings
 nfs:
   storageClassName: astrago-nfs-csi
@@ -13,8 +13,8 @@ keycloak:
   servicePort: 30001
 # Astrago Settings
 astrago:
-  #proxyUrl: http://10.61.3.161:30080
-  proxyUrl: http://59.10.103.94:30080
+  proxyUrl: http://10.61.3.161:30080
+  #proxyUrl: http://59.10.103.94:30080
   servicePort: 30080
   userInitPassword: astrago
   keycloak:
