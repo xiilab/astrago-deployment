@@ -48,6 +48,8 @@ astrago:
     registry: "harbor.xiilab.com:32443"
     repository: "astrago/experiment"
     imageTag: "dev-3eff"
+  oneview:
+    enabled: true
 harbor:
   enabled: true    
 offline:
