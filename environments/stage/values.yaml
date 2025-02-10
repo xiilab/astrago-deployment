@@ -41,9 +41,11 @@ astrago:
     repository: "xiilab/astrago"
     imageTag: "monitor-stag-c624"
   frontend:
-    registry: "10.61.3.161:30002"
-    repository: "astrago/frontend"
-    imageTag: frontend-stag-e766
+    registry: "docker.io"
+    repository: "xiilab/astrago"
+    # registry: "10.61.3.161:30002"
+    # repository: "astrago/frontend"
+    imageTag: "frontend-stag-e766"
   oneview:
     enabled: true
 harbor:
