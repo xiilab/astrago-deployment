@@ -7,6 +7,10 @@ environments:
     values:
     - environments/common/values.yaml
     - environments/dev/values.yaml
+  dev2:
+    values:
+    - environments/common/values.yaml
+    - environments/dev2/values.yaml
   stage:
     values:
     - environments/common/values.yaml

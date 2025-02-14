@@ -1,0 +1,55 @@
+# externalIP:
+externalIP: 10.61.3.12
+#externalIP: 59.10.103.94
+# Volume Settings
+nfs:
+  storageClassName: astrago-nfs-csi
+  server: 10.61.3.2
+  basePath: /kube_storage/develop-astrago
+# Keycloak Settings
+keycloak:
+  adminUser: admin
+  adminPassword: xiirocks
+  servicePort: 30001
+# Astrago Settings
+astrago:
+  proxyUrl: http://10.61.3.12:30080
+  #proxyUrl: http://59.10.103.94:30080
+  servicePort: 30080
+  userInitPassword: astrago
+  keycloak:
+    externalKeycloakUrl: http://10.61.3.12:30001/auth
+    realm: astrago
+    client: astrago-client
+    clientSecret: astragosecret
+    userInitPassword: astrago
+  mariadb:
+    rootPassword: root
+    username: astrago
+    password: xiirocks
+    maxLifetime: "3595000"
+  core:
+    registry: "docker.io"
+    repository: "xiilab/astrago"
+    imageTag: "core-stag-89c4"
+  batch:
+    registry: "docker.io"
+    repository: "xiilab/astrago"
+    imageTag: "batch-stag-89c4"
+  monitor:
+    registry: "docker.io"
+    repository: "xiilab/astrago"
+    imageTag: "monitor-stag-89c4"
+  frontend:
+    registry: "docker.io"
+    repository: "xiilab/astrago"
+    # registry: "10.61.3.161:30002"
+    # repository: "astrago/frontend"
+    imageTag: "frontend-stag-12f6"
+  oneview:
+    enabled: true
+harbor:
+  enabled: true
+offline:
+  registry: # 192.168.56.11:35000
+  httpServer: # http://192.168.56.11
