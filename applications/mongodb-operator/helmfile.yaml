@@ -1,0 +1,10 @@
+releases:
+- name: mongodb-operator
+  namespace: mongodb-operator
+  #chart: mongodb/community-operator
+  chart: community-operator
+  wait: true
+  labels:
+    app: mongodb-operator
+  values:
+  - values.yaml.gotmpl

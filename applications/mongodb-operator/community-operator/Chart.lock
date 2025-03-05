@@ -1,0 +1,6 @@
+dependencies:
+- name: community-operator-crds
+  repository: file://charts/community-operator-crds
+  version: 0.10.0
+digest: sha256:b7f2eae471d6c48f230d99b6c2f39320796a93a5af60919b3f7cb103925ed577
+generated: "2024-08-07T17:07:28.518017+09:00"
