@@ -33,15 +33,15 @@ astrago:
   core:
     registry: "docker.io"
     repository: "xiilab/astrago"
-    imageTag: "core-stag-c1fa"
+    imageTag: "core-stag-d58d"
   batch:
     registry: "docker.io"
     repository: "xiilab/astrago"
-    imageTag: "batch-stag-c1fa"
+    imageTag: "batch-stag-d58d"
   monitor:
     registry: "docker.io"
     repository: "xiilab/astrago"
-    imageTag: "monitor-stag-c1fa"
+    imageTag: "monitor-stag-d58d"
   frontend:
     registry: "docker.io"
     repository: "xiilab/astrago"
