@@ -47,7 +47,7 @@ astrago:
     repository: "xiilab/astrago"
     # registry: "10.61.3.161:30002"
     # repository: "astrago/frontend"
-    imageTag: "frontend-stag-a7fc"
+    imageTag: "frontend-stag-b9ab"
   oneview:
     enabled: true
 harbor:
