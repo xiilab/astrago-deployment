@@ -28,8 +28,6 @@ astrago:
     username: astrago
     password: xiirocks
     maxLifetime: "3595000"
-  mongodb:
-    url: mongodb://astrago:xiirocks@astrago-mongodb:27017/astrago?authSou
   core:
     registry: "docker.io"
     repository: "xiilab/astrago"
