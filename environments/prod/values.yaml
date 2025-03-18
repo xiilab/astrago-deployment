@@ -41,7 +41,7 @@ astrago:
   frontend:
     registry: "docker.io"
     repository: "xiilab/astrago"
-    imageTag: frontend-v1.0.48
+    imageTag: frontend-v1.0.49
   oneview:
     enabled: false
 harbor:
