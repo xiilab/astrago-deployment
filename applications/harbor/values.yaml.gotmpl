@@ -76,6 +76,13 @@ registry:
     image:
       repository: "{{ .Values.offline.registry | default "docker.io" }}/goharbor/registry-photon"
       tag: v2.11.1
+    resources:
+      requests:
+        cpu: 3
+        memory: 2048Mi
+      limits:
+        cpu: 3
+        memory: 2048Mi
   controller:
     image:
       repository: "{{ .Values.offline.registry | default "docker.io" }}/goharbor/harbor-registryctl"
@@ -92,6 +99,13 @@ database:
     image:
       repository: "{{ .Values.offline.registry | default "docker.io" }}/goharbor/harbor-db"
       tag: v2.11.1
+    resources:
+      requests:
+        cpu: 3
+        memory: 2048Mi
+      limits:
+        cpu: 3
+        memory: 2048Mi
 redis:
   type: internal
   internal:
