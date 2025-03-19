@@ -55,7 +55,13 @@ core:
     - name: PROMETHEUS_URL
       value: http://prometheus-kube-prometheus-prometheus.prometheus.svc.cluster.local:9090
     - name: ASTRAGO_PRIVATE-REGISTRY-URL
-      value: "{{ .Values.offline.registry | default "" }}" 
+      value: "{{ .Values.offline.registry | default "" }}"
+    - name: HARBOR_URL
+      value: "10.61.3.12:30002"
+    - name: HARBOR_ID
+      value: "admin"
+    - name: HARBOR_PASSWORD
+      value: "Harbor12345"
 
 batch:
   image:
@@ -109,6 +115,12 @@ batch:
       value: {{ .Values.astrago.userInitPassword }}
     - name: ASTRAGO_PRIVATE-REGISTRY-URL
       value: "{{ .Values.offline.registry | default "" }}"
+    - name: HARBOR_URL
+      value: "10.61.3.12:30002"
+    - name: HARBOR_ID
+      value: "admin"
+    - name: HARBOR_PASSWORD
+      value: "Harbor12345"
 
 monitor:
   image:
