@@ -783,6 +783,12 @@ spec:
               value: "astrago"
             - name: ASTRAGO_PRIVATE-REGISTRY-URL
               value: ""
+            - name: HARBOR_URL
+              value: "10.61.3.12:30002"
+            - name: HARBOR_ID
+              value: "admin"
+            - name: HARBOR_PASSWORD
+              value: "Harbor12345"
           volumeMounts:
             - name: astrago-workload-log
               mountPath: /root/astrago
@@ -856,6 +862,12 @@ spec:
             value: "http://prometheus-kube-prometheus-prometheus.prometheus.svc.cluster.local:9090"
           - name: ASTRAGO_PRIVATE-REGISTRY-URL
             value: ""
+          - name: HARBOR_URL
+            value: "10.61.3.12:30002"
+          - name: HARBOR_ID
+            value: "admin"
+          - name: HARBOR_PASSWORD
+            value: "Harbor12345"
           volumeMounts:
             - name: astrago-workload-log
               mountPath: /root/astrago
