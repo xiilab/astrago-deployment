@@ -31,15 +31,15 @@ astrago:
   core:
     registry: "docker.io"
     repository: "xiilab/astrago"
-    imageTag: "core-stage-d99e"
+    imageTag: "core-stage-cdef"
   batch:
     registry: "docker.io"
     repository: "xiilab/astrago"
-    imageTag: "batch-stage-d99e"
+    imageTag: "batch-stage-cdef"
   monitor:
     registry: "docker.io"
     repository: "xiilab/astrago"
-    imageTag: "monitor-stage-d99e"
+    imageTag: "monitor-stage-cdef"
   frontend:
     registry: "docker.io"
     repository: "xiilab/astrago"
