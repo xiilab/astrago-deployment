@@ -59,9 +59,9 @@ core:
     - name: HARBOR_URL
       value: http://{{ .Values.externalIP }}:{{ .Values.harbor.servicePort }}
     - name: HARBOR_ID
-      value: "{{ .Values.harbor.user }}"
+      value: "admin"
     - name: HARBOR_PASSWORD
-      value: "{{ .Values.harbor.password }}"
+      value: "{{ .Values.harbor.adminPassword }}"
 batch:
   image:
     registry: "{{ .Values.astrago.batch.registry }}"
@@ -117,9 +117,9 @@ batch:
     - name: HARBOR_URL
       value: http://{{ .Values.externalIP }}:{{ .Values.harbor.servicePort }}
     - name: HARBOR_ID
-      value: "{{ .Values.harbor.user }}"
+      value: "admin"
     - name: HARBOR_PASSWORD
-      value: "{{ .Values.harbor.password }}"
+      value: "{{ .Values.harbor.adminPassword }}"
 
 monitor:
   image:

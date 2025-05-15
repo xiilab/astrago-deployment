@@ -53,7 +53,7 @@ persistence:
       size: 5Gi
       annotations: {}
 
-harborAdminPassword: "Harbor12345"
+harborAdminPassword: "{{ .Values.harbor.adminPassword }}"
 
 nginx:
   image:
