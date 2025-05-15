@@ -57,12 +57,11 @@ core:
     - name: ASTRAGO_PRIVATE-REGISTRY-URL
       value: "{{ .Values.offline.registry | default "" }}" 
     - name: HARBOR_URL
-      value: "10.61.3.12:30002"
+      value: http://{{ .Values.externalIP }}:{{ .Values.harbor.servicePort }}
     - name: HARBOR_ID
-      value: "admin"
+      value: "{{ .Values.harbor.user }}"
     - name: HARBOR_PASSWORD
-      value: "Harbor12345"
-
+      value: "{{ .Values.harbor.password }}"
 batch:
   image:
     registry: "{{ .Values.astrago.batch.registry }}"
@@ -116,11 +115,11 @@ batch:
     - name: ASTRAGO_PRIVATE-REGISTRY-URL
       value: "{{ .Values.offline.registry | default "" }}"
     - name: HARBOR_URL
-      value: "10.61.3.12:30002"
+      value: http://{{ .Values.externalIP }}:{{ .Values.harbor.servicePort }}
     - name: HARBOR_ID
-      value: "admin"
+      value: "{{ .Values.harbor.user }}"
     - name: HARBOR_PASSWORD
-      value: "Harbor12345"
+      value: "{{ .Values.harbor.password }}"
 
 monitor:
   image:

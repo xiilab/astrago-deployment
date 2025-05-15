@@ -11,7 +11,7 @@ expose:
       https:
         port: 443
         nodePort: 30003
-externalURL: http://{{ .Values.externalIP }}:30002
+externalURL: http://{{ .Values.externalIP }}:{{ .Values.harbor.servicePort }}
 persistence:
   enabled: true
   resourcePolicy: "keep"

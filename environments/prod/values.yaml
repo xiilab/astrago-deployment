@@ -45,7 +45,10 @@ astrago:
   oneview:
     enabled: false
 harbor:
+  servicePort: 30002
   enabled: true
+  user: admin
+  password: Harbor12345
 offline:
   registry: # 192.168.56.11:35000
   httpServer: # http://192.168.56.11
