@@ -3,7 +3,7 @@ gpu-operator:
     enabled: true
     repository: nvcr.io/nvidia/k8s
     image: dcgm-exporter
-    version: 3.3.0-3.2.0-ubuntu22.04
+    version: 3.3.8-3.6.0-ubuntu22.04
     imagePullPolicy: IfNotPresent
     config:
       name: metrics-config
@@ -17,6 +17,7 @@ gpu-operator:
 
   driver:
     enabled: false
+    kernelModuleType: auto
 
   toolkit:
     enabled: true 

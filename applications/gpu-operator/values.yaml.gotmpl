@@ -16,7 +16,7 @@ gpu-operator:
     enabled: true
     repository: "{{ .Values.offline.registry | default "nvcr.io" }}/nvidia/k8s"
     image: dcgm-exporter
-    version: 3.3.5-3.4.1-ubuntu22.04
+    version: 3.3.8-3.6.0-ubuntu22.04
     imagePullPolicy: IfNotPresent
     config:
       name: metrics-config
@@ -28,41 +28,54 @@ gpu-operator:
       - name: DCGM_EXPORTER_COLLECTORS
         value: "/etc/dcgm-exporter/dcgm-metrics.csv"
 
+  dcgm:
+    enabled: true
+    repository: "{{ .Values.offline.registry | default "nvcr.io" }}/nvidia/k8s"
+    image: dcgm
+    version: 3.3.8-1-ubuntu22.04
+    imagePullPolicy: IfNotPresent
+
   driver:
     enabled: false
+    # kernelModuleType 파라미터 (useOpenKernelModules 대체)
+    kernelModuleType: auto
+    repository: "{{ .Values.offline.registry | default "nvcr.io" }}/nvidia"
+    image: driver
+    # version: ""
+    imagePullPolicy: IfNotPresent
+    startupProbe:
+      initialDelaySeconds: 60
+      periodSeconds: 10
+      timeoutSeconds: 60
+      failureThreshold: 120
 
   toolkit:
     enabled: true
     repository: "{{ .Values.offline.registry | default "nvcr.io" }}/nvidia/k8s"
     image: container-toolkit
-    version: v1.15.0-ubuntu20.04
+    version: v1.17.0-ubuntu20.04
+    imagePullPolicy: IfNotPresent
 
   devicePlugin:
     enabled: true
     repository: "{{ .Values.offline.registry | default "nvcr.io" }}/nvidia"
     image: k8s-device-plugin
-    version: v0.15.0-ubi8
-    config:
-      name: "nvidia-plugin-config-mps"
-
-  dcgm:
-    # disabled by default to use embedded nv-hostengine by exporter
-    enabled: false
-    repository: "{{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native"
-    image: dcgm
-    version: 3.3.5-1-ubuntu22.04    
+    version: v0.17.0-ubi8
+    imagePullPolicy: IfNotPresent
 
   gfd:
     enabled: true
     repository: "{{ .Values.offline.registry | default "nvcr.io" }}/nvidia"
-    image: k8s-device-plugin
-    version: v0.15.0-ubi8    
+    image: gpu-feature-discovery
+    version: v0.17.0-ubi8
+    imagePullPolicy: IfNotPresent
 
   migManager:
     enabled: true
-    repository: "{{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native"
-    image: k8s-mig-manager
-    version: v0.7.0-ubuntu20.04
+    repository: "{{ .Values.offline.registry | default "nvcr.io" }}/nvidia/k8s"
+    image: mig-manager
+    version: v0.10.0-ubuntu20.04
+    imagePullPolicy: IfNotPresent
     config:
       name: "custom-mig-parted-config"
       default: "all-disabled"
@@ -74,60 +87,54 @@ gpu-operator:
     enabled: false
     repository: "{{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native"
     image: gpu-operator-validator
+    # version: ""
+    imagePullPolicy: IfNotPresent
 
   gds:
     enabled: false
     repository: "{{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native"
-    image: nvidia-fs
-    version: "2.17.5"    
-
-  gdrcopy:
-    enabled: false
-    repository: "{{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native"
-    image: gdrdrv
-    version: "v2.4.1"    
+    image: gds-driver
+    version: v2.20.5-535.129.03-ubuntu20.04
+    imagePullPolicy: IfNotPresent
 
   vgpuManager:
     enabled: false
-    repository: "{{ .Values.offline.registry | default "" }}"
-    image: vgpu-manager    
-    version: ""    
-
-  vgpuDeviceManager:
-    enabled: false
     repository: "{{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native"
     image: vgpu-device-manager
-    version: "v0.2.6"
+    version: v0.2.8
+    imagePullPolicy: IfNotPresent
 
-  vfioManager:
-    enabled: false
-    repository: "{{ .Values.offline.registry | default "nvcr.io" }}/nvidia"
-    image: cuda
-    version: 12.4.1-base-ubi8    
-
-  kataManager:
-    enabled: false    
+  vgpuDeviceManager:
+    enabled: false  
     repository: "{{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native"
-    image: k8s-kata-manager
-    version: v0.2.0
+    image: vgpu-device-manager
+    version: v0.2.8
+    imagePullPolicy: IfNotPresent
 
   sandboxDevicePlugin:
-    enabled: true
+    enabled: false
     repository: "{{ .Values.offline.registry | default "nvcr.io" }}/nvidia"
     image: kubevirt-gpu-device-plugin
-    version: v1.2.7    
+    version: v1.2.10
+    imagePullPolicy: IfNotPresent
+
+  kataManager:
+    enabled: false
+    repository: "{{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native"
+    image: k8s-kata-manager
+    version: v0.2.2
+    imagePullPolicy: IfNotPresent
 
   ccManager:
     enabled: false
-    defaultMode: "off"
     repository: "{{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native"
     image: k8s-cc-manager
-    version: v0.1.1    
+    version: v0.1.1
+    imagePullPolicy: IfNotPresent
 
-  node-feature-discovery:    
-    image:
-      repository: "{{ .Values.offline.registry | default "registry.k8s.io" }}/nfd/node-feature-discovery"
-      pullPolicy: IfNotPresent    
-
-  mig:
-    strategy: single
+node-feature-discovery:
+  master:
+    extraLabelNs:
+      - nvidia.com
+    serviceAccount:
+      name: node-feature-discovery
