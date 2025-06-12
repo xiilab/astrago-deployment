@@ -7,8 +7,8 @@ nfs:
   server: 10.61.3.2
   basePath: /kube_storage/develop-astrago
 
-# GPU Session Monitoring Settings - Linear BE-102
-gpu-session-monitoring:
+# GPU Process Exporter Settings
+gpu-process-exporter:
   enabled: true
   collection:
     schedule: "*/1 * * * *"  # Every minute

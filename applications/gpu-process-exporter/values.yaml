@@ -1,7 +1,7 @@
-# GPU Session Monitoring Configuration
-# Linear BE-102: 각 GPU/MIG에 연결된 사용자 수 및 세션별 리소스 사용량
+# GPU Process Exporter Configuration
+# Exports GPU process metrics to Prometheus via Node Exporter textfile collector
 
-gpu-session-monitoring:
+gpu-process-exporter:
   enabled: true
 
 # Collection settings

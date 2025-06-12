@@ -1,7 +1,8 @@
-# GPU Session Monitoring Configuration
-# Linear BE-102: 각 GPU/MIG에 연결된 사용자 수 및 세션별 리소스 사용량
+# GPU Process Exporter Configuration
+# Exports GPU process metrics to Prometheus via Node Exporter textfile collector
 
-{{- if index .Values "gpu-session-monitoring" "enabled" }}
+gpu-process-exporter:
+  enabled: {{ .Values.gpu.enabled | default true }}
 
 # Collection settings
 collection:
@@ -34,7 +35,7 @@ prometheus:
 # GPU configuration
 gpu:
   # Number of GPUs to monitor (adjust based on your cluster)
-  count: 4
+  count: {{ .Values.gpu.count | default 4 }}
   # GPU device indices to monitor
   devices: [0, 1, 2, 3]
 
@@ -46,6 +47,4 @@ nodeSelector:
 tolerations:
 - key: nvidia.com/gpu
   operator: Exists
-  effect: NoSchedule
-
-{{- end }} 
+  effect: NoSchedule 

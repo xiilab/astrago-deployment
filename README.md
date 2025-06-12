@@ -40,8 +40,8 @@
 ⚡ **[빠른 시작 가이드](#빠른-시작)**  
 *5분만에 설치 완료*
 
-🎯 **[GPU 세션 모니터링](docs/GPU-Session-Monitoring-QuickStart.md)**  
-*GPU 리소스 실시간 추적*
+🎯 **[GPU 프로세스 모니터링](docs/GPU-Process-Monitoring-QuickStart.md)**  
+*GPU 프로세스 실시간 추적*
 
 </td>
 <td align="center" width="33%">
@@ -61,8 +61,8 @@
 🌍 **[환경 설정](docs/deployment-environments.md)**  
 *다중 환경 관리 방법*
 
-🎮 **[GPU 모니터링 상세](docs/GPU-Session-Monitoring-Guide.md)**  
-*GPU 리소스 추적 완전 가이드*
+🎮 **[GPU 프로세스 모니터링 상세](docs/GPU-Process-Monitoring-Guide.md)**  
+*GPU 프로세스 추적 완전 가이드*
 
 </td>
 <td align="center" width="33%">
@@ -104,7 +104,7 @@ Astrago 배포 시스템은 **AI/ML 작업 관리 플랫폼**을 Kubernetes 환�
 | 🔧 **완전 자동화** | 원클릭 배포 시스템 | ✅ 스크립트 지원 |
 | 📦 **Helm 기반** | 클라우드 네이티브 패키지 관리 | ✅ Helmfile 활용 |
 | 🔒 **에어갭 지원** | 완전 격리된 환경 배포 | ✅ 폐쇄망 대응 |
-| 🎮 **GPU 세션 모니터링** | 실시간 GPU 리소스 추적 및 MIG 지원 | ✅ nvidia-smi 연동 |
+| 🎮 **GPU 프로세스 모니터링** | 실시간 GPU 프로세스 추적 및 MIG 지원 | ✅ nvidia-smi 연동 |
 
 </div>
 
@@ -141,7 +141,7 @@ graph TB
     subgraph "📈 모니터링"
         PROM[📊 Prometheus]
         GRAF[📈 Grafana]
-        GPU_MON[🎮 GPU Session Monitor]
+        GPU_MON[🎮 GPU Process Monitor]
     end
     
     subgraph "🗄️ 데이터 저장소"
@@ -319,10 +319,10 @@ Astrago는 **GPU 세션 모니터링 시스템**을 내장하여 prometheus에�
 
 ```bash
 # GPU 모니터링 활성화
-./deploy_astrago.sh sync gpu-session-monitoring
+./deploy_astrago.sh sync gpu-process-exporter
 
 # 메트릭 확인
-curl http://prometheus:9090/api/v1/query?query=gpu_session_count
+curl http://prometheus:9090/api/v1/query?query=gpu_process_count
 
 # Grafana 대시보드에서 시각화
 # - GPU 사용률 현황
@@ -330,7 +330,7 @@ curl http://prometheus:9090/api/v1/query?query=gpu_session_count
 # - 유휴 GPU 감지
 ```
 
-자세한 내용은 **[GPU 세션 모니터링 가이드](docs/GPU-Session-Monitoring-Guide.md)**를 참조하세요.
+자세한 내용은 **[GPU 프로세스 모니터링 가이드](docs/GPU-Process-Monitoring-Guide.md)**를 참조하세요.
 
 ---
 
@@ -381,7 +381,7 @@ curl http://prometheus:9090/api/v1/query?query=gpu_session_count
 ./deploy_astrago.sh sync gpu-operator
 
 # GPU 세션 모니터링 활성화
-./deploy_astrago.sh sync gpu-session-monitoring
+./deploy_astrago.sh sync gpu-process-exporter
 ```
 
 ### 🔄 업데이트 및 관리

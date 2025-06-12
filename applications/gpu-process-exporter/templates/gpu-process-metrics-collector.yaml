@@ -1,8 +1,8 @@
-{{- if index .Values "gpu-session-monitoring" "enabled" }}
+{{- if index .Values "gpu-process-exporter" "enabled" }}
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: gpu-session-metrics-collector
+  name: gpu-process-metrics-collector
   namespace: {{ .Release.Namespace }}
 spec:
   schedule: {{ .Values.collection.schedule | quote }}
@@ -17,7 +17,7 @@ spec:
           hostPID: true
           restartPolicy: OnFailure
           containers:
-          - name: gpu-session-collector
+          - name: gpu-process-collector
             image: nvcr.io/nvidia/k8s/dcgm-exporter:3.3.5-3.4.1-ubuntu22.04
             command:
             - /bin/bash
@@ -27,11 +27,11 @@ spec:
               mkdir -p /host/var/lib/node_exporter/textfile_collector
               
               # 메트릭 헤더 생성
-              cat > /tmp/gpu_sessions.prom << 'EOF'
-              # HELP gpu_session_count Number of active GPU sessions per GPU
-              # TYPE gpu_session_count gauge
-              # HELP gpu_total_sessions Total number of GPU sessions across all GPUs
-              # TYPE gpu_total_sessions gauge
+              cat > /tmp/gpu_processes.prom << 'EOF'
+              # HELP gpu_process_count Number of active GPU processes per GPU
+              # TYPE gpu_process_count gauge
+              # HELP gpu_total_processes Total number of GPU processes across all GPUs
+              # TYPE gpu_total_processes gauge
               # HELP gpu_process_utilization GPU utilization per process with detailed info  
               # TYPE gpu_process_utilization gauge
               # HELP gpu_process_memory_utilization GPU memory utilization per process
@@ -41,7 +41,7 @@ spec:
               EOF
               
               # GPU 프로세스 상세 정보 수집 (nvidia-smi 기반)
-              total_sessions=0
+              total_processes=0
               
               echo "Collecting GPU process information from nvidia-smi..."
               echo "Checking MIG mode status..."
@@ -64,7 +64,7 @@ spec:
               # 동적으로 GPU/MIG 인스턴스 목록 생성
               gpu_list=$(nvidia-smi --query-gpu=index --format=csv,noheader,nounits)
               
-              # GPU별로 세션 카운트 초기화 (동적)
+              # GPU별로 프로세스 카운트 초기화 (동적)
               echo "$gpu_list" | while read gpu_index; do
                 gpu_index=$(echo "$gpu_index" | tr -d ' ')
                 echo "0" > /tmp/gpu_${gpu_index}_count.tmp
@@ -132,44 +132,44 @@ spec:
                     gpu_display=$(echo "$gpu_id" | sed 's/\//_/g')  # 슬래시를 언더스코어로 변경
                     
                     # 해당 GPU에만 메트릭 생성
-                    echo "gpu_process_utilization{gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\"} $gpu_util" >> /tmp/gpu_sessions.prom
-                    echo "gpu_process_memory_utilization{gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\"} $mem_util" >> /tmp/gpu_sessions.prom
-                    echo "gpu_process_info{gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\",status=\"active\",gpu_memory=\"${gpu_memory}MiB\"} 1" >> /tmp/gpu_sessions.prom
+                    echo "gpu_process_utilization{gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\"} $gpu_util" >> /tmp/gpu_processes.prom
+                    echo "gpu_process_memory_utilization{gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\"} $mem_util" >> /tmp/gpu_processes.prom
+                    echo "gpu_process_info{gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\",status=\"active\",gpu_memory=\"${gpu_memory}MiB\"} 1" >> /tmp/gpu_processes.prom
                     
-                    # 해당 GPU의 세션 카운트 증가
+                    # 해당 GPU의 프로세스 카운트 증가
                     current_count=$(cat /tmp/gpu_${gpu_id}_count.tmp 2>/dev/null || echo "0")
                     echo $((current_count + 1)) > /tmp/gpu_${gpu_id}_count.tmp
-                    total_sessions=$((total_sessions + 1))
+                    total_processes=$((total_processes + 1))
                   fi
                 done
               fi
               
-              # 각 GPU별 세션 카운트 및 idle 상태 처리 (동적)
+              # 각 GPU별 프로세스 카운트 및 idle 상태 처리 (동적)
               echo "$gpu_list" | while read gpu_index; do
                 gpu_index=$(echo "$gpu_index" | tr -d ' ')
                 gpu_display=$(echo "$gpu_index" | sed 's/\//_/g')  # 슬래시를 언더스코어로 변경
-                session_count=$(cat /tmp/gpu_${gpu_index}_count.tmp 2>/dev/null || echo "0")
-                echo "gpu_session_count{gpu=\"$gpu_display\"} $session_count" >> /tmp/gpu_sessions.prom
+                process_count=$(cat /tmp/gpu_${gpu_index}_count.tmp 2>/dev/null || echo "0")
+                echo "gpu_process_count{gpu=\"$gpu_display\"} $process_count" >> /tmp/gpu_processes.prom
                 
                 # 프로세스가 없는 GPU는 idle 상태로 표시
-                if [ "$session_count" -eq 0 ]; then
-                  echo "gpu_process_info{gpu=\"$gpu_display\",pid=\"none\",command=\"none\",pod=\"none\",namespace=\"none\",container=\"none\",status=\"idle\",gpu_memory=\"0MiB\"} 0" >> /tmp/gpu_sessions.prom
+                if [ "$process_count" -eq 0 ]; then
+                  echo "gpu_process_info{gpu=\"$gpu_display\",pid=\"none\",command=\"none\",pod=\"none\",namespace=\"none\",container=\"none\",status=\"idle\",gpu_memory=\"0MiB\"} 0" >> /tmp/gpu_processes.prom
                 fi
               done
               
-              echo "gpu_total_sessions $total_sessions" >> /tmp/gpu_sessions.prom
+              echo "gpu_total_processes $total_processes" >> /tmp/gpu_processes.prom
               
               # 타임스탬프 추가
-              echo "# Generated at $(date)" >> /tmp/gpu_sessions.prom
+              echo "# Generated at $(date)" >> /tmp/gpu_processes.prom
               
               # 임시 파일 정리
               rm -f /tmp/gpu_mapping.txt /tmp/gpu_*_count.tmp /tmp/gpu_list.txt
               
               # 메트릭 파일 이동
-              mv /tmp/gpu_sessions.prom /host/var/lib/node_exporter/textfile_collector/gpu_sessions.prom
+              mv /tmp/gpu_processes.prom /host/var/lib/node_exporter/textfile_collector/gpu_processes.prom
               
-              echo "$(date): GPU session metrics collected with MIG-aware GPU mapping"
-              cat /host/var/lib/node_exporter/textfile_collector/gpu_sessions.prom
+              echo "$(date): GPU process metrics collected with MIG-aware GPU mapping"
+              cat /host/var/lib/node_exporter/textfile_collector/gpu_processes.prom
             resources:
               {{- toYaml .Values.collection.resources | nindent 14 }}
             volumeMounts:

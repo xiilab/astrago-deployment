@@ -34,7 +34,7 @@ helmfiles:
   values:
   - {{ toYaml .Values | nindent 4 }}
 
-- path: applications/gpu-session-monitoring/helmfile.yaml
+- path: applications/gpu-process-exporter/helmfile.yaml
   values:
   - {{ toYaml .Values | nindent 4 }}
 
