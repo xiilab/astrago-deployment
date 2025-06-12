@@ -1,0 +1,50 @@
+# GPU Session Monitoring Configuration
+# Linear BE-102: 각 GPU/MIG에 연결된 사용자 수 및 세션별 리소스 사용량
+
+gpu-session-monitoring:
+  enabled: true
+
+# Collection settings
+collection:
+  # CronJob schedule (every minute)
+  schedule: "*/1 * * * *"
+  
+  # Image settings
+  image:
+    repository: busybox
+    tag: "1.35"
+    pullPolicy: IfNotPresent
+  
+  # Resource limits
+  resources:
+    limits:
+      cpu: 100m
+      memory: 64Mi
+    requests:
+      cpu: 50m
+      memory: 32Mi
+
+# Prometheus integration
+prometheus:
+  # Node Exporter textfile collector directory
+  textfileCollectorPath: /var/lib/node_exporter/textfile_collector
+  
+  # Prometheus server service for metric queries
+  serverService: prometheus-kube-prometheus-prometheus.prometheus.svc:9090
+
+# GPU configuration
+gpu:
+  # Number of GPUs to monitor (adjust based on your cluster)
+  count: 4
+  # GPU device indices to monitor
+  devices: [0, 1, 2, 3]
+
+# Node selection
+nodeSelector:
+  nvidia.com/gpu.present: "true"
+
+# Tolerations for GPU nodes
+tolerations:
+- key: nvidia.com/gpu
+  operator: Exists
+  effect: NoSchedule 

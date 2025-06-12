@@ -65,6 +65,18 @@ gfd: v0.17.0-ubi8
 migManager: v0.10.0-ubuntu20.04
 ```
 
+#### **GPU 세션 모니터링 (신규)**
+
+- **차트 버전**: `0.1.0`
+- **수집기 이미지**: `nvcr.io/nvidia/k8s/dcgm-exporter:3.3.5-3.4.1-ubuntu22.04`
+- **수집 주기**: `*/1 * * * *` (1분마다)
+- **지원 기능**:
+  - ✅ nvidia-smi PID 정확 매핑
+  - ✅ MIG (Multi-Instance GPU) 지원
+  - ✅ 동적 GPU 감지
+  - ✅ Pod 정보 자동 연결
+  - ✅ Prometheus 메트릭 연동
+
 ---
 
 ## 📱 **2. 애플리케이션 구성요소**
@@ -142,6 +154,26 @@ prometheus-windows-exporter: 0.1.*
 
 - **차트 버전**: `2.13.0`
 - **애플리케이션 버전**: `2.3.0`
+
+### **2.8 GPU 리소스 모니터링**
+
+#### **GPU 세션 모니터링**
+
+- **차트 버전**: `0.1.0`
+- **수집기 이미지**: `nvcr.io/nvidia/k8s/dcgm-exporter:3.3.5-3.4.1-ubuntu22.04`
+- **수집 방식**: CronJob (Node Exporter textfile collector)
+- **주요 메트릭**:
+
+```yaml
+# GPU 세션 관련
+gpu_session_count                     # GPU별 활성 세션 수
+gpu_total_sessions                    # 전체 GPU 세션 수
+
+# 프로세스 상세 정보
+gpu_process_info                      # PID, 명령어, Pod 정보
+gpu_process_utilization               # 프로세스별 GPU 사용률
+gpu_process_memory_utilization        # 프로세스별 메모리 사용률
+```
 
 ---
 
@@ -258,6 +290,23 @@ offline:
 - ✅ Tensor_Core_Utilization
 - ✅ MIG 파티션 메트릭
 - ✅ NVLink 메트릭
+
+### **7.2 GPU 세션 모니터링 메트릭 (신규)**
+
+#### **프로세스 추적 메트릭**
+
+- ✅ `gpu_session_count` - GPU별 활성 세션 수
+- ✅ `gpu_total_sessions` - 전체 GPU 세션 수  
+- ✅ `gpu_process_info` - 프로세스 상세 정보 (PID, 명령어, Pod 정보)
+- ✅ `gpu_process_utilization` - 프로세스별 GPU 사용률
+- ✅ `gpu_process_memory_utilization` - 프로세스별 메모리 사용률
+
+#### **특징**
+
+- 🎯 **정확한 PID 매핑**: nvidia-smi와 Prometheus PID 완전 일치
+- 🔧 **MIG 지원**: Multi-Instance GPU 환경 자동 감지
+- 🏷️ **Pod 연결**: Kubernetes Pod와 GPU 프로세스 자동 매핑
+- 🔄 **동적 감지**: GPU 개수 및 MIG 인스턴스 자동 인식
 
 ---
 

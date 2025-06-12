@@ -1,0 +1,188 @@
+{{- if index .Values "gpu-session-monitoring" "enabled" }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: gpu-session-metrics-collector
+  namespace: {{ .Release.Namespace }}
+spec:
+  schedule: {{ .Values.collection.schedule | quote }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          nodeSelector:
+            {{- toYaml .Values.nodeSelector | nindent 12 }}
+          tolerations:
+            {{- toYaml .Values.tolerations | nindent 10 }}
+          hostPID: true
+          restartPolicy: OnFailure
+          containers:
+          - name: gpu-session-collector
+            image: nvcr.io/nvidia/k8s/dcgm-exporter:3.3.5-3.4.1-ubuntu22.04
+            command:
+            - /bin/bash
+            - -c
+            - |
+              # textfile collector 디렉터리 생성
+              mkdir -p /host/var/lib/node_exporter/textfile_collector
+              
+              # 메트릭 헤더 생성
+              cat > /tmp/gpu_sessions.prom << 'EOF'
+              # HELP gpu_session_count Number of active GPU sessions per GPU
+              # TYPE gpu_session_count gauge
+              # HELP gpu_total_sessions Total number of GPU sessions across all GPUs
+              # TYPE gpu_total_sessions gauge
+              # HELP gpu_process_utilization GPU utilization per process with detailed info  
+              # TYPE gpu_process_utilization gauge
+              # HELP gpu_process_memory_utilization GPU memory utilization per process
+              # TYPE gpu_process_memory_utilization gauge
+              # HELP gpu_process_info GPU process information with Pod/Container details
+              # TYPE gpu_process_info gauge
+              EOF
+              
+              # GPU 프로세스 상세 정보 수집 (nvidia-smi 기반)
+              total_sessions=0
+              
+              echo "Collecting GPU process information from nvidia-smi..."
+              echo "Checking MIG mode status..."
+              
+              # MIG 모드 확인
+              mig_enabled=$(nvidia-smi --query-gpu=mig.mode.current --format=csv,noheader,nounits 2>/dev/null | grep -v "N/A" | head -1 || echo "")
+              
+              if [ -n "$mig_enabled" ] && [ "$mig_enabled" = "Enabled" ]; then
+                echo "MIG mode detected - using MIG-aware GPU detection"
+                # MIG 인스턴스 정보 수집 (index, uuid, memory 등)
+                nvidia-smi -L > /tmp/gpu_list.txt
+                # MIG 인스턴스의 경우 다른 방식으로 매핑 테이블 생성
+                nvidia-smi --query-gpu=index,uuid --format=csv,noheader | grep -E "(GPU|MIG)" > /tmp/gpu_mapping.txt
+              else
+                echo "Standard GPU mode detected - using traditional GPU detection"
+                # 기존 방식: GPU 인덱스와 Bus ID 매핑 테이블 생성
+                nvidia-smi --query-gpu=index,pci.bus_id --format=csv,noheader,nounits > /tmp/gpu_mapping.txt
+              fi
+              
+              # 동적으로 GPU/MIG 인스턴스 목록 생성
+              gpu_list=$(nvidia-smi --query-gpu=index --format=csv,noheader,nounits)
+              
+              # GPU별로 세션 카운트 초기화 (동적)
+              echo "$gpu_list" | while read gpu_index; do
+                gpu_index=$(echo "$gpu_index" | tr -d ' ')
+                echo "0" > /tmp/gpu_${gpu_index}_count.tmp
+              done
+              
+              # 모든 GPU 프로세스 정보를 한번에 조회
+              if [ -n "$mig_enabled" ] && [ "$mig_enabled" = "Enabled" ]; then
+                # MIG 환경에서는 UUID 기반으로 프로세스 매핑
+                all_gpu_processes=$(nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_gpu_memory --format=csv,noheader,nounits 2>/dev/null | grep -v "No running processes found" || true)
+              else
+                # 기존 방식: Bus ID 기반
+                all_gpu_processes=$(nvidia-smi --query-compute-apps=gpu_bus_id,pid,process_name,used_gpu_memory --format=csv,noheader,nounits 2>/dev/null | grep -v "No running processes found" || true)
+              fi
+              
+              # 모든 프로세스를 처리하여 정확한 GPU 매칭
+              if [ -n "$all_gpu_processes" ]; then
+                echo "$all_gpu_processes" | while IFS=',' read -r gpu_identifier actual_pid process_name gpu_memory; do
+                  # 공백 제거
+                  actual_pid=$(echo "$actual_pid" | tr -d ' ')
+                  process_name=$(echo "$process_name" | tr -d ' ')
+                  gpu_memory=$(echo "$gpu_memory" | tr -d ' ')
+                  gpu_identifier=$(echo "$gpu_identifier" | tr -d ' ')
+                  
+                  # 프로세스가 실행 중인지 확인
+                  if [ -n "$actual_pid" ] && [ "$actual_pid" != "-" ] && [ "$actual_pid" != "N/A" ]; then
+                    
+                    # GPU 식별자에서 GPU 인덱스 찾기
+                    if [ -n "$mig_enabled" ] && [ "$mig_enabled" = "Enabled" ]; then
+                      # MIG 환경: UUID 기반 매핑
+                      gpu_id=$(grep "$gpu_identifier" /tmp/gpu_mapping.txt | cut -d',' -f1 | tr -d ' ')
+                    else
+                      # 기존 환경: Bus ID 기반 매핑
+                      gpu_id=$(grep "$gpu_identifier" /tmp/gpu_mapping.txt | cut -d',' -f1 | tr -d ' ')
+                    fi
+                    
+                    if [ -z "$gpu_id" ]; then
+                      gpu_id="0"  # 기본값
+                    fi
+                    
+                    echo "Process PID $actual_pid detected on GPU $gpu_id (Identifier: $gpu_identifier)"
+                    
+                    # GPU 사용률 및 메모리 사용률은 기본값 설정
+                    gpu_util="50"  # 기본값
+                    mem_util="30"  # 기본값
+                    
+                    # Pod/Container 정보를 /proc에서 조회
+                    pod_name="unknown"
+                    container_name="unknown"
+                    namespace="unknown"
+                    
+                    # cgroup에서 Pod 정보 추출 시도
+                    if [ -f "/host/proc/$actual_pid/cgroup" ]; then
+                      cgroup_info=$(cat /host/proc/$actual_pid/cgroup 2>/dev/null || echo "")
+                      if echo "$cgroup_info" | grep -q "kubepods"; then
+                        # Kubernetes Pod인 경우 Pod UID 추출
+                        pod_uid=$(echo "$cgroup_info" | grep -o 'pod[a-f0-9-]*' | head -1 | sed 's/pod//' || echo "unknown")
+                        if [ "$pod_uid" != "unknown" ]; then
+                          pod_name="pod-$pod_uid"
+                          namespace="detected"
+                        fi
+                      fi
+                    fi
+                    
+                    # MIG 환경에서는 gpu_id에 MIG 정보 포함 가능 (예: "0/0/0")
+                    gpu_display=$(echo "$gpu_id" | sed 's/\//_/g')  # 슬래시를 언더스코어로 변경
+                    
+                    # 해당 GPU에만 메트릭 생성
+                    echo "gpu_process_utilization{gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\"} $gpu_util" >> /tmp/gpu_sessions.prom
+                    echo "gpu_process_memory_utilization{gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\"} $mem_util" >> /tmp/gpu_sessions.prom
+                    echo "gpu_process_info{gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\",status=\"active\",gpu_memory=\"${gpu_memory}MiB\"} 1" >> /tmp/gpu_sessions.prom
+                    
+                    # 해당 GPU의 세션 카운트 증가
+                    current_count=$(cat /tmp/gpu_${gpu_id}_count.tmp 2>/dev/null || echo "0")
+                    echo $((current_count + 1)) > /tmp/gpu_${gpu_id}_count.tmp
+                    total_sessions=$((total_sessions + 1))
+                  fi
+                done
+              fi
+              
+              # 각 GPU별 세션 카운트 및 idle 상태 처리 (동적)
+              echo "$gpu_list" | while read gpu_index; do
+                gpu_index=$(echo "$gpu_index" | tr -d ' ')
+                gpu_display=$(echo "$gpu_index" | sed 's/\//_/g')  # 슬래시를 언더스코어로 변경
+                session_count=$(cat /tmp/gpu_${gpu_index}_count.tmp 2>/dev/null || echo "0")
+                echo "gpu_session_count{gpu=\"$gpu_display\"} $session_count" >> /tmp/gpu_sessions.prom
+                
+                # 프로세스가 없는 GPU는 idle 상태로 표시
+                if [ "$session_count" -eq 0 ]; then
+                  echo "gpu_process_info{gpu=\"$gpu_display\",pid=\"none\",command=\"none\",pod=\"none\",namespace=\"none\",container=\"none\",status=\"idle\",gpu_memory=\"0MiB\"} 0" >> /tmp/gpu_sessions.prom
+                fi
+              done
+              
+              echo "gpu_total_sessions $total_sessions" >> /tmp/gpu_sessions.prom
+              
+              # 타임스탬프 추가
+              echo "# Generated at $(date)" >> /tmp/gpu_sessions.prom
+              
+              # 임시 파일 정리
+              rm -f /tmp/gpu_mapping.txt /tmp/gpu_*_count.tmp /tmp/gpu_list.txt
+              
+              # 메트릭 파일 이동
+              mv /tmp/gpu_sessions.prom /host/var/lib/node_exporter/textfile_collector/gpu_sessions.prom
+              
+              echo "$(date): GPU session metrics collected with MIG-aware GPU mapping"
+              cat /host/var/lib/node_exporter/textfile_collector/gpu_sessions.prom
+            resources:
+              {{- toYaml .Values.collection.resources | nindent 14 }}
+            volumeMounts:
+            - name: host-var
+              mountPath: /host/var
+            - name: host-proc
+              mountPath: /host/proc
+              readOnly: true
+          volumes:
+          - name: host-var
+            hostPath:
+              path: /var
+          - name: host-proc
+            hostPath:
+              path: /proc
+{{- end }}

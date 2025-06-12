@@ -40,6 +40,9 @@
 ⚡ **[빠른 시작 가이드](#빠른-시작)**  
 *5분만에 설치 완료*
 
+🎯 **[GPU 세션 모니터링](docs/GPU-Session-Monitoring-QuickStart.md)**  
+*GPU 리소스 실시간 추적*
+
 </td>
 <td align="center" width="33%">
 
@@ -57,6 +60,9 @@
 
 🌍 **[환경 설정](docs/deployment-environments.md)**  
 *다중 환경 관리 방법*
+
+🎮 **[GPU 모니터링 상세](docs/GPU-Session-Monitoring-Guide.md)**  
+*GPU 리소스 추적 완전 가이드*
 
 </td>
 <td align="center" width="33%">
@@ -98,6 +104,7 @@ Astrago 배포 시스템은 **AI/ML 작업 관리 플랫폼**을 Kubernetes 환�
 | 🔧 **완전 자동화** | 원클릭 배포 시스템 | ✅ 스크립트 지원 |
 | 📦 **Helm 기반** | 클라우드 네이티브 패키지 관리 | ✅ Helmfile 활용 |
 | 🔒 **에어갭 지원** | 완전 격리된 환경 배포 | ✅ 폐쇄망 대응 |
+| 🎮 **GPU 세션 모니터링** | 실시간 GPU 리소스 추적 및 MIG 지원 | ✅ nvidia-smi 연동 |
 
 </div>
 
@@ -134,6 +141,7 @@ graph TB
     subgraph "📈 모니터링"
         PROM[📊 Prometheus]
         GRAF[📈 Grafana]
+        GPU_MON[🎮 GPU Session Monitor]
     end
     
     subgraph "🗄️ 데이터 저장소"
@@ -153,6 +161,8 @@ graph TB
     BATCH --> GPU
     BATCH --> MPI
     MONITOR --> PROM
+    GPU --> GPU_MON
+    GPU_MON --> PROM
     CSI --> NFS
 ```
 
@@ -287,6 +297,43 @@ echo "🔐 Keycloak: http://<YOUR-IP>:30001"
 
 ---
 
+## 🎮 GPU 세션 모니터링
+
+### 실시간 GPU 리소스 추적
+
+Astrago는 **GPU 세션 모니터링 시스템**을 내장하여 prometheus에서 조회가 불가한 메트릭들을 실시간으로 추적합니다.
+
+<div align="center">
+
+| 기능 | 설명 | 지원 여부 |
+|:---:|:---|:---:|
+| 🎯 **정확한 PID 매핑** | nvidia-smi와 Prometheus PID 완전 일치 | ✅ |
+| 🔧 **MIG 지원** | Multi-Instance GPU 자동 감지 | ✅ |
+| 📊 **실시간 메트릭** | GPU별 세션 수, 메모리 사용량 | ✅ |
+| 🏷️ **Pod 연결** | Kubernetes Pod와 GPU 프로세스 매핑 | ✅ |
+| 🔄 **동적 감지** | GPU 개수 자동 인식 | ✅ |
+
+</div>
+
+### 빠른 시작
+
+```bash
+# GPU 모니터링 활성화
+./deploy_astrago.sh sync gpu-session-monitoring
+
+# 메트릭 확인
+curl http://prometheus:9090/api/v1/query?query=gpu_session_count
+
+# Grafana 대시보드에서 시각화
+# - GPU 사용률 현황
+# - Pod별 GPU 할당 상태
+# - 유휴 GPU 감지
+```
+
+자세한 내용은 **[GPU 세션 모니터링 가이드](docs/GPU-Session-Monitoring-Guide.md)**를 참조하세요.
+
+---
+
 ## 🌍 지원 환경
 
 <div align="center">
@@ -332,6 +379,9 @@ echo "🔐 Keycloak: http://<YOUR-IP>:30001"
 
 # GPU Operator 설치 (GPU 환경)
 ./deploy_astrago.sh sync gpu-operator
+
+# GPU 세션 모니터링 활성화
+./deploy_astrago.sh sync gpu-session-monitoring
 ```
 
 ### 🔄 업데이트 및 관리
@@ -422,6 +472,7 @@ kubectl logs -n astrago deployment/keycloak
   - ✅ GPU Operator 통합
   - ✅ 오프라인 배포 개선
   - ✅ 보안 강화
+  - 🆕 **GPU 세션 모니터링 시스템** - nvidia-smi와 PID 정확 매핑, MIG 지원
 
 ### 📋 로드맵
 

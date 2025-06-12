@@ -1,2 +1,6 @@
 keycloak:
   themeVersion: v1.1.5
+
+# GPU Session Monitoring - Linear BE-102
+gpu-session-monitoring:
+  enabled: true

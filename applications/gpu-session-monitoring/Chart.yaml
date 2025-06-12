@@ -1,0 +1,15 @@
+apiVersion: v2
+name: gpu-session-monitoring
+description: GPU Session and Process Monitoring for Linear BE-102
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+maintainers:
+- name: Astrago Team
+  email: support@astrago.io
+keywords:
+- gpu
+- monitoring
+- sessions
+- processes
+- prometheus 

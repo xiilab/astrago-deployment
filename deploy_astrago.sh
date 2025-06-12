@@ -38,6 +38,7 @@ print_usage() {
     echo "Available Apps:"
     echo "nfs-provisioner"
     echo "gpu-operator"
+    echo "gpu-session-monitoring"
     echo "prometheus"
     echo "event-exporter"
     echo "keycloak"
