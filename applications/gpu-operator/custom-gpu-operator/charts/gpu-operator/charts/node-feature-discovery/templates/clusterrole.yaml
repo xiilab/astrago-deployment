@@ -21,6 +21,7 @@ rules:
   resources:
   - nodefeatures
   - nodefeaturerules
+  - nodefeaturegroups
   verbs:
   - get
   - list
