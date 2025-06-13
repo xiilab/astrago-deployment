@@ -4,3 +4,30 @@ keycloak:
 # GPU Process Exporter - Exports GPU process metrics to Prometheus
 gpu-process-exporter:
   enabled: true
+
+# Loki Stack - Complete logging solution with Loki and Promtail
+loki:
+  enabled: true
+  retentionPeriod: "744h"  # 31 days
+  replicas: 1
+  resources:
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+  persistence:
+    enabled: true
+    size: "10Gi"
+    storageClass: "astrago-nfs-csi"
+
+promtail:
+  enabled: true
+  resources:
+    limits:
+      cpu: "200m"
+      memory: "256Mi"
+    requests:
+      cpu: "100m"
+      memory: "128Mi"

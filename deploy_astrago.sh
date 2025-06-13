@@ -36,13 +36,14 @@ print_usage() {
     echo "                Usage: $0 destroy <app name>"
     echo ""
     echo "Available Apps:"
-echo "nfs-provisioner"
-echo "gpu-operator"
+    echo "nfs-provisioner"
+    echo "gpu-operator"
 echo "gpu-process-exporter"
-echo "prometheus"
-echo "event-exporter"
-echo "keycloak"
-echo "astrago"
+echo "loki-stack"
+    echo "prometheus"
+    echo "event-exporter"
+    echo "keycloak"
+    echo "astrago"
     exit 0
 }
 

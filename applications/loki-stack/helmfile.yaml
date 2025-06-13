@@ -1,0 +1,17 @@
+releases:
+- name: loki-stack
+  namespace: loki-stack
+  chart: ./
+  wait: true
+  labels:
+    app: loki-stack
+    component: logging
+  values:
+  - values.yaml.gotmpl
+  hooks:
+  - events: ["presync"]
+    showlogs: true
+    command: "helm"
+    args: ["dependency", "update", "."]
+
+ 

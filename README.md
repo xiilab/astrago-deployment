@@ -82,6 +82,9 @@
 📋 **[종합 가이드](docs/comprehensive-guide.md)**  
 *모든 내용을 담은 완전 가이드*
 
+🔗 **[Prometheus ↔ Loki 자동 연동](docs/prometheus-loki-integration.md)**  
+*설치 시 자동으로 모니터링 통합 환경 구축*
+
 </td>
 </tr>
 </table>
@@ -231,8 +234,9 @@ echo "🔐 Keycloak: http://<YOUR-IP>:30001"
 | 🎯 **Astrago Core** | 메인 AI/ML 플랫폼 | `30080` | ✅ | [상세보기](docs/applications.md#astrago-core) |
 | 🔐 **Keycloak** | 인증/인가 서비스 | `30080/auth` | ✅ | [상세보기](docs/applications.md#keycloak) |
 | 📊 **Prometheus** | 모니터링 시스템 | `30090` | ✅ | [상세보기](docs/applications.md#prometheus) |
+| 📝 **Loki Stack** | 로그 수집/분석 | `3100` | ✅ | [상세보기](docs/applications.md#loki-stack) |
 | 💾 **CSI Driver NFS** | 스토리지 프로비저닝 | `-` | ✅ | [상세보기](docs/applications.md#csi-driver-nfs) |
-| 🖥️ **GPU Operator** | GPU 리소스 관리 | `-` | ⚠️ | [상세보기](docs/applications.md#gpu-operator) |
+| 🖥️ **GPU Operator** | GPU 리소스 관리 | `-` | ✅ | [상세보기](docs/applications.md#gpu-operator) |
 | ⚡ **MPI Operator** | 분산 컴퓨팅 | `-` | ✅ | [상세보기](docs/applications.md#mpi-operator) |
 | 🚢 **Harbor** | 컨테이너 레지스트리 | `30002` | ⚠️ | [상세보기](docs/applications.md#harbor) |
 
@@ -382,6 +386,9 @@ curl http://prometheus:9090/api/v1/query?query=gpu_process_count
 
 # GPU 세션 모니터링 활성화
 ./deploy_astrago.sh sync gpu-process-exporter
+
+# 로그 수집 시스템 배포
+./deploy_astrago.sh sync loki-stack
 ```
 
 ### 🔄 업데이트 및 관리

@@ -54,11 +54,12 @@ graph TB
 | CSI Driver NFS | 인프라 | 스토리지 프로비저닝 | 1 | NFS 서버 |
 | GPU Operator | 인프라 | GPU 리소스 관리 | 2 | NVIDIA 드라이버 |
 | Prometheus | 모니터링 | 메트릭 수집 | 3 | - |
-| Keycloak | 인증 | 사용자 인증/인가 | 4 | 데이터베이스 |
-| MPI Operator | 인프라 | 분산 컴퓨팅 | 5 | - |
-| Flux | GitOps | 지속적 배포 | 6 | Git 저장소 |
-| Harbor | 레지스트리 | 컨테이너 이미지 저장 | 7 | - |
-| Astrago | 애플리케이션 | 메인 플랫폼 | 8 | 모든 인프라 |
+| Loki Stack | 로깅 | 로그 수집/분석 | 4 | NFS 스토리지 |
+| Keycloak | 인증 | 사용자 인증/인가 | 5 | 데이터베이스 |
+| MPI Operator | 인프라 | 분산 컴퓨팅 | 6 | - |
+| Flux | GitOps | 지속적 배포 | 7 | Git 저장소 |
+| Harbor | 레지스트리 | 컨테이너 이미지 저장 | 8 | - |
+| Astrago | 애플리케이션 | 메인 플랫폼 | 9 | 모든 인프라 |
 
 ## 🔧 개별 애플리케이션 상세
 
@@ -253,33 +254,126 @@ kubectl port-forward svc/prometheus-grafana 3000:80 -n astrago
 curl http://{{ .Values.externalIP }}:9090/api/v1/query?query=up
 ```
 
-### 4. GPU Operator
+### 4. Loki Stack ✅ **신규 추가**
 
 #### 📋 개요
 
-NVIDIA GPU 리소스를 Kubernetes에서 관리하고 스케줄링하기 위한 오퍼레이터입니다.
+Grafana Loki 기반의 로그 수집 및 분석 시스템으로 Kubernetes 클러스터의 모든 로그를 중앙화하여 관리합니다.
 
 #### ⚙️ 설정
 
 ```yaml
-# applications/gpu-operator/values.yaml
+# applications/loki-stack/values.yaml.gotmpl
+loki:
+  deploymentMode: SingleBinary
+  loki:
+    auth_enabled: false
+    commonConfig:
+      replication_factor: 1
+    limits_config:
+      reject_old_samples: false
+      reject_old_samples_max_age: 168h
+  
+  singleBinary:
+    replicas: 1
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: astrago-nfs-csi
+
+promtail:
+  config:
+    clients:
+      - url: http://loki-stack.loki-stack.svc:3100/loki/api/v1/push
+    scrape_configs:
+      - job_name: kubernetes-pods
+        kubernetes_sd_configs:
+          - role: pod
+```
+
+#### 🔍 로그 조회 및 관리
+
+```bash
+# 설치
+helmfile -e astrago -l app=loki-stack sync
+
+# 상태 확인
+kubectl get pods -n loki-stack
+kubectl get svc -n loki-stack
+
+# Loki 접속 (포트 포워딩)
+kubectl port-forward -n loki-stack svc/loki-stack 3100:3100
+
+# LogQL 쿼리 예시
+curl -G -s "http://localhost:3100/loki/api/v1/query" \
+  --data-urlencode 'query={namespace="astrago"}' \
+  --data-urlencode 'limit=100'
+
+# 특정 Pod 로그 조회
+curl -G -s "http://localhost:3100/loki/api/v1/query" \
+  --data-urlencode 'query={pod="astrago-core-xxx"}' \
+  --data-urlencode 'limit=50'
+```
+
+#### 🎯 주요 기능
+
+- ✅ **중앙화된 로그 수집**: 모든 Kubernetes Pod 로그 자동 수집
+- ✅ **LogQL 쿼리**: 강력한 로그 검색 및 필터링
+- ✅ **Prometheus 연동**: ServiceMonitor를 통한 메트릭 수집
+- ✅ **NFS 영구 저장**: 로그 데이터 안전한 보관
+- ✅ **실시간 스트리밍**: 실시간 로그 모니터링
+
+### 5. GPU Operator ✅ **v24.9.2 업데이트**
+
+#### 📋 개요
+
+NVIDIA GPU 리소스를 Kubernetes에서 관리하고 스케줄링하기 위한 오퍼레이터입니다. 최신 v24.9.2 버전으로 업데이트되었습니다.
+
+#### ⚙️ 설정 (v24.9.2)
+
+```yaml
+# applications/gpu-operator/values.yaml.gotmpl
 gpu-operator:
   operator:
     defaultRuntime: containerd
   
   driver:
     enabled: true
-    version: "{{ .Values.gpu.driverVersion | default "515.65.01" }}"
+    version: "550.144.03"  # 최신 드라이버
+    manager:
+      version: v0.7.0      # 새로운 드라이버 매니저
   
   toolkit:
     enabled: true
+    version: v1.17.4-ubuntu20.04
   
   devicePlugin:
     enabled: true
+    version: v0.17.0
   
-  nodeStatusExporter:
+  dcgm:
     enabled: true
+    version: 3.3.9-1-ubuntu22.04
+  
+  dcgmExporter:
+    enabled: true
+    version: 3.3.9-3.6.1-ubuntu22.04
+  
+  migManager:
+    enabled: true
+    version: v0.10.0-ubuntu20.04
+  
+  gfd:
+    enabled: true
+    version: v0.17.0  # k8s-device-plugin 이미지 사용
 ```
+
+#### 🆕 v24.9.2 새로운 기능
+
+- ✅ **Driver Manager**: 드라이버 라이프사이클 관리 개선
+- ✅ **DCGM 3.3.9**: 향상된 GPU 메트릭 수집
+- ✅ **GDS/GDRCopy**: GPU Direct Storage 지원
+- ✅ **향상된 MIG 지원**: Multi-Instance GPU 관리 개선
 
 #### 🔍 GPU 리소스 확인
 
@@ -310,7 +404,7 @@ spec:
 EOF
 ```
 
-### 5. MPI Operator
+### 6. MPI Operator
 
 #### 📋 개요
 
@@ -368,7 +462,7 @@ spec:
             name: mpi-worker
 ```
 
-### 6. Harbor
+### 7. Harbor
 
 #### 📋 개요
 
@@ -422,7 +516,7 @@ curl -X POST "http://{{ .Values.externalIP }}:30002/api/v2.0/projects" \
   -d '{"project_name":"astrago","public":false}'
 ```
 
-### 7. Flux
+### 8. Flux
 
 #### 📋 개요
 

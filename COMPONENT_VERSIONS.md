@@ -43,9 +43,9 @@ enable_nodelocaldns: true
 
 #### **GPU Operator**
 
-- **현재 버전**: `v24.9.2`
+- **현재 버전**: `v24.9.2` ✅ **최신 업데이트**
 - **Kubernetes 지원 범위**: `>= 1.26.0`
-- **DCGM Exporter**: `3.3.8-3.6.0-ubuntu22.04`
+- **DCGM Exporter**: `3.3.9-3.6.1-ubuntu22.04`
 - **설정 파일**: `applications/gpu-operator/`
 
 #### **NVIDIA Driver**
@@ -55,14 +55,20 @@ enable_nodelocaldns: true
 - **Ubuntu 패키지**: `nvidia-headless-535-server`
 - **설정 파일**: `ansible/roles/nvidia.nvidia_driver/defaults/main.yml`
 
-#### **GPU Operator 컴포넌트 버전**
+#### **GPU Operator 컴포넌트 버전** ✅ **v24.9.2 업데이트**
 
 ```yaml
-dcgmExporter: 3.3.8-3.6.0-ubuntu22.04
-toolkit: v1.17.0-ubuntu20.04
-devicePlugin: v0.17.0-ubi8
-gfd: v0.17.0-ubi8
+# 최신 v24.9.2 버전 컴포넌트들
+dcgmExporter: 3.3.9-3.6.1-ubuntu22.04
+dcgm: 3.3.9-1-ubuntu22.04
+toolkit: v1.17.4-ubuntu20.04
+devicePlugin: v0.17.0
+gfd: v0.17.0 (k8s-device-plugin 이미지 사용)
 migManager: v0.10.0-ubuntu20.04
+driver: 550.144.03
+driverManager: v0.7.0
+gds: 2.20.5 (nvidia-fs)
+gdrcopy: v2.4.1-2
 ```
 
 #### **GPU 세션 모니터링 (신규)**
@@ -124,6 +130,36 @@ kube-state-metrics: 5.15.*
 prometheus-node-exporter: 4.24.*
 grafana: 7.0.*
 prometheus-windows-exporter: 0.1.*
+```
+
+#### **Loki Stack (로그 수집)** ✅ **신규 추가**
+
+- **차트 버전**: `1.0.0`
+- **Loki 버전**: `2.9.6`
+- **Promtail 버전**: `2.9.3`
+- **배포 모드**: SingleBinary
+- **스토리지**: NFS (astrago-nfs-csi)
+- **설정 파일**: `applications/loki-stack/`
+
+#### **Loki Stack 구성 요소**
+
+```yaml
+# Loki 서버
+loki:
+  version: 2.9.6
+  mode: SingleBinary
+  replicas: 1
+  replication_factor: 1
+  storage: filesystem (NFS)
+  
+# Promtail (로그 수집기)
+promtail:
+  version: 2.9.3
+  deployment: DaemonSet
+  targets:
+    - kubernetes-pods
+    - kubernetes-system
+    - /var/log/syslog
 ```
 
 ### **2.4 컨테이너 레지스트리**
@@ -339,7 +375,8 @@ applications/
 ├── gpu-operator/values.yaml.gotmpl    # GPU Operator 설정
 ├── astrago/helmfile.yaml              # Astrago 배포 설정
 ├── keycloak/helmfile.yaml             # Keycloak 배포 설정
-└── prometheus/helmfile.yaml           # 모니터링 설정
+├── prometheus/helmfile.yaml           # 모니터링 설정
+└── loki-stack/helmfile.yaml           # 로그 수집 설정
 
 environments/
 ├── common/values.yaml                 # 공통 설정

@@ -204,13 +204,17 @@ helmfile -e astrago -l app=csi-driver-nfs sync
 # 2. Keycloak 배포
 helmfile -e astrago -l app=keycloak sync
 
-# 3. Prometheus 배포
+# 3. Loki Stack 배포 (로그 수집) - 먼저 설치
+helmfile -e astrago -l app=loki-stack sync
+
+# 4. Prometheus 배포 (Loki 자동 연동)
+# ⚡ Loki가 먼저 설치되어 있으면 Grafana에 자동으로 데이터소스 추가됨
 helmfile -e astrago -l app=prometheus sync
 
-# 4. GPU Operator 배포 (GPU 사용시)
+# 5. GPU Operator 배포 (GPU 사용시)
 helmfile -e astrago -l app=gpu-operator sync
 
-# 5. Astrago 메인 애플리케이션 배포
+# 6. Astrago 메인 애플리케이션 배포
 helmfile -e astrago -l app=astrago sync
 ```
 
@@ -251,7 +255,33 @@ curl http://<EXTERNAL_IP>:30080
 
 # Keycloak 접속
 curl http://<EXTERNAL_IP>:30001
+
+# Prometheus 접속
+curl http://<EXTERNAL_IP>:30090
+
+# Grafana 접속 (Prometheus 내장)
+curl http://<EXTERNAL_IP>:30090/grafana
 ```
+
+### 4. 🔗 Prometheus ↔ Loki 자동 연동 확인
+
+```bash
+# Grafana에서 Loki 데이터소스 확인
+kubectl get configmap prometheus-grafana -n prometheus -o yaml | grep -A 10 "name: Loki"
+
+# Loki 서비스 연결 테스트
+kubectl exec -it $(kubectl get pods -n prometheus -l app.kubernetes.io/name=grafana -o jsonpath='{.items[0].metadata.name}') -n prometheus -c grafana -- curl -s http://loki-stack.loki-stack.svc.cluster.local:3100/ready
+
+# 자동 추가된 대시보드 확인
+kubectl get configmap prometheus-grafana -n prometheus -o yaml | grep -A 5 "loki-logs"
+```
+
+**✅ 자동 연동 성공 시 확인 사항:**
+
+- Grafana 데이터소스에 **Loki** 자동 추가
+- **Loki Logs Dashboard** (ID: 13639) 자동 설치
+- **Loki Operational Dashboard** (ID: 14055) 자동 설치
+- Prometheus에서 Loki 메트릭 수집 확인
 
 ## 🎯 설치 옵션
 
