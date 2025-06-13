@@ -26,6 +26,9 @@ spec:
               # textfile collector 디렉터리 생성
               mkdir -p /host/var/lib/node_exporter/textfile_collector
               
+              # 기존 메트릭 파일 제거 (오래된 데이터 방지)
+              rm -f /host/var/lib/node_exporter/textfile_collector/gpu_processes.prom
+              
               # 메트릭 헤더 생성
               cat > /tmp/gpu_processes.prom << 'EOF'
               # HELP gpu_process_count Number of active GPU processes per GPU
@@ -65,10 +68,10 @@ spec:
               gpu_list=$(nvidia-smi --query-gpu=index --format=csv,noheader,nounits)
               
               # GPU별로 프로세스 카운트 초기화 (동적)
-              echo "$gpu_list" | while read gpu_index; do
+              while read gpu_index; do
                 gpu_index=$(echo "$gpu_index" | tr -d ' ')
                 echo "0" > /tmp/gpu_${gpu_index}_count.tmp
-              done
+              done <<< "$gpu_list"
               
               # 모든 GPU 프로세스 정보를 한번에 조회
               if [ -n "$mig_enabled" ] && [ "$mig_enabled" = "Enabled" ]; then
@@ -81,7 +84,7 @@ spec:
               
               # 모든 프로세스를 처리하여 정확한 GPU 매칭
               if [ -n "$all_gpu_processes" ]; then
-                echo "$all_gpu_processes" | while IFS=',' read -r gpu_identifier actual_pid process_name gpu_memory; do
+                while IFS=',' read -r gpu_identifier actual_pid process_name gpu_memory; do
                   # 공백 제거
                   actual_pid=$(echo "$actual_pid" | tr -d ' ')
                   process_name=$(echo "$process_name" | tr -d ' ')
@@ -141,11 +144,11 @@ spec:
                     echo $((current_count + 1)) > /tmp/gpu_${gpu_id}_count.tmp
                     total_processes=$((total_processes + 1))
                   fi
-                done
+                done <<< "$all_gpu_processes"
               fi
               
               # 각 GPU별 프로세스 카운트 및 idle 상태 처리 (동적)
-              echo "$gpu_list" | while read gpu_index; do
+              while read gpu_index; do
                 gpu_index=$(echo "$gpu_index" | tr -d ' ')
                 gpu_display=$(echo "$gpu_index" | sed 's/\//_/g')  # 슬래시를 언더스코어로 변경
                 process_count=$(cat /tmp/gpu_${gpu_index}_count.tmp 2>/dev/null || echo "0")
@@ -155,7 +158,7 @@ spec:
                 if [ "$process_count" -eq 0 ]; then
                   echo "gpu_process_info{gpu=\"$gpu_display\",pid=\"none\",command=\"none\",pod=\"none\",namespace=\"none\",container=\"none\",status=\"idle\",gpu_memory=\"0MiB\"} 0" >> /tmp/gpu_processes.prom
                 fi
-              done
+              done <<< "$gpu_list"
               
               echo "gpu_total_processes $total_processes" >> /tmp/gpu_processes.prom
               
