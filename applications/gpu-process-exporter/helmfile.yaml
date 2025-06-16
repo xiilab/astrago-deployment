@@ -6,5 +6,3 @@ releases:
     app: gpu-process-exporter
   values:
   - {{ toYaml .Values | nindent 4 }}
-  needs:
-  - prometheus/prometheus 
