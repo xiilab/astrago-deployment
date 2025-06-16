@@ -107,8 +107,37 @@ spec:
                     echo "Process PID $actual_pid detected on GPU $gpu_id (Identifier: $gpu_identifier)"
                     
                     # GPU 사용률 및 메모리 사용률은 기본값 설정
-                    gpu_util="50"  # 기본값
-                    mem_util="30"  # 기본값
+                    gpu_util="0"  # 기본값
+                    mem_util="0"  # 기본값
+                    
+                    # 노드 이름 가져오기
+                    node_name=$(hostname)
+                    
+                    # 프로세스별 GPU 사용률 정보 수집 (nvidia-smi pmon 사용)
+                    if [ -n "$mig_enabled" ] && [ "$mig_enabled" = "Enabled" ]; then
+                      # MIG 환경에서는 UUID 기반으로 프로세스 매핑
+                      gpu_index=$(echo "$gpu_identifier" | cut -d'-' -f1)
+                    else
+                      # 기존 환경: Bus ID 기반
+                      gpu_index=$(echo "$gpu_identifier" | cut -d':' -f1)
+                    fi
+                    
+                    # nvidia-smi pmon으로 프로세스 정보 수집
+                    process_stats=$(nvidia-smi pmon -i "$gpu_index" -s um -c 1 2>/dev/null | tail -n +3 | grep "$actual_pid" || echo "")
+                    
+                    if [ -n "$process_stats" ]; then
+                      # GPU 사용률과 메모리 사용량 추출
+                      gpu_util=$(echo "$process_stats" | awk '{print $4}')
+                      used_mem=$(echo "$process_stats" | awk '{print $10}')
+                      
+                      # 전체 GPU 메모리 가져오기
+                      total_mem=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits -i "$gpu_index")
+                      
+                      # 메모리 사용률 계산 (소수점 한 자리)
+                      if [[ $total_mem =~ ^[0-9]+$ && $used_mem =~ ^[0-9]+$ ]]; then
+                        mem_util=$(awk -v u="$used_mem" -v t="$total_mem" 'BEGIN{printf "%.1f", (u/t)*100}')
+                      fi
+                    fi
                     
                     # Pod/Container 정보를 /proc에서 조회
                     pod_name="unknown"
@@ -132,9 +161,9 @@ spec:
                     gpu_display=$(echo "$gpu_id" | sed 's/\//_/g')  # 슬래시를 언더스코어로 변경
                     
                     # 해당 GPU에만 메트릭 생성
-                    echo "gpu_process_utilization{gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\"} $gpu_util" >> /tmp/gpu_processes.prom
-                    echo "gpu_process_memory_utilization{gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\"} $mem_util" >> /tmp/gpu_processes.prom
-                    echo "gpu_process_info{gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\",status=\"active\",gpu_memory=\"${gpu_memory}MiB\"} 1" >> /tmp/gpu_processes.prom
+                    echo "gpu_process_utilization{node=\"$node_name\",gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\",gpu_memory=\"${gpu_memory}MiB\"} $gpu_util" >> /tmp/gpu_processes.prom
+                    echo "gpu_process_memory_utilization{node=\"$node_name\",gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\",gpu_memory=\"${gpu_memory}MiB\"} $mem_util" >> /tmp/gpu_processes.prom
+                    echo "gpu_process_info{node=\"$node_name\",gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\",status=\"active\",gpu_memory=\"${gpu_memory}MiB\"} 1" >> /tmp/gpu_processes.prom
                     
                     # 해당 GPU의 프로세스 카운트 증가
                     current_count=$(cat /tmp/gpu_${gpu_id}_count.tmp 2>/dev/null || echo "0")
@@ -153,7 +182,7 @@ spec:
                 
                 # 프로세스가 없는 GPU는 idle 상태로 표시
                 if [ "$process_count" -eq 0 ]; then
-                  echo "gpu_process_info{gpu=\"$gpu_display\",pid=\"none\",command=\"none\",pod=\"none\",namespace=\"none\",container=\"none\",status=\"idle\",gpu_memory=\"0MiB\"} 0" >> /tmp/gpu_processes.prom
+                  echo "gpu_process_info{node=\"$node_name\",gpu=\"$gpu_display\",pid=\"none\",command=\"none\",pod=\"none\",namespace=\"none\",container=\"none\",status=\"idle\",gpu_memory=\"0MiB\"} 0" >> /tmp/gpu_processes.prom
                 fi
               done
               
