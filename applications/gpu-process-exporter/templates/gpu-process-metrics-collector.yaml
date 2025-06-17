@@ -19,15 +19,17 @@ spec:
           containers:
           - name: gpu-process-collector
             image: nvcr.io/nvidia/k8s/dcgm-exporter:3.3.5-3.4.1-ubuntu22.04
+            env:
+              - name: NODE_NAME
+                valueFrom:
+                  fieldRef:
+                    fieldPath: spec.nodeName
             command:
             - /bin/bash
             - -c
             - |
               # textfile collector 디렉터리 생성
               mkdir -p /host/var/lib/node_exporter/textfile_collector
-              
-              # 기존 메트릭 파일 제거 (오래된 데이터 방지)
-              rm -f /host/var/lib/node_exporter/textfile_collector/gpu_processes.prom
               
               # 메트릭 헤더 생성
               cat > /tmp/gpu_processes.prom << 'EOF'
@@ -41,6 +43,8 @@ spec:
               # TYPE gpu_process_memory_utilization gauge
               # HELP gpu_process_info GPU process information with Pod/Container details
               # TYPE gpu_process_info gauge
+              # HELP gpu_process_start_time_seconds Process start time in seconds since epoch
+              # TYPE gpu_process_start_time_seconds gauge
               EOF
               
               # GPU 프로세스 상세 정보 수집 (nvidia-smi 기반)
@@ -56,22 +60,22 @@ spec:
                 echo "MIG mode detected - using MIG-aware GPU detection"
                 # MIG 인스턴스 정보 수집 (index, uuid, memory 등)
                 nvidia-smi -L > /tmp/gpu_list.txt
-                # MIG 인스턴스의 경우 다른 방식으로 매핑 테이블 생성
-                nvidia-smi --query-gpu=index,uuid --format=csv,noheader | grep -E "(GPU|MIG)" > /tmp/gpu_mapping.txt
+                # MIG 인스턴스의 경우 UUID 기반으로 매핑 테이블 생성
+                nvidia-smi --query-gpu=index,uuid --format=csv,noheader | grep -E "(GPU|MIG)" | tr -d ' ' > /tmp/gpu_mapping.txt
               else
                 echo "Standard GPU mode detected - using traditional GPU detection"
                 # 기존 방식: GPU 인덱스와 Bus ID 매핑 테이블 생성
-                nvidia-smi --query-gpu=index,pci.bus_id --format=csv,noheader,nounits > /tmp/gpu_mapping.txt
+                nvidia-smi --query-gpu=index,pci.bus_id --format=csv,noheader,nounits | tr -d ' ' > /tmp/gpu_mapping.txt
               fi
               
               # 동적으로 GPU/MIG 인스턴스 목록 생성
               gpu_list=$(nvidia-smi --query-gpu=index --format=csv,noheader,nounits)
               
               # GPU별로 프로세스 카운트 초기화 (동적)
-              while read gpu_index; do
+              echo "$gpu_list" | while read gpu_index; do
                 gpu_index=$(echo "$gpu_index" | tr -d ' ')
                 echo "0" > /tmp/gpu_${gpu_index}_count.tmp
-              done <<< "$gpu_list"
+              done
               
               # 모든 GPU 프로세스 정보를 한번에 조회
               if [ -n "$mig_enabled" ] && [ "$mig_enabled" = "Enabled" ]; then
@@ -84,7 +88,7 @@ spec:
               
               # 모든 프로세스를 처리하여 정확한 GPU 매칭
               if [ -n "$all_gpu_processes" ]; then
-                while IFS=',' read -r gpu_identifier actual_pid process_name gpu_memory; do
+                echo "$all_gpu_processes" | while IFS=',' read -r gpu_identifier actual_pid process_name gpu_memory; do
                   # 공백 제거
                   actual_pid=$(echo "$actual_pid" | tr -d ' ')
                   process_name=$(echo "$process_name" | tr -d ' ')
@@ -97,26 +101,88 @@ spec:
                     # GPU 식별자에서 GPU 인덱스 찾기
                     if [ -n "$mig_enabled" ] && [ "$mig_enabled" = "Enabled" ]; then
                       # MIG 환경: UUID 기반 매핑
-                      gpu_id=$(grep "$gpu_identifier" /tmp/gpu_mapping.txt | cut -d',' -f1 | tr -d ' ')
+                      gpu_id=$(awk -F',' -v id="$gpu_identifier" '$2==id {print $1}' /tmp/gpu_mapping.txt)
                     else
                       # 기존 환경: Bus ID 기반 매핑
-                      gpu_id=$(grep "$gpu_identifier" /tmp/gpu_mapping.txt | cut -d',' -f1 | tr -d ' ')
+                      gpu_id=$(awk -F',' -v id="$gpu_identifier" '$2==id {print $1}' /tmp/gpu_mapping.txt)
                     fi
                     
                     if [ -z "$gpu_id" ]; then
+                      echo "Warning: Could not find GPU index for identifier: $gpu_identifier"
                       gpu_id="0"  # 기본값
                     fi
                     
                     echo "Process PID $actual_pid detected on GPU $gpu_id (Identifier: $gpu_identifier)"
                     
                     # GPU 사용률 및 메모리 사용률은 기본값 설정
-                    gpu_util="50"  # 기본값
-                    mem_util="30"  # 기본값
+                    gpu_util="0"  # 기본값
+                    mem_util="0"  # 기본값
+                    
+                    # 노드 이름 가져오기
+                    node_name=$NODE_NAME
+                    
+                    # 프로세스별 GPU 사용률 정보 수집 (nvidia-smi pmon 사용)
+                    if [ -n "$mig_enabled" ] && [ "$mig_enabled" = "Enabled" ]; then
+                      # MIG 환경에서는 UUID 기반으로 프로세스 매핑
+                      gpu_index=$(echo "$gpu_id" | cut -d'-' -f1)
+                    else
+                      # 기존 환경: Bus ID 기반
+                      gpu_index=$(echo "$gpu_id" | cut -d':' -f1)
+                    fi
+                    
+                    # nvidia-smi pmon으로 프로세스 정보 수집
+                    echo "▶️ Running nvidia-smi pmon for GPU index: $gpu_index, PID: $actual_pid"
+                    
+                    process_stats=$(nvidia-smi pmon -i "$gpu_index" -s um -c 1 2>/dev/null | tail -n +3 | grep "$actual_pid" || echo "")
+                    
+                    echo "📋 Raw process_stats:"
+                    echo "$process_stats"
+                    
+                    if [ -n "$process_stats" ]; then
+                      # GPU 사용률과 메모리 사용량 추출
+                      gpu_util=$(echo "$process_stats" | awk '{print $4}')
+                      used_mem=$(echo "$process_stats" | awk '{print $10}')
+                      
+                      echo "✅ Parsed values:"
+                      echo "GPU Utilization : $gpu_util"
+                      echo "Used GPU Memory : $used_mem MiB"
+                      
+                      # 전체 GPU 메모리 가져오기
+                      total_mem=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits -i "$gpu_index")
+                      echo "Total GPU Memory: $total_mem MiB"
+                      
+                      # 메모리 사용률 계산 (소수점 한 자리)
+                      if [[ $total_mem =~ ^[0-9]+$ && $used_mem =~ ^[0-9]+$ ]]; then
+                        mem_util=$(awk -v u="$used_mem" -v t="$total_mem" 'BEGIN{printf "%.1f", (u/t)*100}')
+                        echo "🧮 Memory Utilization: $mem_util %"
+                      else
+                        echo "⚠️ Memory values are not numeric: used_mem='$used_mem', total_mem='$total_mem'"
+                      fi
+                    else
+                      echo "🚫 No matching process found in nvidia-smi pmon for PID $actual_pid on GPU $gpu_index"
+                    fi
                     
                     # Pod/Container 정보를 /proc에서 조회
                     pod_name="unknown"
                     container_name="unknown"
                     namespace="unknown"
+                    process_start_time="0"
+                    
+                    # 프로세스 시작 시간 조회
+                    if [ -f "/host/proc/$actual_pid/stat" ]; then
+                      # /proc/[pid]/stat의 22번째 필드가 프로세스 시작 시간 (jiffies)
+                      start_time_jiffies=$(cat /host/proc/$actual_pid/stat 2>/dev/null | awk '{print $22}' || echo "0")
+                      if [ "$start_time_jiffies" != "0" ]; then
+                        # 시스템 부팅 시간 계산
+                        if [ -f "/host/proc/uptime" ]; then
+                          uptime_seconds=$(awk '{print int($1)}' /host/proc/uptime)
+                          current_time=$(date +%s)
+                          boot_time=$((current_time - uptime_seconds))
+                          # jiffies를 초로 변환하고 부팅 시간을 더해 실제 시작 시간 계산
+                          process_start_time=$((boot_time + (start_time_jiffies / 100)))
+                        fi
+                      fi
+                    fi
                     
                     # cgroup에서 Pod 정보 추출 시도
                     if [ -f "/host/proc/$actual_pid/cgroup" ]; then
@@ -135,20 +201,20 @@ spec:
                     gpu_display=$(echo "$gpu_id" | sed 's/\//_/g')  # 슬래시를 언더스코어로 변경
                     
                     # 해당 GPU에만 메트릭 생성
-                    echo "gpu_process_utilization{gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\"} $gpu_util" >> /tmp/gpu_processes.prom
-                    echo "gpu_process_memory_utilization{gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\"} $mem_util" >> /tmp/gpu_processes.prom
-                    echo "gpu_process_info{gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\",status=\"active\",gpu_memory=\"${gpu_memory}MiB\"} 1" >> /tmp/gpu_processes.prom
+                    echo "gpu_process_utilization{node=\"$node_name\",gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\",gpu_memory=\"${gpu_memory}MiB\",start_time=\"$process_start_time\"} $gpu_util" >> /tmp/gpu_processes.prom
+                    echo "gpu_process_memory_utilization{node=\"$node_name\",gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\",gpu_memory=\"${gpu_memory}MiB\",start_time=\"$process_start_time\"} $mem_util" >> /tmp/gpu_processes.prom
+                    echo "gpu_process_info{node=\"$node_name\",gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\",status=\"active\",gpu_memory=\"${gpu_memory}MiB\",start_time=\"$process_start_time\"} 1" >> /tmp/gpu_processes.prom
                     
                     # 해당 GPU의 프로세스 카운트 증가
                     current_count=$(cat /tmp/gpu_${gpu_id}_count.tmp 2>/dev/null || echo "0")
                     echo $((current_count + 1)) > /tmp/gpu_${gpu_id}_count.tmp
                     total_processes=$((total_processes + 1))
                   fi
-                done <<< "$all_gpu_processes"
+                done
               fi
               
               # 각 GPU별 프로세스 카운트 및 idle 상태 처리 (동적)
-              while read gpu_index; do
+              echo "$gpu_list" | while read gpu_index; do
                 gpu_index=$(echo "$gpu_index" | tr -d ' ')
                 gpu_display=$(echo "$gpu_index" | sed 's/\//_/g')  # 슬래시를 언더스코어로 변경
                 process_count=$(cat /tmp/gpu_${gpu_index}_count.tmp 2>/dev/null || echo "0")
@@ -156,9 +222,9 @@ spec:
                 
                 # 프로세스가 없는 GPU는 idle 상태로 표시
                 if [ "$process_count" -eq 0 ]; then
-                  echo "gpu_process_info{gpu=\"$gpu_display\",pid=\"none\",command=\"none\",pod=\"none\",namespace=\"none\",container=\"none\",status=\"idle\",gpu_memory=\"0MiB\"} 0" >> /tmp/gpu_processes.prom
+                  echo "gpu_process_info{node=\"$node_name\",gpu=\"$gpu_display\",pid=\"none\",command=\"none\",pod=\"none\",namespace=\"none\",container=\"none\",status=\"idle\",gpu_memory=\"0MiB\"} 0" >> /tmp/gpu_processes.prom
                 fi
-              done <<< "$gpu_list"
+              done
               
               echo "gpu_total_processes $total_processes" >> /tmp/gpu_processes.prom
               
