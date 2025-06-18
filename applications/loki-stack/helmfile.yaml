@@ -8,10 +8,5 @@ releases:
     component: logging
   values:
   - values.yaml.gotmpl
-  hooks:
-  - events: ["presync"]
-    showlogs: true
-    command: "helm"
-    args: ["dependency", "update", "."]
 
  

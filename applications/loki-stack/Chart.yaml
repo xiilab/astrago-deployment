@@ -1,14 +1,8 @@
 apiVersion: v2
 name: loki-stack
-description: Complete logging solution with Loki and Promtail
+description: Complete logging solution with Loki and Promtail using local charts
 type: application
 version: 1.0.0
 appVersion: "2.9.6"
 
-dependencies:
-- name: loki
-  version: "5.47.2"
-  repository: "https://grafana.github.io/helm-charts"
-- name: promtail
-  version: "6.15.5"
-  repository: "https://grafana.github.io/helm-charts" 
+# No external dependencies - everything will be defined locally 
