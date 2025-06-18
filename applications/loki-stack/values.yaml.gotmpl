@@ -22,6 +22,23 @@ loki:
     enabled: {{ .Values.loki.persistence.enabled | default true }}
     size: {{ .Values.loki.persistence.size | default "10Gi" | quote }}
     storageClass: {{ .Values.loki.persistence.storageClass | default "astrago-nfs-csi" | quote }}
+  
+  # Retention Policy Configuration
+  config:
+    table_manager:
+      retention_deletes_enabled: {{ .Values.loki.retention.enabled | default true }}
+      retention_period: {{ .Values.loki.retention.period | default "720h" | quote }}  # 30 days default
+    
+    compactor:
+      working_directory: /loki/compactor
+      shared_store: filesystem
+      compaction_interval: {{ .Values.loki.retention.compaction_interval | default "10m" | quote }}
+      retention_enabled: {{ .Values.loki.retention.enabled | default true }}
+      retention_delete_delay: {{ .Values.loki.retention.delete_delay | default "2h" | quote }}
+      retention_delete_worker_count: {{ .Values.loki.retention.delete_worker_count | default 150 }}
+      
+    limits_config:
+      retention_period: {{ .Values.loki.retention.period | default "720h" | quote }}  # 30 days default
 
 # Promtail Configuration
 promtail:

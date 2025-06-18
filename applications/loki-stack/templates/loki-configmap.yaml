@@ -47,8 +47,28 @@ data:
     ruler:
       alertmanager_url: http://localhost:9093
       
+    # Retention and Compaction Configuration
+    {{- if .Values.loki.config.table_manager }}
+    table_manager:
+      retention_deletes_enabled: {{ .Values.loki.config.table_manager.retention_deletes_enabled | default false }}
+      retention_period: {{ .Values.loki.config.table_manager.retention_period | default "720h" | quote }}
+    {{- end }}
+    
+    {{- if .Values.loki.config.compactor }}
+    compactor:
+      working_directory: {{ .Values.loki.config.compactor.working_directory | default "/loki/compactor" | quote }}
+      shared_store: {{ .Values.loki.config.compactor.shared_store | default "filesystem" | quote }}
+      compaction_interval: {{ .Values.loki.config.compactor.compaction_interval | default "10m" | quote }}
+      retention_enabled: {{ .Values.loki.config.compactor.retention_enabled | default false }}
+      retention_delete_delay: {{ .Values.loki.config.compactor.retention_delete_delay | default "2h" | quote }}
+      retention_delete_worker_count: {{ .Values.loki.config.compactor.retention_delete_worker_count | default 150 }}
+    {{- end }}
+    
     limits_config:
       reject_old_samples: false
       reject_old_samples_max_age: 168h
       ingestion_rate_mb: 16
-      ingestion_burst_size_mb: 32 
+      ingestion_burst_size_mb: 32
+      {{- if .Values.loki.config.limits_config }}
+      retention_period: {{ .Values.loki.config.limits_config.retention_period | default "720h" | quote }}
+      {{- end }} 

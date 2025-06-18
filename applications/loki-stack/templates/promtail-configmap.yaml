@@ -17,14 +17,20 @@ data:
       filename: /run/promtail/positions.yaml
       
     clients:
-      - url: http://{{ include "loki-stack.fullname" . }}-loki:3100/loki/api/v1/push
+      - url: http://{{ include "loki-stack.fullname" . }}-loki.{{ .Release.Namespace }}.svc.cluster.local:3100/loki/api/v1/push
         
     scrape_configs:
       - job_name: kubernetes-pods
         kubernetes_sd_configs:
           - role: pod
         pipeline_stages:
-          - cri: {}
+          - regex:
+              expression: '^(?P<timestamp>\S+) (?P<stream>stdout|stderr) (?P<flag>\S+) (?P<content>.*)$'
+          - timestamp:
+              source: timestamp
+              format: RFC3339Nano
+          - output:
+              source: content
         relabel_configs:
           - source_labels:
               - __meta_kubernetes_pod_controller_name
@@ -36,8 +42,9 @@ data:
               - __meta_kubernetes_pod_label_app
               - __tmp_controller_name
               - __meta_kubernetes_pod_name
-            regex: ^;*([^;]+)(;.*)?$
+            regex: ^([^;]+).*|^;([^;]+).*|^;;([^;]+).*|^;;;(.+)$
             action: replace
+            replacement: $1$2$3$4
             target_label: app
           - source_labels:
               - __meta_kubernetes_pod_label_app_kubernetes_io_instance
@@ -75,7 +82,7 @@ data:
             - __meta_kubernetes_pod_container_name
             target_label: container
           - action: replace
-            replacement: /var/log/pods/*$1/*/*.log
+            replacement: /var/log/pods/*$1/*.log
             separator: /
             source_labels:
             - __meta_kubernetes_pod_uid

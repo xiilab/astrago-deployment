@@ -1,4 +1,4 @@
-# externalIP: 
+# externalIP:
 externalIP: 10.61.3.12
 # Volume Settings
 nfs:
@@ -10,7 +10,7 @@ nfs:
 gpu-process-exporter:
   enabled: true
   collection:
-    schedule: "*/1 * * * *"  # Every minute
+    schedule: "*/1 * * * *" # Every minute
     image:
       repository: busybox
       tag: "1.35"
@@ -29,9 +29,9 @@ gpu-process-exporter:
   nodeSelector:
     nvidia.com/gpu.present: "true"
   tolerations:
-  - key: nvidia.com/gpu
-    operator: Exists
-    effect: NoSchedule
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
 
 # Keycloak Settings
 keycloak:
@@ -78,8 +78,39 @@ astrago:
     imageTag: "dev-3eff"
   oneview:
     enabled: true
+# Loki Settings
+loki:
+  replicas: 1
+  resources:
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+  persistence:
+    enabled: true
+    size: "20Gi"
+    storageClass: "astrago-nfs-csi"
+  retention:
+    enabled: true
+    period: "168h" # 7 days for dev environment
+    compaction_interval: "10m"
+    delete_delay: "2h"
+    delete_worker_count: 150
+
+# Promtail Settings
+promtail:
+  resources:
+    limits:
+      cpu: "200m"
+      memory: "512Mi"
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+
 harbor:
-  enabled: true    
+  enabled: true
 offline:
   registry: # 192.168.56.11:35000
   httpServer: # http://192.168.56.11
