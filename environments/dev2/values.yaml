@@ -6,12 +6,11 @@ nfs:
   storageClassName: astrago-nfs-csi
   server: 10.61.3.2
   basePath: /kube_storage/develop-astrago
-
 # GPU Process Exporter Settings
 gpu-process-exporter:
   enabled: true
   collection:
-    schedule: "*/1 * * * *"  # Every minute
+    schedule: "*/1 * * * *" # Every minute
     image:
       repository: busybox
       tag: "1.35"
@@ -30,10 +29,9 @@ gpu-process-exporter:
   nodeSelector:
     nvidia.com/gpu.present: "true"
   tolerations:
-  - key: nvidia.com/gpu
-    operator: Exists
-    effect: NoSchedule
-
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
 # Keycloak Settings
 keycloak:
   adminUser: admin
@@ -75,7 +73,7 @@ astrago:
     repository: "xiilab/astrago"
     # registry: "10.61.3.161:30002"
     # repository: "astrago/frontend"
-    imageTag: "frontend-stag-8d40"
+    imageTag: "frontend-stag-f5bc"
   oneview:
     enabled: true
 harbor:
