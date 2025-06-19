@@ -1,0 +1,2 @@
+nvcr.io/nvidia/k8s/dcgm-exporter:3.3.5-3.4.1-ubuntu22.04
+busybox:1.35 

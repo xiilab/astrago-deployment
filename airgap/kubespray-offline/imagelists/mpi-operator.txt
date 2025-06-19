@@ -1,1 +1,1 @@
-mpioperator/mpi-operator:0.5.0
+docker.io/mpioperator/mpi-operator:0.5.0
