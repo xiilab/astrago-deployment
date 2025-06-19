@@ -25,6 +25,29 @@ loki:
   
   # Retention Policy Configuration
   config:
+    # 다중 런타임 환경을 위한 Query Cache 설정
+    query_cache_size: {{ .Values.loki.config.query_cache_size | default 128 }}
+    
+    # 다중 런타임 환경을 위한 Ingestion Limits (기본값 2배 증가)
+    ingestion_rate_mb: {{ .Values.loki.config.ingestion_rate_mb | default 32 }}
+    ingestion_burst_size_mb: {{ .Values.loki.config.ingestion_burst_size_mb | default 64 }}
+    
+    # 다중 런타임 라벨로 인한 스트림 수 지원
+    max_streams_per_user: {{ .Values.loki.config.max_streams_per_user | default 20000 }}
+    max_global_streams_per_user: {{ .Values.loki.config.max_global_streams_per_user | default 30000 }}
+    
+    # 로그 라인 및 쿼리 제한 설정
+    max_line_size: {{ .Values.loki.config.max_line_size | default "256KB" | quote }}
+    max_entries_limit_per_query: {{ .Values.loki.config.max_entries_limit_per_query | default 5000 }}
+    max_query_length: {{ .Values.loki.config.max_query_length | default "12000h" | quote }}
+    max_query_parallelism: {{ .Values.loki.config.max_query_parallelism | default 16 }}
+    max_query_series: {{ .Values.loki.config.max_query_series | default 5000 }}
+    
+    # 스트림별 Rate Limit (컨테이너 로그 처리)
+    per_stream_rate_limit: {{ .Values.loki.config.per_stream_rate_limit | default "10MB" | quote }}
+    per_stream_rate_limit_burst: {{ .Values.loki.config.per_stream_rate_limit_burst | default "20MB" | quote }}
+    
+    # Retention 설정
     table_manager:
       retention_deletes_enabled: {{ .Values.loki.retention.enabled | default true }}
       retention_period: {{ .Values.loki.retention.period | default "720h" | quote }}  # 30 days default
