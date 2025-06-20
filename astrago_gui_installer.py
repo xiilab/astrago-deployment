@@ -13,6 +13,39 @@ REGEX_NODE_NAME = r'^[a-zA-Z0-9-]+$'
 REGEX_IP_ADDRESS = r'^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$'
 REGEX_PATH = r'^\/(?:[a-zA-Z0-9_-]+\/?)*$'
 
+# ==========================================
+# 🎨 Beautiful Color Definitions
+# ==========================================
+# Color pairs will be initialized in the main function
+COLOR_GRADIENT1 = 1
+COLOR_GRADIENT2 = 2  
+COLOR_GRADIENT3 = 3
+COLOR_GRADIENT4 = 4
+COLOR_SUCCESS = 5
+COLOR_ERROR = 6
+COLOR_WARNING = 7
+COLOR_INFO = 8
+COLOR_SELECTED = 9
+COLOR_BORDER = 10
+
+# ==========================================
+# 🎯 Beautiful Unicode Box Characters
+# ==========================================
+BOX_CHARS = {
+    'top_left': '╔',
+    'top_right': '╗', 
+    'bottom_left': '╚',
+    'bottom_right': '╝',
+    'horizontal': '═',
+    'vertical': '║',
+    'section_top_left': '┌',
+    'section_top_right': '┐',
+    'section_bottom_left': '└', 
+    'section_bottom_right': '┘',
+    'section_horizontal': '─',
+    'section_vertical': '│'
+}
+
 
 class DataManager:
     def __init__(self):
@@ -234,35 +267,117 @@ class AstragoInstaller:
         self.stdscr = None
 
     def read_and_display_output(self, process):
+        self.stdscr.clear()
+        h, w = self.stdscr.getmaxyx()
         output_lines = []
-
+        
+        # 상단 제목 박스
+        title_width = min(w - 4, 70)
+        title_x = (w - title_width) // 2
+        self.print_beautiful_box(0, title_x, title_width, 3, "🔄 Installation Progress", COLOR_GRADIENT1)
+        
+        # 출력 영역
+        output_start_y = 4
+        max_lines = h - output_start_y - 3
+        
         while True:
             output = process.stdout.readline()
             if output == '' and process.poll() is not None:
                 break
             if output:
                 output_lines.append(output.strip())
-                max_lines = self.stdscr.getmaxyx()[0] - 2
                 if len(output_lines) > max_lines:
                     output_lines = output_lines[-max_lines:]
-                self.stdscr.erase()  # Use erase instead of clear to avoid full screen flicker
-                _, w = self.stdscr.getmaxyx()
+                
+                # 출력 영역 지우기
+                for i in range(output_start_y, h - 2):
+                    self.stdscr.addstr(i, 0, " " * (w - 1))
+                
+                # 출력 표시
                 for idx, line in enumerate(output_lines):
-                    self.stdscr.addstr(idx, 0, line[:w - 1], curses.color_pair(2))
+                    if output_start_y + idx < h - 2:
+                        display_line = line[:w - 1]
+                        # 로그 레벨에 따른 색상
+                        if "ERROR" in line or "Failed" in line:
+                            color = COLOR_ERROR
+                        elif "WARNING" in line or "WARN" in line:
+                            color = COLOR_WARNING
+                        elif "SUCCESS" in line or "Completed" in line:
+                            color = COLOR_SUCCESS
+                        else:
+                            color = COLOR_INFO
+                        
+                        self.stdscr.addstr(output_start_y + idx, 0, display_line, curses.color_pair(color))
+                
                 self.stdscr.refresh()
+        
         process.stdout.close()
         process.wait()
-        # Display the "Press any key to return to the menu" message
-        output_lines.append("Press any key to return to the menu")
-        h, w = self.stdscr.getmaxyx()
-        for idx, line in enumerate(output_lines[-h + 1:]):
-            self.stdscr.addstr(idx, 0, line[:w - 1], curses.color_pair(2))
+        
+        # 완료 메시지
+        completion_y = h - 2
+        if completion_y > 0:
+            completion_msg = "🎉 Installation completed! Press any key to return to the menu"
+            msg_x = (w - len(completion_msg)) // 2
+            if msg_x >= 0:
+                self.stdscr.addstr(completion_y, msg_x, completion_msg, curses.color_pair(COLOR_SUCCESS) | curses.A_BOLD)
+        
         self.stdscr.refresh()
         curses.flushinp()
         self.stdscr.getch()
 
+    def print_beautiful_box(self, y, x, width, height, title="", color_pair=COLOR_GRADIENT1):
+        """아름다운 박스를 그립니다"""
+        h, w = self.stdscr.getmaxyx()
+        
+        # 박스 그리기
+        if y < h and x < w:
+            # 상단
+            self.stdscr.addstr(y, x, BOX_CHARS['top_left'], curses.color_pair(color_pair))
+            for i in range(1, width-1):
+                if x + i < w:
+                    self.stdscr.addstr(y, x + i, BOX_CHARS['horizontal'], curses.color_pair(color_pair))
+            if x + width - 1 < w:
+                self.stdscr.addstr(y, x + width - 1, BOX_CHARS['top_right'], curses.color_pair(color_pair))
+            
+            # 중간 라인들
+            for j in range(1, height-1):
+                if y + j < h:
+                    if x < w:
+                        self.stdscr.addstr(y + j, x, BOX_CHARS['vertical'], curses.color_pair(color_pair))
+                    if x + width - 1 < w:
+                        self.stdscr.addstr(y + j, x + width - 1, BOX_CHARS['vertical'], curses.color_pair(color_pair))
+            
+            # 하단
+            if y + height - 1 < h:
+                if x < w:
+                    self.stdscr.addstr(y + height - 1, x, BOX_CHARS['bottom_left'], curses.color_pair(color_pair))
+                for i in range(1, width-1):
+                    if x + i < w:
+                        self.stdscr.addstr(y + height - 1, x + i, BOX_CHARS['horizontal'], curses.color_pair(color_pair))
+                if x + width - 1 < w:
+                    self.stdscr.addstr(y + height - 1, x + width - 1, BOX_CHARS['bottom_right'], curses.color_pair(color_pair))
+        
+        # 제목 추가
+        if title and len(title) < width - 4:
+            title_x = x + (width - len(title)) // 2
+            if title_x < w and y < h:
+                self.stdscr.addstr(y, title_x, f" {title} ", curses.color_pair(color_pair) | curses.A_BOLD)
+
     def print_banner(self):
         self.stdscr.clear()
+        h, w = self.stdscr.getmaxyx()
+        
+        # 아름다운 박스로 둘러싸인 배너
+        box_width = min(w - 4, 80)
+        box_height = 12
+        box_x = (w - box_width) // 2
+        box_y = max(1, (h - box_height) // 2 - 8)
+        
+        # 외부 박스
+        self.print_beautiful_box(box_y, box_x, box_width, box_height, "🚀 ASTRAGO GUI INSTALLER", COLOR_GRADIENT1)
+        
+        # 내부 제목
         title = [
             "    ___         __                         ",
             "   /   |  _____/ /__________ _____ _____   ",
@@ -271,48 +386,85 @@ class AstragoInstaller:
             "/_/  |_/____/\\__/_/   \\__,_/\\__, /\\____/   ",
             "                           /____/          ",
         ]
+        
         now_utc = datetime.now(timezone.utc)
         now_kst = now_utc + timedelta(hours=9)
         current_hour = now_kst.hour
-        if current_hour >= 21:
+        
+        # 시간에 따른 특별 디자인 (밤 시간)
+        if current_hour >= 21 or current_hour <= 6:
             title = [
-                " ▄▄▄        ██████ ▄▄▄█████▓ ██▀███   ▄▄▄        ▄████  ▒█████  ",
-                "▒████▄    ▒██    ▒ ▓  ██▒ ▓▒▓██ ▒ ██▒▒████▄     ██▒ ▀█▒▒██▒  ██▒",
-                "▒██  ▀█▄  ░ ▓██▄   ▒ ▓██░ ▒░▓██ ░▄█ ▒▒██  ▀█▄  ▒██░▄▄▄░▒██░  ██▒",
-                "░██▄▄▄▄██   ▒   ██▒░ ▓██▓ ░ ▒██▀▀█▄  ░██▄▄▄▄██ ░▓█  ██▓▒██   ██░",
-                " ▓█   ▓██▒▒██████▒▒  ▒██▒ ░ ░██▓ ▒██▒ ▓█   ▓██▒░▒▓███▀▒░ ████▓▒░",
-                " ▒▒   ▓▒█░▒ ▒▓▒ ▒ ░  ▒ ░░   ░ ▒▓ ░▒▓░ ▒▒   ▓▒█░ ░▒   ▒ ░ ▒░▒░▒░ ",
-                "  ▒   ▒▒ ░░ ░▒  ░ ░    ░      ░▒ ░ ▒░  ▒   ▒▒ ░  ░   ░   ░ ▒ ▒░ ",
-                "  ░   ▒   ░  ░  ░    ░        ░░   ░   ░   ▒   ░ ░   ░ ░ ░ ░ ▒  ",
-                "  ░  ░      ░              ░           ░  ░      ░     ░ ░      ",
+                "✨ A S T R A G O ✨",
+                "「 AI Infrastructure Platform 」",
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+                "🌙 Night Mode Activated 🌙",
             ]
-
-        h, w = self.stdscr.getmaxyx()
+        
+        # 제목 출력
         for idx, line in enumerate(title):
-            line = line[:w - 1]
-            x = w // 2 - len(line) // 2
-            y = h // 2 - len(title) // 2 + idx - 10
-            if 0 <= y < h and 0 <= x < w:
-                self.stdscr.addstr(y, x, line[:w], curses.color_pair(2))
+            line = line[:box_width - 6]
+            title_x = box_x + (box_width - len(line)) // 2
+            title_y = box_y + 2 + idx
+            if 0 <= title_y < h and 0 <= title_x < w:
+                color = COLOR_GRADIENT2 if idx % 2 == 0 else COLOR_GRADIENT3
+                self.stdscr.addstr(title_y, title_x, line, curses.color_pair(color) | curses.A_BOLD)
+        
+        # 하단 정보
+        info_y = box_y + box_height + 1
+        if info_y < h:
+            info_text = "🔥 Beautiful Installation Experience 🔥"
+            info_x = (w - len(info_text)) // 2
+            if 0 <= info_x < w:
+                self.stdscr.addstr(info_y, info_x, info_text, curses.color_pair(COLOR_GRADIENT4) | curses.A_DIM)
+        
         self.stdscr.refresh()
 
     def print_menu(self, menu, selected_row_idx):
         self.stdscr.clear()
         self.print_banner()
         h, w = self.stdscr.getmaxyx()
-        x = w // 2 - len(max(menu, key=len)) // 2
+        
+        # 메뉴 박스 설정
+        menu_width = min(w - 8, 60)
+        menu_height = len(menu) + 4
+        menu_x = (w - menu_width) // 2
+        menu_y = h // 2 + 2
+        
+        # 메뉴 박스 그리기
+        self.print_beautiful_box(menu_y, menu_x, menu_width, menu_height, "📋 Main Menu", COLOR_GRADIENT2)
+        
+        # 메뉴 아이템 출력
         for idx, row in enumerate(menu):
-            y = h // 2 - len(menu) // 2 + idx
-            if 0 <= y < h and 0 <= x < w:
+            item_y = menu_y + 2 + idx
+            item_x = menu_x + 3
+            
+            if 0 <= item_y < h and 0 <= item_x < w:
+                # 메뉴 아이템 전체 배경
+                menu_text = f"  {row}  "
+                if len(menu_text) > menu_width - 6:
+                    menu_text = menu_text[:menu_width - 6]
+                
                 if idx == selected_row_idx:
-                    self.stdscr.attron(curses.color_pair(1))
-                    self.stdscr.addstr(y, x, row[:w])
-                    self.stdscr.attroff(curses.color_pair(1))
+                    # 선택된 메뉴
+                    self.stdscr.addstr(item_y, item_x, "▶", curses.color_pair(COLOR_SELECTED) | curses.A_BOLD)
+                    self.stdscr.addstr(item_y, item_x + 2, menu_text, curses.color_pair(COLOR_SELECTED) | curses.A_BOLD)
                 else:
-                    self.stdscr.addstr(y, x, row[:w])
+                    # 일반 메뉴
+                    icon = "🔹" if idx < len(menu) - 1 else "🚪"
+                    self.stdscr.addstr(item_y, item_x, " ", curses.color_pair(COLOR_INFO))
+                    self.stdscr.addstr(item_y, item_x + 2, menu_text, curses.color_pair(COLOR_INFO))
+        
+        # 하단 도움말
+        help_y = menu_y + menu_height + 1
+        if help_y < h:
+            help_text = "↑↓ 이동 | Enter 선택 | ESC 종료"
+            help_x = (w - len(help_text)) // 2
+            if 0 <= help_x < w:
+                self.stdscr.addstr(help_y, help_x, help_text, curses.color_pair(COLOR_INFO) | curses.A_DIM)
+        
         self.stdscr.refresh()
 
-    def print_table(self, y, x, header, data, selected_index=-1):
+    def print_table(self, y, x, header, data, selected_index=-1, title=""):
         h, w = self.stdscr.getmaxyx()
         header_widths = [len(col) for col in header]
         data_widths = [[len(str(value)) for value in row] for row in data]
@@ -322,31 +474,74 @@ class AstragoInstaller:
         else:
             max_widths = header_widths[:]
 
-        total_width = sum(max_widths) + len(header) - 1
-        if total_width > w:
+        # 박스 그리기 문자 사용
+        total_width = sum(max_widths) + len(header) * 3 + 1
+        if total_width > w - 4:
             for i in range(len(max_widths)):
-                max_widths[i] = max(1, max_widths[i] * (w - len(header) + 1) // total_width)
+                max_widths[i] = max(1, max_widths[i] * (w - len(header) * 3 - 5) // sum(max_widths))
 
-        line = '+'.join(['-' * width for width in max_widths])
-
-        self.stdscr.addstr(y, x, '+' + line + '+')
+        # 상단 테두리
+        top_line = BOX_CHARS['section_top_left']
+        for i, width in enumerate(max_widths):
+            top_line += BOX_CHARS['section_horizontal'] * (width + 2)
+            if i < len(max_widths) - 1:
+                top_line += '┬'
+        top_line += BOX_CHARS['section_top_right']
+        
+        if y < h and x < w:
+            self.stdscr.addstr(y, x, top_line[:w-x], curses.color_pair(COLOR_BORDER))
+        
+        # 헤더
         y += 1
-        self.stdscr.addstr(y, x, '|' + '|'.join(header[i].center(max_widths[i]) for i in range(len(header))) + '|')
+        if y < h and x < w:
+            header_line = BOX_CHARS['section_vertical']
+            for i, col in enumerate(header):
+                header_text = f" {col.center(max_widths[i])} "
+                header_line += header_text
+                if i < len(header) - 1:
+                    header_line += BOX_CHARS['section_vertical']
+            header_line += BOX_CHARS['section_vertical']
+            self.stdscr.addstr(y, x, header_line[:w-x], curses.color_pair(COLOR_GRADIENT2) | curses.A_BOLD)
+        
+        # 헤더 구분선
         y += 1
-        self.stdscr.addstr(y, x, '+' + line + '+')
+        if y < h and x < w:
+            mid_line = '├'
+            for i, width in enumerate(max_widths):
+                mid_line += BOX_CHARS['section_horizontal'] * (width + 2)
+                if i < len(max_widths) - 1:
+                    mid_line += '┼'
+            mid_line += '┤'
+            self.stdscr.addstr(y, x, mid_line[:w-x], curses.color_pair(COLOR_BORDER))
 
+        # 데이터 행
         for idx, row in enumerate(data):
-            new_row = [str(col).center(max_widths[i]) for i, col in enumerate(row)]
             y += 1
-            if y < h - 2:
+            if y < h - 2 and x < w:
+                row_line = BOX_CHARS['section_vertical']
+                for i, col in enumerate(row):
+                    cell_text = f" {str(col).center(max_widths[i])} "
+                    row_line += cell_text
+                    if i < len(max_widths) - 1:
+                        row_line += BOX_CHARS['section_vertical']
+                row_line += BOX_CHARS['section_vertical']
+                
                 if selected_index == idx:
-                    self.stdscr.addstr(y, x, '|' + '|'.join(new_row) + '|', curses.color_pair(1))
+                    self.stdscr.addstr(y, x, row_line[:w-x], curses.color_pair(COLOR_SELECTED) | curses.A_BOLD)
                 else:
-                    self.stdscr.addstr(y, x, '|' + '|'.join(new_row) + '|')
+                    self.stdscr.addstr(y, x, row_line[:w-x], curses.color_pair(COLOR_INFO))
 
+        # 하단 테두리
         y += 1
-        if y < h:
-            self.stdscr.addstr(y, x, '+' + line + '+')
+        if y < h and x < w:
+            bottom_line = BOX_CHARS['section_bottom_left']
+            for i, width in enumerate(max_widths):
+                bottom_line += BOX_CHARS['section_horizontal'] * (width + 2)
+                if i < len(max_widths) - 1:
+                    bottom_line += '┴'
+            bottom_line += BOX_CHARS['section_bottom_right']
+            self.stdscr.addstr(y, x, bottom_line[:w-x], curses.color_pair(COLOR_BORDER))
+            
         self.stdscr.refresh()
 
     def print_nfs_server_table(self, y, x):
@@ -493,42 +688,125 @@ class AstragoInstaller:
 
     def print_sub_menu(self, menu, selected_row_idx):
         h, w = self.stdscr.getmaxyx()
+        
+        # 상단 제목 박스
+        title_height = 4
+        title_width = min(w - 4, 70)
+        title_x = (w - title_width) // 2
+        title_y = 1
+        
+        self.print_beautiful_box(title_y, title_x, title_width, title_height, "🔧 Configuration Menu", COLOR_GRADIENT3)
+        
+        # 메뉴 박스
+        menu_width = min(w - 8, 60)
+        menu_height = len(menu) + 4
+        menu_x = 2
+        menu_y = title_y + title_height + 1
+        
+        self.print_beautiful_box(menu_y, menu_x, menu_width, menu_height, "📝 Options", COLOR_GRADIENT2)
+        
+        # 메뉴 아이템들
         for idx, row in enumerate(menu):
-            if len(row) > w:
-                row = row[:w - 1]
-            x = 0
-            y = idx
-            if y < h:
+            item_y = menu_y + 2 + idx
+            item_x = menu_x + 3
+            
+            if item_y < h and item_x < w:
+                # 메뉴 텍스트 준비
+                if len(row) > menu_width - 8:
+                    row = row[:menu_width - 8]
+                
                 if idx == selected_row_idx:
-                    self.stdscr.attron(curses.color_pair(1))
-                    self.stdscr.addstr(y, x, row)
-                    self.stdscr.attroff(curses.color_pair(1))
+                    # 선택된 메뉴
+                    self.stdscr.addstr(item_y, item_x, "▶", curses.color_pair(COLOR_SELECTED) | curses.A_BOLD)
+                    self.stdscr.addstr(item_y, item_x + 2, f" {row} ", curses.color_pair(COLOR_SELECTED) | curses.A_BOLD)
                 else:
-                    self.stdscr.addstr(y, x, row)
+                    # 일반 메뉴 - 아이콘 선택
+                    if "Back" in row or "뒤로" in row:
+                        icon = "🔙"
+                    elif "Add" in row or "추가" in row:
+                        icon = "➕"
+                    elif "Remove" in row or "제거" in row:
+                        icon = "➖"
+                    elif "Edit" in row or "편집" in row:
+                        icon = "✏️"
+                    elif "Setting" in row or "설정" in row:
+                        icon = "⚙️"
+                    elif "Install" in row or "설치" in row:
+                        icon = "📦"
+                    else:
+                        icon = "🔹"
+                    
+                    self.stdscr.addstr(item_y, item_x, icon, curses.color_pair(COLOR_INFO))
+                    self.stdscr.addstr(item_y, item_x + 3, row, curses.color_pair(COLOR_INFO))
+        
+        # 하단 도움말
+        help_y = menu_y + menu_height + 1
+        if help_y < h:
+            help_text = "↑↓ 이동 | Enter 선택 | Backspace 뒤로 | ESC 종료"
+            self.stdscr.addstr(help_y, 2, help_text, curses.color_pair(COLOR_INFO) | curses.A_DIM)
+        
         self.stdscr.refresh()
 
     def make_query(self, y, x, query, default_value=None, valid_regex=None):
         h, w = self.stdscr.getmaxyx()
         input_line = []
+        
+        # 입력 박스 디자인
+        input_width = min(w - x - 4, 50)
+        input_height = 5
+        
+        # 입력 박스 그리기
+        self.print_beautiful_box(y, x, input_width, input_height, "📝 Input Required", COLOR_GRADIENT3)
+        
+        # 쿼리 텍스트
+        query_y = y + 2
+        query_x = x + 2
+        if query_y < h and query_x < w:
+            self.stdscr.addstr(query_y, query_x, query, curses.color_pair(COLOR_INFO) | curses.A_BOLD)
+        
+        # 입력 필드
+        input_y = query_y + 1
+        input_x = query_x
+        input_field_width = input_width - 4
+        
         while True:
-            if y < h and x + len(query) < w:
-                self.stdscr.addstr(y, x, query)
-            self.stdscr.clrtoeol()
-            self.stdscr.addstr(y, x + len(query), ''.join(input_line), curses.color_pair(2))
+            # 입력 필드 배경 지우기
+            if input_y < h and input_x < w:
+                self.stdscr.addstr(input_y, input_x, " " * input_field_width)
+                
+                # 입력된 텍스트 표시
+                display_text = ''.join(input_line)
+                if len(display_text) > input_field_width - 2:
+                    display_text = display_text[-(input_field_width - 2):]
+                
+                # 입력 박스 스타일
+                self.stdscr.addstr(input_y, input_x, "▶ ", curses.color_pair(COLOR_GRADIENT2))
+                self.stdscr.addstr(input_y, input_x + 2, display_text, curses.color_pair(COLOR_SUCCESS) | curses.A_BOLD)
+                self.stdscr.addstr(input_y, input_x + 2 + len(display_text), "█", curses.color_pair(COLOR_SELECTED))  # 커서
+            
             key = self.stdscr.getch()
-            if 33 <= key <= 126:
+            
+            if 33 <= key <= 126:  # 출력 가능한 문자
                 input_line.append(chr(key))
-            if key in (curses.KEY_BACKSPACE, 127):
+            elif key in (curses.KEY_BACKSPACE, 127, 8):  # 백스페이스
                 if input_line:
-                    input_line.pop(len(input_line) - 1)
-            if key == curses.KEY_ENTER or key in [10, 13]:
-                if input_line:
-                    if not valid_regex or re.fullmatch(valid_regex, ''.join(input_line)):
-                        return ''.join(input_line)
+                    input_line.pop()
+            elif key == curses.KEY_ENTER or key in [10, 13]:  # 엔터
+                input_text = ''.join(input_line)
+                if input_text:
+                    if not valid_regex or re.fullmatch(valid_regex, input_text):
+                        return input_text
+                    else:
+                        # 유효하지 않은 입력
+                        error_y = input_y + 1
+                        if error_y < h:
+                            self.stdscr.addstr(error_y, input_x, "❌ Invalid format! Please try again.", curses.color_pair(COLOR_ERROR))
+                            self.stdscr.refresh()
+                            curses.napms(1500)  # 1.5초 대기
                 else:
                     if default_value is not None:
                         return default_value
-            if key == 27:
+            elif key == 27:  # ESC
                 return ESCAPE_CODE
 
         return ''.join(input_line)
@@ -595,7 +873,7 @@ class AstragoInstaller:
 
     def setting_node_menu(self):
         self.stdscr.clear()
-        menu = ["1. Add Node", "2. Remove Node", "3. Edit Node", "4. Back"]
+        menu = ["1. ➕ Add Node", "2. ➖ Remove Node", "3. ✏️ Edit Node", "4. 🔙 Back"]
         self.navigate_sub_menu(menu, {
             0: self.add_node,
             1: self.remove_node,
@@ -616,14 +894,14 @@ class AstragoInstaller:
 
     def setting_nfs_menu(self):
         self.stdscr.clear()
-        menu = ["1. Setting NFS Server", "2. Install NFS Server(Optional)", "3. Back"]
+        menu = ["1. ⚙️ Setting NFS Server", "2. 📦 Install NFS Server(Optional)", "3. 🔙 Back"]
         self.navigate_sub_menu(menu, {
             0: self.set_nfs_query,
             1: self.install_nfs
         }, self.print_nfs_server_table)
 
     def install_astrago_menu(self):
-        menu = ["1. Set NFS Server", "2. Install Astrago", "3. Uninstall Astrago", "4. Back"]
+        menu = ["1. 🗄️ Set NFS Server", "2. 🚀 Install Astrago", "3. 🗑️ Uninstall Astrago", "4. 🔙 Back"]
         self.navigate_menu(menu, {
             0: self.setting_nfs_menu,
             1: self.install_astrago,
@@ -631,8 +909,8 @@ class AstragoInstaller:
         })
 
     def install_kubernetes_menu(self):
-        menu = ["1. Set Nodes", "2. Install Kubernetes", "3. Reset Kubernetes", "4. Install GPU Driver (Optional)",
-                "5. Back"]
+        menu = ["1. 🖥️ Set Nodes", "2. ☸️ Install Kubernetes", "3. 🔄 Reset Kubernetes", "4. 🎮 Install GPU Driver (Optional)",
+                "5. 🔙 Back"]
         self.navigate_menu(menu, {
             0: self.setting_node_menu,
             1: self.install_kubernetes,
@@ -693,14 +971,39 @@ class AstragoInstaller:
 
     def main(self, stdscr):
         self.stdscr = stdscr
-        main_menu = ["1. Kubernetes",
-                     "2. Astrago",
-                     "3. Close"]
+        
+        # ==========================================
+        # 🎨 Beautiful Color Initialization
+        # ==========================================
+        curses.start_color()
+        curses.use_default_colors()
+        
+        # 그라데이션 색상 정의 (run_gui_installer.sh와 통일)
+        curses.init_pair(COLOR_GRADIENT1, 129, -1)    # Purple gradient
+        curses.init_pair(COLOR_GRADIENT2, 135, -1)    # Light purple gradient
+        curses.init_pair(COLOR_GRADIENT3, 141, -1)    # Pink purple gradient
+        curses.init_pair(COLOR_GRADIENT4, 147, -1)    # Light pink gradient
+        
+        # 기능별 색상
+        curses.init_pair(COLOR_SUCCESS, curses.COLOR_GREEN, -1)      # 성공
+        curses.init_pair(COLOR_ERROR, curses.COLOR_RED, -1)          # 오류
+        curses.init_pair(COLOR_WARNING, curses.COLOR_YELLOW, -1)     # 경고
+        curses.init_pair(COLOR_INFO, curses.COLOR_CYAN, -1)          # 정보
+        curses.init_pair(COLOR_SELECTED, curses.COLOR_BLACK, curses.COLOR_GREEN)  # 선택
+        curses.init_pair(COLOR_BORDER, curses.COLOR_BLUE, -1)        # 테두리
+        
+        # 터미널 설정
         curses.echo()
         curses.set_escdelay(1)
-        curses.curs_set(0)
-        curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_GREEN)
-        curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
+        curses.curs_set(0)  # 커서 숨기기
+        
+        # 메인 메뉴
+        main_menu = [
+            "1. 🏗️  Kubernetes Infrastructure",
+            "2. 🚀 Astrago Platform", 
+            "3. 🚪 Exit"
+        ]
+        
         self.navigate_menu(main_menu, {
             0: self.install_kubernetes_menu,
             1: self.install_astrago_menu
