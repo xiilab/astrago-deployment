@@ -150,52 +150,61 @@ check_system_requirements() {
 
 # Function to select installation mode
 select_installation_mode() {
-    # Check if running in non-interactive mode or if AUTO_MODE is set
-    if [ ! -t 0 ] || [ -n "$AUTO_MODE" ]; then
+    # Check if AUTO_MODE is set
+    if [ -n "$AUTO_MODE" ]; then
         print_info "자동 모드: 온라인 설치로 진행합니다"
         echo "online"
         return
     fi
     
     echo ""
-    print_section "설치 모드 선택" "🔧"
-    echo -e "${BOLD}설치 모드를 선택해주세요:${RESET}"
     echo ""
-    echo -e "${GREEN}1) 온라인 설치${RESET}  - 인터넷을 통한 패키지 다운로드 및 설치"
-    echo -e "${BLUE}2) 오프라인 설치${RESET} - 로컬 패키지를 사용한 에어갭 환경 설치"
+    print_section "설치 모드 선택" "🔧"
+    echo ""
+    echo -e "${BOLD}${CYAN}설치 모드를 선택해주세요:${RESET}"
+    echo ""
+    echo -e "  ${GREEN}${BOLD}1)${RESET} ${GREEN}온라인 설치${RESET}"
+    echo -e "     ${DIM}→ 인터넷을 통한 패키지 다운로드 및 설치${RESET}"
+    echo -e "     ${DIM}→ 최신 버전 사용 가능${RESET}"
+    echo ""
+    echo -e "  ${BLUE}${BOLD}2)${RESET} ${BLUE}오프라인 설치${RESET}"
+    echo -e "     ${DIM}→ 로컬 패키지를 사용한 에어갭 환경 설치${RESET}"
+    echo -e "     ${DIM}→ 사전에 패키지 준비 필요${RESET}"
     echo ""
     echo -e "${DIM}💡 팁: 자동 모드로 실행하려면 AUTO_MODE=1 환경변수를 설정하세요${RESET}"
     echo ""
     
-    local timeout_count=0
     while true; do
-        printf "설치 모드를 선택하세요 [1-2] (기본값: 1): "
+        echo -n -e "${BOLD}${YELLOW}설치 모드를 선택하세요 [1-2] (기본값: 1): ${RESET}"
         
-        # Add timeout for read to prevent hanging
-        if read -t 30 -r choice; then
-            echo "입력된 선택: '$choice'" >&2  # 디버깅용
+        # Force flush output
+        exec 1>&1
+        
+        # Read user input with timeout
+        if read -t 60 -r choice; then
+            echo ""  # New line after input
             case $choice in
                 1|"")
+                    print_success "온라인 설치 모드가 선택되었습니다"
                     echo "online"
                     return
                     ;;
                 2)
+                    print_success "오프라인 설치 모드가 선택되었습니다"
                     echo "offline"
                     return
                     ;;
                 *)
                     print_error "잘못된 선택입니다: '$choice'. 1 또는 2를 선택해주세요."
+                    echo ""
                     ;;
             esac
         else
             # Timeout occurred
-            timeout_count=$((timeout_count + 1))
-            if [ $timeout_count -ge 3 ]; then
-                print_warning "입력 시간 초과. 기본값(온라인 설치)으로 진행합니다."
-                echo "online"
-                return
-            fi
-            print_warning "입력 시간 초과 ($timeout_count/3). 다시 시도해주세요."
+            echo ""
+            print_warning "입력 시간 초과. 기본값(온라인 설치)으로 진행합니다."
+            echo "online"
+            return
         fi
     done
 }
@@ -378,6 +387,10 @@ print_header
 
 # Check system requirements
 check_system_requirements
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
 
 # Select installation mode
 INSTALLATION_MODE=$(select_installation_mode)
