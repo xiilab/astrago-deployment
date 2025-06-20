@@ -48,8 +48,8 @@ BOX_CHARS = {
     'section_vertical': '│'
 }
 
-# 환경 변수에서 설치 모드 가져오기
-INSTALLATION_MODE = os.environ.get('ASTRAGO_INSTALLATION_MODE', 'online')
+# 환경 변수에서 설치 모드 가져오기 (기본값 없음)
+INSTALLATION_MODE = os.environ.get('ASTRAGO_INSTALLATION_MODE', None)
 
 class DataManager:
     def __init__(self):
@@ -460,6 +460,7 @@ class AstragoInstaller:
         self.command_runner = CommandRunner(self.data_manager)
         self.stdscr = None
         self.installation_mode = INSTALLATION_MODE
+        self.offline_packages_prepared = False
 
     def read_and_display_output(self, process):
         """명령어 출력을 실시간으로 표시"""
@@ -700,6 +701,51 @@ class AstragoInstaller:
             ))
         self.print_table(y, x, header, data, selected_index)
 
+    def select_installation_mode(self):
+        """설치 모드 선택"""
+        self.stdscr.clear()
+        h, w = self.stdscr.getmaxyx()
+        
+        # 제목
+        title = "🔧 설치 모드 선택"
+        self.print_beautiful_box(2, 2, w-4, 12, title, COLOR_GRADIENT1)
+        
+        # 모드 설명
+        y = 5
+        self.stdscr.addstr(y, 6, "설치 모드를 선택해주세요:", curses.color_pair(COLOR_INFO))
+        y += 2
+        
+        self.stdscr.addstr(y, 6, "1. 🌐 온라인 설치", curses.color_pair(COLOR_SUCCESS))
+        y += 1
+        self.stdscr.addstr(y, 8, "- 인터넷을 통한 패키지 다운로드 및 설치")
+        y += 1
+        self.stdscr.addstr(y, 8, "- 최신 버전 사용 가능")
+        y += 2
+        
+        self.stdscr.addstr(y, 6, "2. 📦 오프라인 설치", curses.color_pair(COLOR_WARNING))
+        y += 1
+        self.stdscr.addstr(y, 8, "- 로컬 패키지를 사용한 에어갭 환경 설치")
+        y += 1
+        self.stdscr.addstr(y, 8, "- 사전에 패키지 준비 필요")
+        
+        # 하단 도움말
+        help_y = h - 3
+        self.stdscr.addstr(help_y, 6, "1/2: 모드 선택 | ESC: 종료", curses.color_pair(COLOR_INFO))
+        
+        self.stdscr.refresh()
+        
+        while True:
+            key = self.stdscr.getch()
+            
+            if key == ord('1'):
+                self.installation_mode = 'online'
+                return 'online'
+            elif key == ord('2'):
+                self.installation_mode = 'offline'
+                return 'offline'
+            elif key == 27:  # ESC
+                return None
+
     def configure_environment(self):
         """환경 설정"""
         self.stdscr.clear()
@@ -773,32 +819,56 @@ class AstragoInstaller:
 
     def prepare_offline_packages(self):
         """오프라인 패키지 준비"""
-        if self.installation_mode != 'offline':
-            self.stdscr.clear()
-            self.stdscr.addstr(0, 0, "❌ 오프라인 모드에서만 사용 가능한 기능입니다.", curses.color_pair(3))
-            self.stdscr.addstr(2, 0, "아무 키나 눌러 메뉴로 돌아가세요")
-            self.stdscr.refresh()
-            curses.flushinp()
-            self.stdscr.getch()
-            return
-
         self.stdscr.clear()
-        self.stdscr.addstr(0, 0, "📦 오프라인 패키지 준비")
-        self.stdscr.addstr(1, 0, "오프라인 설치에 필요한 패키지들을 다운로드합니다...")
-        self.stdscr.addstr(3, 0, "계속하시겠습니까? [y/N]: ")
+        h, w = self.stdscr.getmaxyx()
+        
+        # 제목
+        title = "📦 오프라인 패키지 준비"
+        self.print_beautiful_box(1, 1, w-2, 15, title, COLOR_GRADIENT1)
+        
+        y = 4
+        self.stdscr.addstr(y, 4, "오프라인 설치에 필요한 패키지들을 준비합니다:", curses.color_pair(COLOR_INFO))
+        y += 2
+        
+        self.stdscr.addstr(y, 4, "• Kubernetes 컨테이너 이미지")
+        y += 1
+        self.stdscr.addstr(y, 4, "• Astrago 애플리케이션 이미지")
+        y += 1
+        self.stdscr.addstr(y, 4, "• Helm 차트 및 의존성")
+        y += 1
+        self.stdscr.addstr(y, 4, "• 기타 필수 바이너리")
+        y += 2
+        
+        # 경고 메시지
+        self.stdscr.addstr(y, 4, "⚠️  주의사항:", curses.color_pair(COLOR_WARNING))
+        y += 1
+        self.stdscr.addstr(y, 4, "- 인터넷 연결이 필요합니다")
+        y += 1
+        self.stdscr.addstr(y, 4, "- 다운로드에 시간이 오래 걸릴 수 있습니다")
+        y += 1
+        self.stdscr.addstr(y, 4, "- 충분한 디스크 공간이 필요합니다")
+        y += 2
+        
+        # 확인 메시지
+        self.stdscr.addstr(y, 4, "계속하시겠습니까? [y/N]: ", curses.color_pair(COLOR_GRADIENT2))
+        
         self.stdscr.refresh()
         
         key = self.stdscr.getch()
         if key not in [ord('y'), ord('Y')]:
             return
         
+        # 패키지 준비 실행
         process = self.command_runner.run_prepare_offline_packages()
         if process:
             self.read_and_display_output(process)
+            self.offline_packages_prepared = True
         else:
             self.stdscr.clear()
-            self.stdscr.addstr(0, 0, "❌ 오프라인 패키지 준비 스크립트를 찾을 수 없습니다.", curses.color_pair(3))
-            self.stdscr.addstr(2, 0, "아무 키나 눌러 메뉴로 돌아가세요")
+            self.stdscr.addstr(0, 0, "❌ 오프라인 패키지 준비 스크립트를 찾을 수 없습니다.", curses.color_pair(COLOR_ERROR))
+            self.stdscr.addstr(2, 0, "스크립트 경로를 확인해주세요:")
+            self.stdscr.addstr(3, 0, "- scripts/prepare-offline-packages.sh")
+            self.stdscr.addstr(5, 0, "아무 키나 눌러 메뉴로 돌아가세요")
             self.stdscr.refresh()
             curses.flushinp()
             self.stdscr.getch()
@@ -1414,10 +1484,15 @@ class AstragoInstaller:
         self.stdscr.addstr(y, 0, "🔧 설치 모드:", curses.color_pair(COLOR_GRADIENT2))
         y += 1
         mode_text = "오프라인" if self.installation_mode == 'offline' else "온라인"
-        self.stdscr.addstr(y, 2, f"현재 모드: {mode_text}")
+        mode_color = COLOR_WARNING if self.installation_mode == 'offline' else COLOR_SUCCESS
+        self.stdscr.addstr(y, 2, f"현재 모드: {mode_text}", curses.color_pair(mode_color))
         y += 1
         
         if self.installation_mode == 'offline':
+            packages_status = "✅ 준비됨" if self.offline_packages_prepared else "❌ 미준비"
+            packages_color = COLOR_SUCCESS if self.offline_packages_prepared else COLOR_ERROR
+            self.stdscr.addstr(y, 2, f"오프라인 패키지: {packages_status}", curses.color_pair(packages_color))
+            y += 1
             self.stdscr.addstr(y, 2, f"오프라인 레지스트리: {status['offline_registry'] or '미설정'}")
             y += 1
             self.stdscr.addstr(y, 2, f"HTTP 서버: {status['offline_http'] or '미설정'}")
@@ -1559,19 +1634,43 @@ class AstragoInstaller:
         curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
         curses.init_pair(3, curses.COLOR_RED, curses.COLOR_BLACK)
         
-        main_menu = ["1. 🏗️ Kubernetes Infrastructure",
-                     "2. 🚀 Astrago Platform", 
-                     "3. ⚙️ Environment Settings",
-                     "4. 📊 System Status",
-                     "5. ❌ Close"]
+        # 환경 변수에서 설치 모드가 설정되지 않은 경우 사용자에게 선택하도록 함
+        if self.installation_mode is None or self.installation_mode not in ['online', 'offline']:
+            mode = self.select_installation_mode()
+            if mode is None:
+                return  # 사용자가 ESC를 눌러 종료
+            self.installation_mode = mode
         
-        try:
-            self.navigate_menu(main_menu, {
+        # 설치 모드에 따라 메뉴 구성
+        if self.installation_mode == 'offline':
+            main_menu = ["1. 🏗️ Kubernetes Infrastructure",
+                         "2. 🚀 Astrago Platform", 
+                         "3. 📦 Prepare Offline Packages",
+                         "4. ⚙️ Environment Settings",
+                         "5. 📊 System Status",
+                         "6. ❌ Close"]
+            handlers = {
+                0: self.install_kubernetes_menu,
+                1: self.install_astrago_menu,
+                2: self.prepare_offline_packages,
+                3: self.configure_environment,
+                4: self.print_status_info
+            }
+        else:
+            main_menu = ["1. 🏗️ Kubernetes Infrastructure",
+                         "2. 🚀 Astrago Platform", 
+                         "3. ⚙️ Environment Settings",
+                         "4. 📊 System Status",
+                         "5. ❌ Close"]
+            handlers = {
                 0: self.install_kubernetes_menu,
                 1: self.install_astrago_menu,
                 2: self.configure_environment,
                 3: self.print_status_info
-            })
+            }
+        
+        try:
+            self.navigate_menu(main_menu, handlers)
         except KeyboardInterrupt:
             pass
         except Exception as e:
