@@ -35,7 +35,7 @@ print_header() {
     echo -e "${GRADIENT1}╔══════════════════════════════════════════════════════════════════════════════╗${RESET}"
     echo -e "${GRADIENT2}║                                                                              ║${RESET}"
     echo -e "${GRADIENT3}║  ${BOLD}${WHITE}🚀 ASTRAGO GUI INSTALLER SETUP ${RESET}${GRADIENT3}                                      ║${RESET}"
-    echo -e "${GRADIENT4}║  ${DIM}${WHITE}Preparing your system for the beautiful installation experience${RESET}${GRADIENT4}      ║${RESET}"
+    echo -e "${GRADIENT4}║  ${DIM}${WHITE}통합 설치 환경 구성 - 온라인/오프라인 모드 지원${RESET}${GRADIENT4}                      ║${RESET}"
     echo -e "${GRADIENT1}║                                                                              ║${RESET}"
     echo -e "${GRADIENT2}╚══════════════════════════════════════════════════════════════════════════════╝${RESET}"
     echo ""
@@ -69,10 +69,106 @@ print_info() {
     echo -e "${BLUE}   ℹ️  ${message}${RESET}"
 }
 
+# Print warning message
+print_warning() {
+    local message="$1"
+    echo -e "${YELLOW}   ⚠️  ${BOLD}${message}${RESET}"
+}
+
 # Print error message
 print_error() {
     local message="$1"
     echo -e "${RED}   ❌ ${BOLD}${message}${RESET}"
+}
+
+# ==========================================
+# � System Checking Functions
+# ==========================================
+
+# Function to detect Python version
+detect_python_version() {
+    for py_version in python3.12 python3.11 python3.10 python3; do
+        if command -v "$py_version" &> /dev/null; then
+            local version_string=$($py_version --version 2>&1 | cut -d' ' -f2)
+            local major_minor=$(echo "$version_string" | cut -d'.' -f1,2)
+            
+            if python3 -c "import sys; exit(0 if sys.version_info >= (3, 9) else 1)" 2>/dev/null; then
+                echo "$py_version:$major_minor"
+                return 0
+            fi
+        fi
+    done
+    
+    echo "none:0"
+    return 1
+}
+
+# Function to check system requirements
+check_system_requirements() {
+    print_section "시스템 요구사항 검사" "🔍"
+    
+    # Check OS
+    if [ ! -f /etc/os-release ]; then
+        print_error "운영체제를 감지할 수 없습니다. /etc/os-release 파일이 없습니다."
+        exit 1
+    fi
+    
+    source /etc/os-release
+    print_info "감지된 운영체제: ${BOLD}${ID} ${VERSION_ID}${RESET}"
+    print_info "시스템 아키텍처: ${BOLD}$(uname -m)${RESET}"
+    
+    # Check for required commands
+    local missing_commands=()
+    for cmd in git curl wget; do
+        if ! command -v "$cmd" &> /dev/null; then
+            missing_commands+=("$cmd")
+        fi
+    done
+    
+    if [ ${#missing_commands[@]} -gt 0 ]; then
+        print_error "필수 명령어가 누락되었습니다: ${missing_commands[*]}"
+        print_info "패키지 매니저를 사용하여 설치해주세요"
+        exit 1
+    fi
+    
+    # Check disk space (minimum 10GB)
+    local available_space=$(df "$CURRENT_DIR" | tail -1 | awk '{print $4}')
+    if [ "$available_space" -lt 10485760 ]; then # 10GB in KB
+        print_warning "디스크 공간이 부족합니다. 최소 10GB 권장"
+    else
+        print_success "디스크 공간 충분: $(( available_space / 1024 / 1024 ))GB 사용 가능"
+    fi
+    
+    print_success "시스템 요구사항 검사 완료"
+}
+
+# Function to select installation mode
+select_installation_mode() {
+    echo ""
+    print_section "설치 모드 선택" "🔧"
+    echo -e "${BOLD}설치 모드를 선택해주세요:${RESET}"
+    echo ""
+    echo -e "${GREEN}1) 온라인 설치${RESET}  - 인터넷을 통한 패키지 다운로드 및 설치"
+    echo -e "${BLUE}2) 오프라인 설치${RESET} - 로컬 패키지를 사용한 에어갭 환경 설치"
+    echo ""
+    
+    while true; do
+        echo -n "설치 모드를 선택하세요 [1-2]: "
+        read -r choice
+        case $choice in
+            1)
+                echo "online"
+                return
+                ;;
+            2)
+                echo "offline"
+                return
+                ;;
+            *)
+                print_error "잘못된 선택입니다. 1 또는 2를 선택해주세요."
+                ;;
+        esac
+    done
 }
 
 # ==========================================
@@ -85,65 +181,153 @@ CURRENT_DIR=$(dirname "$(realpath "$0")")
 # Source OS release information
 . /etc/os-release
 
-# Check if offline mode is enabled
-IS_OFFLINE=${IS_OFFLINE:-false}
-
 # Function to install Python 3.11 on RHEL/CentOS
 install_python_rhel() {
+    local mode="$1"
     local DNF_OPTS=""
-    if [[ $IS_OFFLINE == "true" ]]; then
+    if [[ $mode == "offline" ]]; then
         DNF_OPTS="--disablerepo=* --enablerepo=offline-repo"
     fi
 
     if [[ "$VERSION_ID" =~ ^7.* ]]; then
-        print_error "RHEL/CentOS 7 is not supported anymore."
+        print_error "RHEL/CentOS 7은 더 이상 지원되지 않습니다."
         exit 1
     fi
 
-    print_step "Installing Python 3.11 for RHEL/CentOS..."
-    sudo dnf install -y $DNF_OPTS python3.11 || exit 1
-    print_success "Python 3.11 installed successfully!"
+    print_step "RHEL/CentOS용 Python 설치 중..."
+    sudo dnf install -y $DNF_OPTS python3.11 python3.11-venv || exit 1
+    print_success "Python 3.11 설치 완료!"
 }
 
 # Function to install Python on Ubuntu
 install_python_ubuntu() {
+    local mode="$1"
     local PY="3.11"
+    
     case "$VERSION_ID" in
         20.04)
-            if [[ $IS_OFFLINE == "false" ]]; then
-                print_step "Adding Python repository for Ubuntu 20.04..."
+            if [[ $mode == "online" ]]; then
+                print_step "Ubuntu 20.04용 Python 저장소 추가 중..."
                 sudo apt install -y software-properties-common
                 sudo add-apt-repository ppa:deadsnakes/ppa -y || exit 1
                 sudo apt update
-                print_success "Repository added successfully!"
+                print_success "저장소 추가 완료!"
             fi
             ;;
         24.04)
             PY="3.12"
-            print_info "Using Python 3.12 for Ubuntu 24.04"
+            print_info "Ubuntu 24.04에서는 Python 3.12 사용"
             ;;
     esac
     
-    print_step "Installing Python ${PY} with virtual environment support..."
+    print_step "Python ${PY} 및 가상환경 지원 패키지 설치 중..."
     sudo apt install -y python${PY}-venv || exit 1
-    print_success "Python ${PY} installed successfully!"
+    print_success "Python ${PY} 설치 완료!"
+}
+
+# Function to setup Python environment
+setup_python_environment() {
+    local mode="$1"
+    local python_info=$(detect_python_version)
+    local python_cmd=$(echo "$python_info" | cut -d':' -f1)
+    local python_version=$(echo "$python_info" | cut -d':' -f2)
+    
+    if [ "$python_cmd" = "none" ]; then
+        print_step "Python 설치 중..."
+        if [[ -e /etc/redhat-release ]]; then
+            install_python_rhel "$mode"
+        else
+            sudo apt update
+            install_python_ubuntu "$mode"
+        fi
+        
+        # Re-detect after installation
+        python_info=$(detect_python_version)
+        python_cmd=$(echo "$python_info" | cut -d':' -f1)
+        python_version=$(echo "$python_info" | cut -d':' -f2)
+    fi
+    
+    print_info "Python 버전: $python_cmd ($python_version)"
+    
+    # Create virtual environment directory name based on detected version
+    local venv_dir="$HOME/.venv/$python_version"
+    
+    if [ ! -d "$venv_dir" ]; then
+        print_step "Python 가상환경 생성 중: $venv_dir"
+        $python_cmd -m venv "$venv_dir" || {
+            print_error "가상환경 생성 실패"
+            exit 1
+        }
+        print_success "가상환경 생성 완료!"
+    else
+        print_success "가상환경이 이미 존재합니다"
+    fi
+    
+    print_step "가상환경 활성화 중..."
+    source "$venv_dir/bin/activate" || {
+        print_error "가상환경 활성화 실패"
+        exit 1
+    }
+    
+    # Store the environment info for later use
+    export PYTHON_CMD="$python_cmd"
+    export VENV_DIR="$venv_dir"
+    export PYTHON_VERSION="$python_version"
+    
+    print_success "Python 환경 설정 완료!"
 }
 
 # Function to check and install binaries
 install_binary() {
     local cmd=$1
     if ! command -v $cmd &> /dev/null; then
-        print_step "Installing ${cmd}..."
+        print_step "${cmd} 설치 중..."
         if [[ -f "$CURRENT_DIR/tools/linux/$cmd" ]]; then
             sudo cp "$CURRENT_DIR/tools/linux/$cmd" /usr/local/bin/
             sudo chmod +x /usr/local/bin/$cmd
-            print_success "${cmd} installed successfully!"
+            print_success "${cmd} 설치 완료!"
         else
-            print_error "${cmd} binary not found in tools folder."
+            print_error "${cmd} 바이너리가 tools 폴더에서 찾을 수 없습니다."
             exit 1
         fi
     else
-        print_success "${cmd} is already installed."
+        print_success "${cmd}이(가) 이미 설치되어 있습니다."
+    fi
+}
+
+# Function to install system dependencies
+install_system_dependencies() {
+    local mode="$1"
+    
+    print_section "시스템 의존성 설치" "�"
+    
+    # Install sshpass if not available
+    if ! command -v sshpass &> /dev/null; then
+        print_step "SSH 연결을 위한 sshpass 설치 중..."
+        case $ID_LIKE in
+            *debian*)
+                if [[ $mode == "online" ]]; then
+                    sudo apt update
+                fi
+                sudo apt install -y sshpass || exit 1
+                ;;
+            *rhel*|*fedora*)
+                if [[ $mode == "online" ]]; then
+                    sudo dnf check-update
+                fi
+                sudo dnf install -y sshpass || exit 1
+                ;;
+            *)
+                if [[ -e /etc/redhat-release ]]; then
+                    sudo dnf install -y sshpass || exit 1
+                else
+                    sudo apt install -y sshpass || exit 1
+                fi
+                ;;
+        esac
+        print_success "sshpass 설치 완료!"
+    else
+        print_success "sshpass가 이미 설치되어 있습니다."
     fi
 }
 
@@ -154,81 +338,59 @@ install_binary() {
 # Print beautiful header
 print_header
 
-# System Information
-print_section "System Information" "🖥️"
-print_info "Operating System: ${BOLD}${ID} ${VERSION_ID}${RESET}"
-print_info "Architecture: ${BOLD}$(uname -m)${RESET}"
-print_info "Offline Mode: ${BOLD}${IS_OFFLINE}${RESET}"
+# Check system requirements
+check_system_requirements
 
-# Python Installation
-print_section "Python Environment Setup" "🐍"
+# Select installation mode
+INSTALLATION_MODE=$(select_installation_mode)
+export IS_OFFLINE=$([ "$INSTALLATION_MODE" = "offline" ] && echo "true" || echo "false")
 
-# Check and install Python 3.11 if not already installed
-dpkg -s python3.11 &> /dev/null
-if [[ $? -eq 0 ]]; then
-    print_success "Python 3.11 is already installed."
+print_section "설치 모드" "⚙️"
+if [ "$INSTALLATION_MODE" = "offline" ]; then
+    print_info "선택된 모드: ${BOLD}오프라인 설치${RESET}"
+    print_warning "오프라인 모드에서는 로컬 패키지만 사용됩니다"
 else
-    print_step "Installing Python 3.11 and dependencies..."
-    if [[ -e /etc/redhat-release ]]; then
-        install_python_rhel
-    else
-        sudo apt update
-        install_python_ubuntu
-    fi
+    print_info "선택된 모드: ${BOLD}온라인 설치${RESET}"
+    print_info "인터넷을 통해 최신 패키지를 다운로드합니다"
 fi
 
-# SSH Tools Installation
-print_section "SSH Tools Setup" "🔐"
+# System Dependencies Installation
+install_system_dependencies "$INSTALLATION_MODE"
 
-# Install sshpass if not already installed
-if ! command -v sshpass &> /dev/null; then
-    print_step "Installing sshpass for secure connections..."
-    if [[ -e /etc/redhat-release ]]; then
-        sudo dnf install -y sshpass || exit 1
-    else
-        sudo apt install -y sshpass || exit 1
-    fi
-    print_success "sshpass installed successfully!"
-else
-    print_success "sshpass is already installed."
-fi
-
-# Virtual Environment Setup
-print_section "Virtual Environment" "📦"
-
-# Create and activate a virtual environment
-print_step "Creating Python virtual environment..."
-python3.11 -m venv ~/.venv/3.11
-print_success "Virtual environment created!"
-
-print_step "Activating virtual environment..."
-source ~/.venv/3.11/bin/activate
-print_success "Virtual environment activated!"
+# Python Environment Setup
+print_section "Python 환경 설정" "🐍"
+setup_python_environment "$INSTALLATION_MODE"
 
 # Install Python dependencies
-print_step "Installing Python dependencies..."
-pip install -r "$CURRENT_DIR/kubespray/requirements.txt"
-print_success "Python dependencies installed!"
+print_step "Python 의존성 설치 중..."
+pip install -r "$CURRENT_DIR/kubespray/requirements.txt" || {
+    print_error "Python 의존성 설치 실패"
+    exit 1
+}
+print_success "Python 의존성 설치 완료!"
 
 # Kubernetes Tools Installation
-print_section "Kubernetes Tools" "☸️"
+print_section "Kubernetes 도구 설치" "☸️"
 
-# Check and install helm, helmfile, and kubectl if necessary
-for cmd in helm helmfile kubectl; do
+# Check and install helm, helmfile, kubectl, and yq if necessary
+for cmd in helm helmfile kubectl yq; do
     install_binary $cmd
 done
 
 # Final Launch
-print_section "Launching GUI Installer" "🎯"
+print_section "GUI 인스톨러 실행" "🎯"
 
 echo ""
 echo -e "${GRADIENT1}╔══════════════════════════════════════════════════════════════════════════════╗${RESET}"
 echo -e "${GRADIENT2}║                                                                              ║${RESET}"
-echo -e "${GRADIENT3}║  ${BOLD}${WHITE}🎉 Setup completed successfully! ${RESET}${GRADIENT3}                                       ║${RESET}"
-echo -e "${GRADIENT4}║  ${DIM}${WHITE}Launching the Astrago GUI Installer...${RESET}${GRADIENT4}                                  ║${RESET}"
+echo -e "${GRADIENT3}║  ${BOLD}${WHITE}🎉 설치 환경 구성 완료! ${RESET}${GRADIENT3}                                              ║${RESET}"
+echo -e "${GRADIENT4}║  ${DIM}${WHITE}Astrago GUI 인스톨러를 시작합니다...${RESET}${GRADIENT4}                                ║${RESET}"
 echo -e "${GRADIENT1}║                                                                              ║${RESET}"
 echo -e "${GRADIENT2}╚══════════════════════════════════════════════════════════════════════════════╝${RESET}"
 echo ""
 
+# Pass installation mode to the GUI installer
+export ASTRAGO_INSTALLATION_MODE="$INSTALLATION_MODE"
+
 # Run the installer script
-python3.11 "$CURRENT_DIR/astrago_gui_installer.py"
+$PYTHON_CMD "$CURRENT_DIR/astrago_gui_installer.py"
