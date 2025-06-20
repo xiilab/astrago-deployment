@@ -15,6 +15,39 @@ REGEX_IP_ADDRESS = r'^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$'
 REGEX_PATH = r'^\/(?:[a-zA-Z0-9_-]+\/?)*$'
 REGEX_URL = r'^https?://[^\s/$.?#].[^\s]*$|^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(:[0-9]+)?$'
 
+# ==========================================
+# 🎨 Beautiful Color Definitions
+# ==========================================
+# Color pairs will be initialized in the main function
+COLOR_GRADIENT1 = 1
+COLOR_GRADIENT2 = 2  
+COLOR_GRADIENT3 = 3
+COLOR_GRADIENT4 = 4
+COLOR_SUCCESS = 5
+COLOR_ERROR = 6
+COLOR_WARNING = 7
+COLOR_INFO = 8
+COLOR_SELECTED = 9
+COLOR_BORDER = 10
+
+# ==========================================
+# 🎯 Beautiful Unicode Box Characters
+# ==========================================
+BOX_CHARS = {
+    'top_left': '╔',
+    'top_right': '╗', 
+    'bottom_left': '╚',
+    'bottom_right': '╝',
+    'horizontal': '═',
+    'vertical': '║',
+    'section_top_left': '┌',
+    'section_top_right': '┐',
+    'section_bottom_left': '└', 
+    'section_bottom_right': '┘',
+    'section_horizontal': '─',
+    'section_vertical': '│'
+}
+
 # 환경 변수에서 설치 모드 가져오기
 INSTALLATION_MODE = os.environ.get('ASTRAGO_INSTALLATION_MODE', 'online')
 
@@ -431,6 +464,7 @@ class AstragoInstaller:
     def read_and_display_output(self, process):
         """명령어 출력을 실시간으로 표시"""
         if process is None:
+            self.stdscr.clear()
             self.stdscr.addstr(0, 0, "명령어를 실행할 수 없습니다.")
             self.stdscr.addstr(1, 0, "아무 키나 눌러 메뉴로 돌아가세요")
             self.stdscr.refresh()
@@ -438,97 +472,146 @@ class AstragoInstaller:
             self.stdscr.getch()
             return
 
+        self.stdscr.clear()
+        h, w = self.stdscr.getmaxyx()
         output_lines = []
+        
+        # 상단 제목 박스
+        title_width = min(w - 4, 70)
+        title_x = (w - title_width) // 2
+        self.print_beautiful_box(0, title_x, title_width, 3, "🔄 Installation Progress", COLOR_GRADIENT1)
+        
+        # 출력 영역
+        output_start_y = 4
+        max_lines = h - output_start_y - 3
+
         while True:
             output = process.stdout.readline()
             if output == '' and process.poll() is not None:
                 break
             if output:
                 output_lines.append(output.strip())
-                max_lines = self.stdscr.getmaxyx()[0] - 2
                 if len(output_lines) > max_lines:
                     output_lines = output_lines[-max_lines:]
-                self.stdscr.erase()
-                _, w = self.stdscr.getmaxyx()
+                
+                # 출력 영역 지우기
+                for i in range(output_start_y, h - 2):
+                    if i < h and w > 1:
+                        try:
+                            self.stdscr.addstr(i, 0, " " * (w - 1))
+                        except curses.error:
+                            pass
+                
+                # 출력 표시
                 for idx, line in enumerate(output_lines):
-                    try:
-                        self.stdscr.addstr(idx, 0, line[:w - 1], curses.color_pair(2))
-                    except curses.error:
-                        pass
+                    if output_start_y + idx < h - 2:
+                        display_line = line[:w - 1]
+                        # 로그 레벨에 따른 색상
+                        if "ERROR" in line or "Failed" in line:
+                            color = COLOR_ERROR
+                        elif "WARNING" in line or "WARN" in line:
+                            color = COLOR_WARNING
+                        elif "SUCCESS" in line or "Completed" in line:
+                            color = COLOR_SUCCESS
+                        else:
+                            color = COLOR_INFO
+                        
+                        try:
+                            self.stdscr.addstr(output_start_y + idx, 0, display_line, curses.color_pair(color))
+                        except curses.error:
+                            pass
+                
                 self.stdscr.refresh()
         
         process.stdout.close()
         process.wait()
         
-        # Display completion message
-        output_lines.append("")
-        if process.returncode == 0:
-            output_lines.append("✅ 작업이 성공적으로 완료되었습니다!")
-        else:
-            output_lines.append("❌ 작업 중 오류가 발생했습니다.")
-        output_lines.append("아무 키나 눌러 메뉴로 돌아가세요")
-        
-        h, w = self.stdscr.getmaxyx()
-        for idx, line in enumerate(output_lines[-h + 1:]):
+        # 완료 메시지
+        completion_y = h - 2
+        if completion_y > 0:
+            completion_msg = "🎉 Installation completed! Press any key to return to the menu"
+            msg_x = max(0, (w - len(completion_msg)) // 2)
             try:
-                color = curses.color_pair(1) if "✅" in line else curses.color_pair(3) if "❌" in line else curses.color_pair(2)
-                self.stdscr.addstr(idx, 0, line[:w - 1], color)
+                self.stdscr.addstr(completion_y, msg_x, completion_msg, curses.color_pair(COLOR_SUCCESS) | curses.A_BOLD)
             except curses.error:
                 pass
+        
         self.stdscr.refresh()
         curses.flushinp()
         self.stdscr.getch()
 
+    def print_beautiful_box(self, y, x, width, height, title="", color_pair=COLOR_GRADIENT1):
+        """아름다운 박스를 그립니다"""
+        h, w = self.stdscr.getmaxyx()
+        
+        # 박스 그리기
+        if y < h and x < w:
+            # 상단
+            self.stdscr.addstr(y, x, BOX_CHARS['top_left'], curses.color_pair(color_pair))
+            for i in range(1, width-1):
+                if x + i < w:
+                    self.stdscr.addstr(y, x + i, BOX_CHARS['horizontal'], curses.color_pair(color_pair))
+            if x + width - 1 < w:
+                self.stdscr.addstr(y, x + width - 1, BOX_CHARS['top_right'], curses.color_pair(color_pair))
+            
+            # 중간 라인들
+            for j in range(1, height-1):
+                if y + j < h:
+                    if x < w:
+                        self.stdscr.addstr(y + j, x, BOX_CHARS['vertical'], curses.color_pair(color_pair))
+                    if x + width - 1 < w:
+                        self.stdscr.addstr(y + j, x + width - 1, BOX_CHARS['vertical'], curses.color_pair(color_pair))
+            
+            # 하단
+            if y + height - 1 < h:
+                if x < w:
+                    self.stdscr.addstr(y + height - 1, x, BOX_CHARS['bottom_left'], curses.color_pair(color_pair))
+                for i in range(1, width-1):
+                    if x + i < w:
+                        self.stdscr.addstr(y + height - 1, x + i, BOX_CHARS['horizontal'], curses.color_pair(color_pair))
+                if x + width - 1 < w:
+                    self.stdscr.addstr(y + height - 1, x + width - 1, BOX_CHARS['bottom_right'], curses.color_pair(color_pair))
+        
+        # 제목 추가
+        if title and len(title) < width - 4:
+            title_x = x + (width - len(title)) // 2
+            if title_x < w and y < h:
+                self.stdscr.addstr(y, title_x, f" {title} ", curses.color_pair(color_pair) | curses.A_BOLD)
+
     def print_banner(self):
         """배너 출력"""
         self.stdscr.clear()
-        
-        # 모드에 따른 배너 선택
-        if self.installation_mode == 'offline':
+        title = [
+            "    ___         __                         ",
+            "   /   |  _____/ /__________ _____ _____   ",
+            "  / /| | / ___/ __/ ___/ __ `/ __ `/ __ \\ ",
+            " / ___ |(__  ) /_/ /  / /_/ / /_/ / /_/ /  ",
+            "/_/  |_/____/\\__/_/   \\__,_/\\__, /\\____/   ",
+            "                           /____/          ",
+        ]
+        now_utc = datetime.now(timezone.utc)
+        now_kst = now_utc + timedelta(hours=9)
+        current_hour = now_kst.hour
+        if current_hour >= 21:
             title = [
-                " ▄▄▄        ██████ ▄▄▄█████▓ ██▀███   ▄▄▄        ▄████  ▒█████   ",
-                "▒████▄    ▒██    ▒ ▓  ██▒ ▓▒▓██ ▒ ██▒▒████▄     ██▒ ▀█▒▒██▒  ██▒ ",
-                "▒██  ▀█▄  ░ ▓██▄   ▒ ▓██░ ▒░▓██ ░▄█ ▒▒██  ▀█▄  ▒██░▄▄▄░▒██░  ██▒ ",
-                "░██▄▄▄▄██   ▒   ██▒░ ▓██▓ ░ ▒██▀▀█▄  ░██▄▄▄▄██ ░▓█  ██▓▒██   ██░ ",
-                " ▓█   ▓██▒▒██████▒▒  ▒██▒ ░ ░██▓ ▒██▒ ▓█   ▓██▒░▒▓███▀▒░ ████▓▒░ ",
-                " ▒▒   ▓▒█░▒ ▒▓▒ ▒ ░  ▒ ░░   ░ ▒▓ ░▒▓░ ▒▒   ▓▒█░ ░▒   ▒ ░ ▒░▒░▒░  ",
-                "  ▒   ▒▒ ░░ ░▒  ░ ░    ░      ░▒ ░ ▒░  ▒   ▒▒ ░  ░   ░   ░ ▒ ▒░  ",
-                "  ░   ▒   ░  ░  ░    ░        ░░   ░   ░   ▒   ░ ░   ░ ░ ░ ░ ▒   ",
-                "      ░  ░      ░              ░           ░  ░      ░     ░ ░   ",
-                "                                   🔒 OFFLINE MODE 🔒              ",
-            ]
-        else:
-            title = [
-                "    ___         __                         ",
-                "   /   |  _____/ /__________ _____ _____   ",
-                "  / /| | / ___/ __/ ___/ __ `/ __ `/ __ \\ ",
-                " / ___ |(__  ) /_/ /  / /_/ / /_/ / /_/ /  ",
-                "/_/  |_/____/\\__/_/   \\__,_/\\__, /\\____/   ",
-                "                           /____/          ",
-                "        🌐 ONLINE MODE 🌐                 ",
+                " ▄▄▄        ██████ ▄▄▄█████▓ ██▀███   ▄▄▄        ▄████  ▒█████  ",
+                "▒████▄    ▒██    ▒ ▓  ██▒ ▓▒▓██ ▒ ██▒▒████▄     ██▒ ▀█▒▒██▒  ██▒",
+                "▒██  ▀█▄  ░ ▓██▄   ▒ ▓██░ ▒░▓██ ░▄█ ▒▒██  ▀█▄  ▒██░▄▄▄░▒██░  ██▒",
+                "░██▄▄▄▄██   ▒   ██▒░ ▓██▓ ░ ▒██▀▀█▄  ░██▄▄▄▄██ ░▓█  ██▓▒██   ██░",
+                " ▓█   ▓██▒▒██████▒▒  ▒██▒ ░ ░██▓ ▒██▒ ▓█   ▓██▒░▒▓███▀▒░ ████▓▒░",
+                " ▒▒   ▓▒█░▒ ▒▓▒ ▒ ░  ▒ ░░   ░ ▒▓ ░▒▓░ ▒▒   ▓▒█░ ░▒   ▒ ░ ▒░▒░▒░ ",
+                "  ▒   ▒▒ ░░ ░▒  ░ ░    ░      ░▒ ░ ▒░  ▒   ▒▒ ░  ░   ░   ░ ▒ ▒░ ",
+                "  ░   ▒   ░  ░  ░    ░        ░░   ░   ░   ▒   ░ ░   ░ ░ ░ ░ ▒  ",
+                "  ░  ░      ░              ░           ░  ░      ░     ░ ░      ",
             ]
 
         h, w = self.stdscr.getmaxyx()
         for idx, line in enumerate(title):
             line = line[:w - 1]
-            x = max(0, w // 2 - len(line) // 2)
-            y = h // 2 - len(title) // 2 + idx - 8
+            x = w // 2 - len(line) // 2
+            y = h // 2 - len(title) // 2 + idx - 10
             if 0 <= y < h and 0 <= x < w:
-                try:
-                    color = curses.color_pair(4) if self.installation_mode == 'offline' else curses.color_pair(2)
-                    self.stdscr.addstr(y, x, line[:w], color)
-                except curses.error:
-                    pass
-        
-        # Current time display
-        now_utc = datetime.now(timezone.utc)
-        now_kst = now_utc + timedelta(hours=9)
-        time_str = f"현재 시간: {now_kst.strftime('%Y-%m-%d %H:%M:%S KST')}"
-        try:
-            self.stdscr.addstr(h - 3, 2, time_str, curses.color_pair(2))
-        except curses.error:
-            pass
-            
+                self.stdscr.addstr(y, x, line[:w], curses.color_pair(2))
         self.stdscr.refresh()
 
     def print_menu(self, menu, selected_row_idx):
@@ -537,55 +620,19 @@ class AstragoInstaller:
         self.print_banner()
         
         h, w = self.stdscr.getmaxyx()
-        menu_start_y = h // 2 + 2
-        
-        # 상태 정보 표시
-        status = self.data_manager.get_environment_status()
-        status_y = menu_start_y - 3
-        
-        status_color = curses.color_pair(1) if status['configured'] else curses.color_pair(3)
-        status_text = f"환경 설정 상태: {'✅ 완료' if status['configured'] else '❌ 미완료'}"
-        
-        try:
-            x = w // 2 - len(status_text) // 2
-            self.stdscr.addstr(status_y, x, status_text, status_color)
-            
-            # 추가 상태 정보
-            if status['configured']:
-                info_text = f"노드: {status['nodes_count']}개 | 모드: {self.installation_mode.upper()}"
-                x = w // 2 - len(info_text) // 2
-                self.stdscr.addstr(status_y + 1, x, info_text, curses.color_pair(2))
-        except curses.error:
-            pass
-        
-        # 메뉴 항목 표시
-        max_menu_width = max(len(item) for item in menu)
-        x = w // 2 - max_menu_width // 2
-        
+        x = w // 2 - len(max(menu, key=len)) // 2
         for idx, row in enumerate(menu):
-            y = menu_start_y + idx
-            if 0 <= y < h - 2 and 0 <= x < w:
-                try:
-                    if idx == selected_row_idx:
-                        self.stdscr.attron(curses.color_pair(1))
-                        self.stdscr.addstr(y, x, f"► {row}".ljust(max_menu_width + 2)[:w])
-                        self.stdscr.attroff(curses.color_pair(1))
-                    else:
-                        self.stdscr.addstr(y, x, f"  {row}"[:w])
-                except curses.error:
-                    pass
-        
-        # 하단 도움말
-        help_text = "↑↓: 이동 | Enter: 선택 | ESC: 종료"
-        try:
-            self.stdscr.addstr(h - 2, 2, help_text, curses.color_pair(2))
-        except curses.error:
-            pass
-            
+            y = h // 2 - len(menu) // 2 + idx
+            if 0 <= y < h and 0 <= x < w:
+                if idx == selected_row_idx:
+                    self.stdscr.attron(curses.color_pair(1))
+                    self.stdscr.addstr(y, x, row[:w])
+                    self.stdscr.attroff(curses.color_pair(1))
+                else:
+                    self.stdscr.addstr(y, x, row[:w])
         self.stdscr.refresh()
 
     def print_table(self, y, x, header, data, selected_index=-1):
-        """테이블 출력"""
         h, w = self.stdscr.getmaxyx()
         
         # 헤더와 데이터 너비 계산
@@ -601,109 +648,31 @@ class AstragoInstaller:
         else:
             max_widths = header_widths[:]
 
-        # 화면 너비에 맞게 조정
-        total_width = sum(max_widths) + len(header) + 1
-        if total_width > w - x:
-            scale_factor = (w - x - len(header) - 1) / total_width
-            max_widths = [max(8, int(width * scale_factor)) for width in max_widths]
+        total_width = sum(max_widths) + len(header) - 1
+        if total_width > w:
+            for i in range(len(max_widths)):
+                max_widths[i] = max(1, max_widths[i] * (w - len(header) + 1) // total_width)
 
-        # 테이블 그리기
-        try:
-            # 상단 경계선
-            line = '+' + '+'.join(['-' * width for width in max_widths]) + '+'
-            self.stdscr.addstr(y, x, line[:w-x])
-            y += 1
-            
-            # 헤더
-            header_row = '|' + '|'.join([str(header[i]).center(max_widths[i]) for i in range(len(header))]) + '|'
-            self.stdscr.addstr(y, x, header_row[:w-x], curses.color_pair(1))
-            y += 1
-            
-            # 헤더 하단 경계선
-            self.stdscr.addstr(y, x, line[:w-x])
-            y += 1
+        line = '+'.join(['-' * width for width in max_widths])
 
-            # 데이터 행
-            for idx, row in enumerate(data):
-                if y >= h - 2:
-                    break
-                    
-                data_row = '|' + '|'.join([str(row[i]).ljust(max_widths[i])[:max_widths[i]] for i in range(len(row))]) + '|'
-                color = curses.color_pair(1) if selected_index == idx else 0
-                self.stdscr.addstr(y, x, data_row[:w-x], color)
-                y += 1
+        self.stdscr.addstr(y, x, '+' + line + '+')
+        y += 1
+        self.stdscr.addstr(y, x, '|' + '|'.join(header[i].center(max_widths[i]) for i in range(len(header))) + '|')
+        y += 1
+        self.stdscr.addstr(y, x, '+' + line + '+')
 
-            # 하단 경계선
-            if y < h - 1:
-                self.stdscr.addstr(y, x, line[:w-x])
-                
-        except curses.error:
-            pass
-            
-        self.stdscr.refresh()
-
-    def print_status_info(self):
-        """상태 정보 출력"""
-        self.stdscr.clear()
-        h, w = self.stdscr.getmaxyx()
-        
-        try:
-            self.stdscr.addstr(0, 0, "🔍 ASTRAGO 시스템 상태", curses.color_pair(1))
-            self.stdscr.addstr(1, 0, "=" * min(50, w-1))
-            
-            status = self.data_manager.get_environment_status()
-            y = 3
-            
-            # 기본 정보
-            self.stdscr.addstr(y, 0, f"설치 모드: {self.installation_mode.upper()}")
+        for idx, row in enumerate(data):
+            new_row = [str(col).center(max_widths[i]) for i, col in enumerate(row)]
             y += 1
-            self.stdscr.addstr(y, 0, f"환경 이름: {self.data_manager.environment_name}")
-            y += 2
-            
-            # 환경 설정 상태
-            config_status = "✅ 완료" if status['configured'] else "❌ 미완료"
-            self.stdscr.addstr(y, 0, f"환경 설정 상태: {config_status}")
-            y += 1
-            
-            if status['external_ip']:
-                self.stdscr.addstr(y, 0, f"외부 IP: {status['external_ip']}")
-                y += 1
-            
-            if status['nfs_server']:
-                self.stdscr.addstr(y, 0, f"NFS 서버: {status['nfs_server']}")
-                y += 1
-                self.stdscr.addstr(y, 0, f"NFS 경로: {status['nfs_path']}")
-                y += 1
-            
-            if self.installation_mode == 'offline':
-                if status['offline_registry']:
-                    self.stdscr.addstr(y, 0, f"오프라인 레지스트리: {status['offline_registry']}")
-                    y += 1
-                if status['offline_http']:
-                    self.stdscr.addstr(y, 0, f"오프라인 HTTP 서버: {status['offline_http']}")
-                    y += 1
-            
-            self.stdscr.addstr(y, 0, f"등록된 노드 수: {status['nodes_count']}")
-            y += 2
-            
-            # Kubernetes 클러스터 상태 확인
-            try:
-                import subprocess
-                result = subprocess.run(['kubectl', 'cluster-info'], 
-                                     capture_output=True, text=True, timeout=5)
-                if result.returncode == 0:
-                    self.stdscr.addstr(y, 0, "Kubernetes 클러스터: ✅ 접근 가능", curses.color_pair(1))
+            if y < h - 2:
+                if selected_index == idx:
+                    self.stdscr.addstr(y, x, '|' + '|'.join(new_row) + '|', curses.color_pair(1))
                 else:
-                    self.stdscr.addstr(y, 0, "Kubernetes 클러스터: ❌ 접근 불가", curses.color_pair(3))
-            except:
-                self.stdscr.addstr(y, 0, "Kubernetes 클러스터: ❓ 상태 확인 불가")
-            
-            y += 2
-            self.stdscr.addstr(y, 0, "아무 키나 눌러 메뉴로 돌아가세요", curses.color_pair(2))
-            
-        except curses.error:
-            pass
-            
+                    self.stdscr.addstr(y, x, '|' + '|'.join(new_row) + '|')
+
+        y += 1
+        if y < h:
+            self.stdscr.addstr(y, x, '+' + line + '+')
         self.stdscr.refresh()
         curses.flushinp()
         self.stdscr.getch()
@@ -1039,57 +1008,94 @@ class AstragoInstaller:
                 
         return ",".join([options[i] for i in range(len(options)) if selected_roles[i]])
 
-    def make_query(self, y, x, query, default_value=None, validation_func=None, password_mode=False):
-        """사용자 입력 받기 (비밀번호 모드 추가)"""
+    def print_sub_menu(self, menu, selected_row_idx):
+        h, w = self.stdscr.getmaxyx()
+        for idx, row in enumerate(menu):
+            if len(row) > w:
+                row = row[:w - 1]
+            x = 0
+            y = idx
+            if y < h:
+                if idx == selected_row_idx:
+                    self.stdscr.attron(curses.color_pair(1))
+                    self.stdscr.addstr(y, x, row)
+                    self.stdscr.attroff(curses.color_pair(1))
+                else:
+                    self.stdscr.addstr(y, x, row)
+        self.stdscr.refresh()
+
+    def make_query(self, y, x, query, default_value=None, valid_regex=None, validation_func=None, password_mode=False):
+        """사용자 입력을 받는 함수"""
         h, w = self.stdscr.getmaxyx()
         input_line = []
+        error_msg = ""
         
         while True:
+            # 화면 지우기
             try:
                 if y < h and x + len(query) < w:
                     self.stdscr.addstr(y, x, query)
                 self.stdscr.clrtoeol()
                 
-                if password_mode:
-                    display_text = '*' * len(input_line)
-                else:
-                    display_text = ''.join(input_line)
-                    
-                self.stdscr.addstr(y, x + len(query), display_text, curses.color_pair(2))
+                # 입력 내용 표시 (패스워드 모드면 * 표시)
+                display_text = '*' * len(input_line) if password_mode else ''.join(input_line)
+                if y < h and x + len(query) + len(display_text) < w:
+                    self.stdscr.addstr(y, x + len(query), display_text, curses.color_pair(COLOR_INFO))
+                
+                # 커서 표시
+                if y < h and x + len(query) + len(display_text) < w:
+                    self.stdscr.addstr(y, x + len(query) + len(display_text), "█", curses.color_pair(COLOR_SELECTED))
+                
+                # 오류 메시지 표시
+                if error_msg and y + 1 < h:
+                    self.stdscr.addstr(y + 1, x, error_msg, curses.color_pair(COLOR_ERROR))
+                
             except curses.error:
                 pass
-                
+            
             key = self.stdscr.getch()
             
-            if 32 <= key <= 126:  # 출력 가능한 문자
+            # 문자 입력
+            if 33 <= key <= 126:
                 input_line.append(chr(key))
+                error_msg = ""
+            
+            # 백스페이스
             elif key in (curses.KEY_BACKSPACE, 127, 8):
                 if input_line:
                     input_line.pop()
+                error_msg = ""
+            
+            # 엔터
             elif key == curses.KEY_ENTER or key in [10, 13]:
-                text = ''.join(input_line)
-                if text:
-                    if not validation_func or validation_func(text):
-                        return text
-                    else:
-                        # 유효성 검사 실패 메시지
-                        try:
-                            self.stdscr.addstr(y + 1, x, "❌ 잘못된 형식입니다. 다시 입력해주세요.", curses.color_pair(3))
-                        except curses.error:
-                            pass
-                        self.stdscr.refresh()
-                        curses.napms(1500)  # 1.5초 대기
-                        try:
-                            self.stdscr.addstr(y + 1, x, " " * 50)  # 메시지 지우기
-                        except curses.error:
-                            pass
+                user_input = ''.join(input_line)
+                
+                # 입력이 있는 경우 유효성 검사
+                if user_input:
+                    valid = True
+                    
+                    # 정규식 검사
+                    if valid_regex and not re.fullmatch(valid_regex, user_input):
+                        valid = False
+                        error_msg = "❌ 잘못된 형식입니다"
+                    
+                    # 함수 검사
+                    elif validation_func and not validation_func(user_input):
+                        valid = False
+                        error_msg = "❌ 유효하지 않은 값입니다"
+                    
+                    if valid:
+                        return user_input
+                
+                # 입력이 없는 경우 기본값 반환
                 elif default_value is not None:
-                    if not validation_func or validation_func(default_value):
-                        return default_value
-            elif key == 27:  # ESC
+                    return default_value
+                else:
+                    error_msg = "❌ 값을 입력해주세요"
+            
+            # ESC
+            elif key == 27:
                 return ESCAPE_CODE
-
-        return ''.join(input_line)
 
     def install_astrago(self):
         """Astrago 애플리케이션 설치"""
@@ -1311,74 +1317,139 @@ class AstragoInstaller:
 
     def setting_node_menu(self):
         """노드 설정 메뉴"""
-        menu = ["노드 추가", "노드 제거", "노드 편집", "뒤로가기"]
-        handlers = {
+        menu = ["1. ➕ Add Node", "2. ➖ Remove Node", "3. ✏️ Edit Node", "4. 🔙 Back"]
+        self.navigate_sub_menu(menu, {
             0: self.add_node,
             1: self.remove_node,
             2: self.edit_node
-        }
-        self.navigate_sub_menu(menu, handlers, self.print_nodes_table)
+        }, self.print_nodes_table)
+
+    def set_nfs_query(self):
+        """NFS 서버 설정"""
+        self.stdscr.clear()
+        self.stdscr.addstr(0, 0, "🗄️ NFS 서버 설정", curses.color_pair(COLOR_GRADIENT1))
+        self.stdscr.addstr(1, 0, "=" * 50)
+        
+        # 현재 설정 표시
+        y = 3
+        current_ip = self.data_manager.nfs_server.get('ip', '')
+        current_path = self.data_manager.nfs_server.get('path', '')
+        
+        self.stdscr.addstr(y, 0, f"현재 NFS IP: {current_ip or '미설정'}")
+        y += 1
+        self.stdscr.addstr(y, 0, f"현재 NFS 경로: {current_path or '미설정'}")
+        y += 2
+        
+        # NFS IP 입력
+        nfs_ip = self.make_query(y, 0, "NFS 서버 IP 주소: ", 
+                               default_value=current_ip,
+                               validation_func=self.data_manager.validate_ip)
+        if nfs_ip == ESCAPE_CODE:
+            return
+        
+        y += 1
+        # NFS 경로 입력
+        nfs_path = self.make_query(y, 0, "NFS 기본 경로: ", 
+                                 default_value=current_path,
+                                 validation_func=self.data_manager.validate_path)
+        if nfs_path == ESCAPE_CODE:
+            return
+        
+        # 설정 저장
+        self.data_manager.set_nfs_server(nfs_ip, nfs_path)
+        
+        y += 2
+        self.stdscr.addstr(y, 0, "✅ NFS 서버 설정이 저장되었습니다!", curses.color_pair(COLOR_SUCCESS))
+        y += 1
+        self.stdscr.addstr(y, 0, "아무 키나 눌러 계속하세요")
+        
+        self.stdscr.refresh()
+        curses.flushinp()
+        self.stdscr.getch()
 
     def setting_nfs_menu(self):
         """NFS 설정 메뉴"""
-        menu = ["NFS 서버 설정", "NFS 서버 설치 (선택사항)", "뒤로가기"]
-        handlers = {
-            0: self.configure_environment,
+        menu = ["1. ⚙️ Setting NFS Server", "2. 📦 Install NFS Server(Optional)", "3. 🔙 Back"]
+        self.navigate_sub_menu(menu, {
+            0: self.set_nfs_query,
             1: self.install_nfs
-        }
-        self.navigate_sub_menu(menu, handlers, self.print_nfs_server_table)
+        }, self.print_nfs_server_table)
+
+    def print_status_info(self):
+        """시스템 상태 정보 표시"""
+        self.stdscr.clear()
+        h, w = self.stdscr.getmaxyx()
+        
+        # 제목
+        title = "📊 시스템 상태 정보"
+        self.stdscr.addstr(0, 0, title, curses.color_pair(COLOR_GRADIENT1) | curses.A_BOLD)
+        self.stdscr.addstr(1, 0, "=" * 60)
+        
+        y = 3
+        status = self.data_manager.get_environment_status()
+        
+        # 환경 설정 상태
+        self.stdscr.addstr(y, 0, "🔧 환경 설정:", curses.color_pair(COLOR_GRADIENT2))
+        y += 1
+        
+        config_status = "✅ 완료" if status['configured'] else "❌ 미완료"
+        config_color = COLOR_SUCCESS if status['configured'] else COLOR_ERROR
+        self.stdscr.addstr(y, 2, f"설정 상태: {config_status}", curses.color_pair(config_color))
+        y += 1
+        
+        self.stdscr.addstr(y, 2, f"외부 IP: {status['external_ip'] or '미설정'}")
+        y += 1
+        self.stdscr.addstr(y, 2, f"NFS 서버: {status['nfs_server'] or '미설정'}")
+        y += 1
+        self.stdscr.addstr(y, 2, f"NFS 경로: {status['nfs_path'] or '미설정'}")
+        y += 2
+        
+        # 노드 정보
+        self.stdscr.addstr(y, 0, "🖥️ 노드 정보:", curses.color_pair(COLOR_GRADIENT2))
+        y += 1
+        self.stdscr.addstr(y, 2, f"등록된 노드 수: {status['nodes_count']}")
+        y += 2
+        
+        # 설치 모드
+        self.stdscr.addstr(y, 0, "🔧 설치 모드:", curses.color_pair(COLOR_GRADIENT2))
+        y += 1
+        mode_text = "오프라인" if self.installation_mode == 'offline' else "온라인"
+        self.stdscr.addstr(y, 2, f"현재 모드: {mode_text}")
+        y += 1
+        
+        if self.installation_mode == 'offline':
+            self.stdscr.addstr(y, 2, f"오프라인 레지스트리: {status['offline_registry'] or '미설정'}")
+            y += 1
+            self.stdscr.addstr(y, 2, f"HTTP 서버: {status['offline_http'] or '미설정'}")
+            y += 2
+        
+        # 도움말
+        help_y = h - 3
+        self.stdscr.addstr(help_y, 0, "아무 키나 눌러 메뉴로 돌아가세요", curses.color_pair(COLOR_INFO))
+        
+        self.stdscr.refresh()
+        curses.flushinp()
+        self.stdscr.getch()
 
     def install_astrago_menu(self):
         """Astrago 설치 메뉴"""
-        if self.installation_mode == 'offline':
-            menu = [
-                "환경 설정", 
-                "오프라인 패키지 준비",
-                "Astrago 설치", 
-                "Astrago 제거", 
-                "개별 애플리케이션 관리",
-                "뒤로가기"
-            ]
-            handlers = {
-                0: self.configure_environment,
-                1: self.prepare_offline_packages,
-                2: self.install_astrago,
-                3: self.uninstall_astrago,
-                4: self.manage_individual_apps
-            }
-        else:
-            menu = [
-                "환경 설정",
-                "Astrago 설치", 
-                "Astrago 제거", 
-                "개별 애플리케이션 관리",
-                "뒤로가기"
-            ]
-            handlers = {
-                0: self.configure_environment,
-                1: self.install_astrago,
-                2: self.uninstall_astrago,
-                3: self.manage_individual_apps
-            }
-        
-        self.navigate_menu(menu, handlers)
+        menu = ["1. 🗄️ Set NFS Server", "2. 🚀 Install Astrago", "3. 🗑️ Uninstall Astrago", "4. 🔙 Back"]
+        self.navigate_menu(menu, {
+            0: self.setting_nfs_menu,
+            1: self.install_astrago,
+            2: self.uninstall_astrago
+        })
 
     def install_kubernetes_menu(self):
         """Kubernetes 설치 메뉴"""
-        menu = [
-            "노드 설정", 
-            "Kubernetes 설치", 
-            "Kubernetes 리셋", 
-            "GPU 드라이버 설치 (선택사항)",
-            "뒤로가기"
-        ]
-        handlers = {
+        menu = ["1. 🖥️ Set Nodes", "2. ☸️ Install Kubernetes", "3. 🔄 Reset Kubernetes", "4. 🎮 Install GPU Driver (Optional)",
+                "5. 🔙 Back"]
+        self.navigate_menu(menu, {
             0: self.setting_node_menu,
             1: self.install_kubernetes,
             2: self.reset_kubernetes,
             3: self.install_gpu_driver
-        }
-        self.navigate_menu(menu, handlers)
+        })
 
     def navigate_sub_menu(self, menu, handlers, table_handler=None):
         """서브 메뉴 네비게이션"""
@@ -1460,38 +1531,52 @@ class AstragoInstaller:
         """메인 함수"""
         self.stdscr = stdscr
         
-        # 색상 설정
+        # ==========================================
+        # 🎨 Beautiful Color Initialization
+        # ==========================================
+        curses.start_color()
+        curses.use_default_colors()
+        
+        # 그라데이션 색상 정의 (run_gui_installer.sh와 통일)
+        curses.init_pair(COLOR_GRADIENT1, 129, -1)  # Purple
+        curses.init_pair(COLOR_GRADIENT2, 135, -1)  # Light Purple
+        curses.init_pair(COLOR_GRADIENT3, 141, -1)  # Pink
+        curses.init_pair(COLOR_GRADIENT4, 147, -1)  # Light Pink
+        curses.init_pair(COLOR_SUCCESS, curses.COLOR_GREEN, -1)
+        curses.init_pair(COLOR_ERROR, curses.COLOR_RED, -1)
+        curses.init_pair(COLOR_WARNING, curses.COLOR_YELLOW, -1)
+        curses.init_pair(COLOR_INFO, curses.COLOR_CYAN, -1)
+        curses.init_pair(COLOR_SELECTED, curses.COLOR_BLACK, curses.COLOR_GREEN)
+        curses.init_pair(COLOR_BORDER, curses.COLOR_BLUE, -1)
+        
+        # 기본 설정
         curses.echo()
         curses.set_escdelay(1)
         curses.curs_set(0)
         
-        # 색상 쌍 정의
-        curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_GREEN)  # 선택된 항목
-        curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)  # 일반 텍스트
-        curses.init_pair(3, curses.COLOR_RED, curses.COLOR_BLACK)    # 오류 메시지
-        curses.init_pair(4, curses.COLOR_YELLOW, curses.COLOR_BLACK) # 오프라인 모드
+        # 호환성을 위한 기본 색상 쌍
+        curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_GREEN)
+        curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
+        curses.init_pair(3, curses.COLOR_RED, curses.COLOR_BLACK)
         
-        # 메인 메뉴
-        main_menu = [
-            "Kubernetes 클러스터",
-            "Astrago 애플리케이션",
-            "시스템 상태 확인",
-            "종료"
-        ]
-        
-        handlers = {
-            0: self.install_kubernetes_menu,
-            1: self.install_astrago_menu,
-            2: self.print_status_info
-        }
+        main_menu = ["1. 🏗️ Kubernetes Infrastructure",
+                     "2. 🚀 Astrago Platform", 
+                     "3. ⚙️ Environment Settings",
+                     "4. 📊 System Status",
+                     "5. ❌ Close"]
         
         try:
-            self.navigate_menu(main_menu, handlers)
+            self.navigate_menu(main_menu, {
+                0: self.install_kubernetes_menu,
+                1: self.install_astrago_menu,
+                2: self.configure_environment,
+                3: self.print_status_info
+            })
         except KeyboardInterrupt:
             pass
         except Exception as e:
             self.stdscr.clear()
-            self.stdscr.addstr(0, 0, f"오류가 발생했습니다: {str(e)}", curses.color_pair(3))
+            self.stdscr.addstr(0, 0, f"오류가 발생했습니다: {str(e)}", curses.color_pair(COLOR_ERROR))
             self.stdscr.addstr(2, 0, "아무 키나 눌러 종료하세요")
             self.stdscr.refresh()
             self.stdscr.getch()
