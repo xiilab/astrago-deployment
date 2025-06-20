@@ -108,13 +108,19 @@ check_system_requirements() {
     print_section "시스템 요구사항 검사" "🔍"
     
     # Check OS
-    if [ ! -f /etc/os-release ]; then
-        print_error "운영체제를 감지할 수 없습니다. /etc/os-release 파일이 없습니다."
-        exit 1
+    if [ -f /etc/os-release ]; then
+        source /etc/os-release
+        print_info "감지된 운영체제: ${BOLD}${ID} ${VERSION_ID}${RESET}"
+    elif [ "$(uname)" = "Darwin" ]; then
+        print_info "감지된 운영체제: ${BOLD}macOS $(sw_vers -productVersion)${RESET}"
+        export ID="macos"
+        export VERSION_ID=$(sw_vers -productVersion)
+    else
+        print_warning "운영체제를 정확히 감지할 수 없습니다. 계속 진행합니다."
+        export ID="unknown"
+        export VERSION_ID="unknown"
     fi
     
-    source /etc/os-release
-    print_info "감지된 운영체제: ${BOLD}${ID} ${VERSION_ID}${RESET}"
     print_info "시스템 아키텍처: ${BOLD}$(uname -m)${RESET}"
     
     # Check for required commands
@@ -144,6 +150,13 @@ check_system_requirements() {
 
 # Function to select installation mode
 select_installation_mode() {
+    # Check if running in non-interactive mode or if AUTO_MODE is set
+    if [ ! -t 0 ] || [ -n "$AUTO_MODE" ]; then
+        print_info "자동 모드: 온라인 설치로 진행합니다"
+        echo "online"
+        return
+    fi
+    
     echo ""
     print_section "설치 모드 선택" "🔧"
     echo -e "${BOLD}설치 모드를 선택해주세요:${RESET}"
@@ -151,23 +164,39 @@ select_installation_mode() {
     echo -e "${GREEN}1) 온라인 설치${RESET}  - 인터넷을 통한 패키지 다운로드 및 설치"
     echo -e "${BLUE}2) 오프라인 설치${RESET} - 로컬 패키지를 사용한 에어갭 환경 설치"
     echo ""
+    echo -e "${DIM}💡 팁: 자동 모드로 실행하려면 AUTO_MODE=1 환경변수를 설정하세요${RESET}"
+    echo ""
     
+    local timeout_count=0
     while true; do
-        echo -n "설치 모드를 선택하세요 [1-2]: "
-        read -r choice
-        case $choice in
-            1)
+        printf "설치 모드를 선택하세요 [1-2] (기본값: 1): "
+        
+        # Add timeout for read to prevent hanging
+        if read -t 30 -r choice; then
+            echo "입력된 선택: '$choice'" >&2  # 디버깅용
+            case $choice in
+                1|"")
+                    echo "online"
+                    return
+                    ;;
+                2)
+                    echo "offline"
+                    return
+                    ;;
+                *)
+                    print_error "잘못된 선택입니다: '$choice'. 1 또는 2를 선택해주세요."
+                    ;;
+            esac
+        else
+            # Timeout occurred
+            timeout_count=$((timeout_count + 1))
+            if [ $timeout_count -ge 3 ]; then
+                print_warning "입력 시간 초과. 기본값(온라인 설치)으로 진행합니다."
                 echo "online"
                 return
-                ;;
-            2)
-                echo "offline"
-                return
-                ;;
-            *)
-                print_error "잘못된 선택입니다. 1 또는 2를 선택해주세요."
-                ;;
-        esac
+            fi
+            print_warning "입력 시간 초과 ($timeout_count/3). 다시 시도해주세요."
+        fi
     done
 }
 
@@ -178,8 +207,10 @@ select_installation_mode() {
 # Get the current directory of the script
 CURRENT_DIR=$(dirname "$(realpath "$0")")
 
-# Source OS release information
-. /etc/os-release
+# Source OS release information if available
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+fi
 
 # Function to install Python 3.11 on RHEL/CentOS
 install_python_rhel() {
@@ -299,7 +330,14 @@ install_binary() {
 install_system_dependencies() {
     local mode="$1"
     
-    print_section "시스템 의존성 설치" "�"
+    print_section "시스템 의존성 설치" "📦"
+    
+    # Skip sshpass installation on macOS for now
+    if [ "$ID" = "macos" ]; then
+        print_info "macOS에서는 sshpass 설치를 건너뜁니다."
+        print_warning "필요시 'brew install hudochenkov/sshpass/sshpass' 명령으로 설치하세요."
+        return
+    fi
     
     # Install sshpass if not available
     if ! command -v sshpass &> /dev/null; then

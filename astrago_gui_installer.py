@@ -330,9 +330,9 @@ quay_image_repo: "{{{{ registry_host }}}}"
         cmd = [
             "ansible-playbook",
             "-i", str(self.kubespray_inventory_path),
-            "--become", "--become-user=root",
-            "cluster.yml",
-            "--extra-vars",
+                                  "--become", "--become-user=root",
+                                  "cluster.yml",
+                                  "--extra-vars",
             self.ansible_extra_values.format(username=username, password=password)
         ]
         
@@ -357,9 +357,9 @@ quay_image_repo: "{{{{ registry_host }}}}"
         return self._run_command([
             "ansible-playbook",
             "-i", str(self.kubespray_inventory_path),
-            "--become", "--become-user=root",
-            "reset.yml",
-            "--extra-vars",
+                                  "--become", "--become-user=root",
+                                  "reset.yml",
+                                  "--extra-vars",
             self.ansible_extra_values.format(username=username, password=password)
         ], cwd=self.current_dir / 'kubespray')
 
@@ -397,11 +397,11 @@ quay_image_repo: "{{{{ registry_host }}}}"
                 },
                 'hosts': {
                     'nfs-server': {
-                        'access_ip': self.data_manager.nfs_server['ip'],
-                        'ansible_host': self.data_manager.nfs_server['ip'],
-                        'ip': self.data_manager.nfs_server['ip'],
-                        'ansible_user': 'root'
-                    }
+            'access_ip': self.data_manager.nfs_server['ip'],
+            'ansible_host': self.data_manager.nfs_server['ip'],
+            'ip': self.data_manager.nfs_server['ip'],
+            'ansible_user': 'root'
+        }
                 }
             }
         }
@@ -414,9 +414,9 @@ quay_image_repo: "{{{{ registry_host }}}}"
         self._save_nfs_inventory()
         return self._run_command([
             "ansible-playbook", "-i", self.nfs_inventory_path,
-            "--become", "--become-user=root",
-            "ansible/install-nfs.yml",
-            "--extra-vars",
+                                  "--become", "--become-user=root",
+                                  "ansible/install-nfs.yml",
+                                  "--extra-vars",
             self.ansible_extra_values.format(username=username, password=password)
         ])
 
@@ -447,9 +447,9 @@ quay_image_repo: "{{{{ registry_host }}}}"
         self._save_gpudriver_inventory()
         return self._run_command([
             "ansible-playbook", "-i", self.gpu_inventory_path,
-            "--become", "--become-user=root",
-            "ansible/install-gpu-driver.yml",
-            "--extra-vars",
+             "--become", "--become-user=root",
+             "ansible/install-gpu-driver.yml",
+             "--extra-vars",
             self.ansible_extra_values.format(username=username, password=password)
         ])
 
