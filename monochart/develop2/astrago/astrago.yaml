@@ -753,7 +753,7 @@ spec:
         - name: astrago
           securityContext:
             {}          
-          image: "docker.io/xiilab/astrago:batch-stag-fab2"          
+          image: "docker.io/xiilab/astrago:batch-stag-31ae"          
           env:
             - name: SPRING_JPA_HIBERNATE_DDL-AUTO
               value: "none"
@@ -829,7 +829,7 @@ spec:
         - name: astrago
           securityContext:
             {}          
-          image: "docker.io/xiilab/astrago:core-stag-fab2"
+          image: "docker.io/xiilab/astrago:core-stag-31ae"
           imagePullPolicy: Always
           env:
           - name: SPRING_JPA_HIBERNATE_DDL-AUTO
@@ -1067,7 +1067,7 @@ spec:
         - name: astrago
           securityContext:
             {}
-          image: "docker.io/xiilab/astrago:monitor-stag-fab2"            
+          image: "docker.io/xiilab/astrago:monitor-stag-31ae"            
           env:
           - name: SPRING_JPA_HIBERNATE_DDL-AUTO
             value: "none"
