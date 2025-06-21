@@ -1,10 +1,12 @@
-# app
-xiilab/astrago:batch-v1.0.44
-xiilab/astrago:core-v1.0.44
-xiilab/astrago:monitor-v1.0.44
-xiilab/astrago:frontend-v1.0.25
+# Astrago Core Platform - 메인 애플리케이션 (applications.md 기준)
 
-#built-in
+# app - 핵심 애플리케이션
+docker.io/xiilab/astrago:batch-stag-31ae
+docker.io/xiilab/astrago:core-stag-31ae
+docker.io/xiilab/astrago:monitor-stag-31ae
+docker.io/xiilab/astrago:frontend-stag-194d
+
+# built-in - 내장 이미지들
 xiilab/horovod:latest
 xiilab/astrago:hub-yolov8-1.1
 #xiilab/astrago:tensorflow-20.12-cuda11.1
@@ -20,7 +22,7 @@ xiilab/astrago:hub-yolov8-1.1
 xiilab/astrago:tensorflow-23.07-cuda12.1
 xiilab/astrago:pytorch-23.07-cuda12.1
 
-#etc
+# etc - 기타 의존성 이미지들
 xiilab/astrago-dataset-nginx:latest
 xiilab/git-sync:v3.6.0
 docker.io/bitnami/mariadb:10.11.4-debian-11-r46

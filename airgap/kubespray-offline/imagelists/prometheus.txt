@@ -1,3 +1,4 @@
+# Prometheus - 모니터링 시스템 (applications.md 기준)
 docker.io/bats/bats:v1.4.1
 docker.io/grafana/grafana:10.2.2
 quay.io/kiwigrid/k8s-sidecar:1.25.2
