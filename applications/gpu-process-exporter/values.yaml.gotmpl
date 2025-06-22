@@ -9,12 +9,6 @@ collection:
   # CronJob schedule (every minute)
   schedule: "*/1 * * * *"
   
-  # Image settings
-  image:
-    repository: busybox
-    tag: "1.35"
-    pullPolicy: IfNotPresent
-  
   # Resource limits
   resources:
     limits:
@@ -23,6 +17,17 @@ collection:
     requests:
       cpu: 50m
       memory: 32Mi
+
+# Security context for GPU access
+securityContext:
+  privileged: true
+
+# Host access for GPU monitoring
+hostAccess:
+  # Mount host /dev for GPU device access
+  devices: true
+  # Use host PID namespace to see all processes
+  hostPID: true
 
 # Prometheus integration
 prometheus:

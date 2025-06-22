@@ -1,0 +1,197 @@
+---
+- name: Kubernetes 클러스터 동적 방화벽 설정
+  hosts: k8s_nodes
+  become: yes
+  vars:
+    # 클러스터 정보
+    cluster_cidr: "10.233.0.0/16"
+    node_cidr: "10.61.3.0/24"
+    
+    # 기본 Kubernetes 포트
+    k8s_ports:
+      - { port: "6443", proto: "tcp", desc: "API Server" }
+      - { port: "2379-2380", proto: "tcp", desc: "etcd" }
+      - { port: "10250", proto: "tcp", desc: "kubelet" }
+      - { port: "10257", proto: "tcp", desc: "controller-manager" }
+      - { port: "10259", proto: "tcp", desc: "scheduler" }
+      - { port: "10256", proto: "tcp", desc: "kubelet health" }
+    
+    # CNI 포트 (Calico)
+    cni_ports:
+      - { port: "179", proto: "tcp", desc: "Calico BGP" }
+      - { port: "4789", proto: "udp", desc: "Calico VXLAN" }
+    
+    # DNS 포트
+    dns_ports:
+      - { port: "53", proto: "tcp", desc: "DNS TCP" }
+      - { port: "53", proto: "udp", desc: "DNS UDP" }
+      - { port: "9153", proto: "tcp", desc: "CoreDNS metrics" }
+    
+    # NodePort 범위
+    nodeport_range: "30000-32767"
+    
+    # 웹 서비스
+    web_ports:
+      - { port: "80", proto: "tcp", desc: "HTTP" }
+      - { port: "443", proto: "tcp", desc: "HTTPS" }
+    
+    # 데이터베이스
+    db_ports:
+      - { port: "3306", proto: "tcp", desc: "MariaDB" }
+      - { port: "5432", proto: "tcp", desc: "PostgreSQL" }
+    
+    # 모니터링
+    monitoring_ports:
+      - { port: "9100", proto: "tcp", desc: "Node Exporter" }
+      - { port: "9400", proto: "tcp", desc: "DCGM Exporter" }
+    
+    # 레지스트리
+    registry_ports:
+      - { port: "35000", proto: "tcp", desc: "Docker Registry" }
+    
+    # NFS 서비스
+    nfs_services:
+      - "nfs"
+      - "rpc-bind" 
+      - "mountd"
+
+  tasks:
+    - name: firewalld 설치 및 활성화
+      systemd:
+        name: firewalld
+        enabled: yes
+        state: started
+
+    - name: 기본 존을 public으로 설정
+      firewalld:
+        zone: public
+        permanent: yes
+        immediate: yes
+        state: enabled
+      become: yes
+
+    - name: Kubernetes 포트 열기
+      firewalld:
+        port: "{{ item.port }}/{{ item.proto }}"
+        zone: public
+        permanent: yes
+        immediate: yes
+        state: enabled
+      loop: "{{ k8s_ports }}"
+      tags: k8s_ports
+
+    - name: CNI 포트 열기
+      firewalld:
+        port: "{{ item.port }}/{{ item.proto }}"
+        zone: public
+        permanent: yes
+        immediate: yes
+        state: enabled
+      loop: "{{ cni_ports }}"
+      tags: cni_ports
+
+    - name: DNS 포트 열기
+      firewalld:
+        port: "{{ item.port }}/{{ item.proto }}"
+        zone: public
+        permanent: yes
+        immediate: yes
+        state: enabled
+      loop: "{{ dns_ports }}"
+      tags: dns_ports
+
+    - name: NodePort 범위 열기
+      firewalld:
+        port: "{{ nodeport_range }}/tcp"
+        zone: public
+        permanent: yes
+        immediate: yes
+        state: enabled
+      tags: nodeport
+
+    - name: 웹 서비스 포트 열기
+      firewalld:
+        port: "{{ item.port }}/{{ item.proto }}"
+        zone: public
+        permanent: yes
+        immediate: yes
+        state: enabled
+      loop: "{{ web_ports }}"
+      tags: web_ports
+
+    - name: 데이터베이스 포트 열기
+      firewalld:
+        port: "{{ item.port }}/{{ item.proto }}"
+        zone: public
+        permanent: yes
+        immediate: yes
+        state: enabled
+      loop: "{{ db_ports }}"
+      tags: db_ports
+
+    - name: 모니터링 포트 열기
+      firewalld:
+        port: "{{ item.port }}/{{ item.proto }}"
+        zone: public
+        permanent: yes
+        immediate: yes
+        state: enabled
+      loop: "{{ monitoring_ports }}"
+      tags: monitoring_ports
+
+    - name: 레지스트리 포트 열기
+      firewalld:
+        port: "{{ item.port }}/{{ item.proto }}"
+        zone: public
+        permanent: yes
+        immediate: yes
+        state: enabled
+      loop: "{{ registry_ports }}"
+      tags: registry_ports
+
+    - name: NFS 서비스 허용
+      firewalld:
+        service: "{{ item }}"
+        zone: public
+        permanent: yes
+        immediate: yes
+        state: enabled
+      loop: "{{ nfs_services }}"
+      tags: nfs_services
+
+    - name: 마스커레이드 활성화
+      firewalld:
+        masquerade: yes
+        zone: public
+        permanent: yes
+        immediate: yes
+        state: enabled
+      tags: masquerade
+
+    - name: 클러스터 노드 네트워크 신뢰
+      firewalld:
+        rich_rule: "rule family='ipv4' source address='{{ node_cidr }}' accept"
+        zone: public
+        permanent: yes
+        immediate: yes
+        state: enabled
+      tags: trust_nodes
+
+    - name: Pod 네트워크 신뢰
+      firewalld:
+        rich_rule: "rule family='ipv4' source address='{{ cluster_cidr }}' accept"
+        zone: public
+        permanent: yes
+        immediate: yes
+        state: enabled
+      tags: trust_pods
+
+    - name: 방화벽 설정 확인
+      command: firewall-cmd --list-all
+      register: firewall_status
+      tags: verify
+
+    - name: 방화벽 상태 출력
+      debug:
+        var: firewall_status.stdout_lines
+      tags: verify 
