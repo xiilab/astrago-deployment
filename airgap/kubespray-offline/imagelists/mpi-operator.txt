@@ -1,2 +1,2 @@
 # MPI Operator v0.4.0 (applications.md 기준)
-mpioperator/mpi-operator:v0.4.0
+mpioperator/mpi-operator:0.4.0

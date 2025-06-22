@@ -4,7 +4,7 @@
 # Loki Configuration
 loki:
   image:
-    repository: grafana/loki
+    repository: {{ .Values.offline.registry | default "docker.io" }}/grafana/loki
     tag: "2.9.6"
     pullPolicy: IfNotPresent
     
@@ -27,7 +27,7 @@ loki:
   config:
     table_manager:
       retention_deletes_enabled: {{ .Values.loki.retention.enabled | default true }}
-      retention_period: {{ .Values.loki.retention.period | default "720h" | quote }}  # 30 days default
+      retention_period: {{ .Values.loki.retention.period | default "30d" | quote }}
     
     compactor:
       working_directory: /loki/compactor
@@ -43,7 +43,7 @@ loki:
 # Promtail Configuration
 promtail:
   image:
-    repository: grafana/promtail
+    repository: {{ .Values.offline.registry | default "docker.io" }}/grafana/promtail
     tag: "2.9.6"
     pullPolicy: IfNotPresent
     

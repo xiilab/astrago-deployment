@@ -25,7 +25,7 @@ astrago:
     rootPassword: root
     username: astrago
     password: xiirocks
-    maxLifetime: "3595000"
+    maxLifetime: "1800000"
   core:
     registry: "docker.io"
     repository: "xiilab/astrago"

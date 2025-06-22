@@ -41,6 +41,7 @@ print_usage() {
     echo "prometheus"
     echo "event-exporter"
     echo "keycloak"
+    echo "mpi-operator"
     echo "astrago"
     exit 0
 }

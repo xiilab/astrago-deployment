@@ -62,6 +62,21 @@ core:
       value: "admin"
     - name: HARBOR_PASSWORD
       value: "{{ .Values.harbor.adminPassword }}"
+    # HikariCP 연결 풀 최적화 설정
+    - name: SPRING_DATASOURCE_HIKARI_CONNECTION-TIMEOUT
+      value: "30000"  # 30초
+    - name: SPRING_DATASOURCE_HIKARI_IDLE-TIMEOUT
+      value: "300000"  # 5분
+    - name: SPRING_DATASOURCE_HIKARI_MINIMUM-IDLE
+      value: "10"
+    - name: SPRING_DATASOURCE_HIKARI_MAXIMUM-POOL-SIZE
+      value: "30"
+    - name: SPRING_DATASOURCE_HIKARI_LEAK-DETECTION-THRESHOLD
+      value: "60000"  # 1분
+    - name: SPRING_DATASOURCE_HIKARI_VALIDATION-TIMEOUT
+      value: "5000"   # 5초
+    - name: SPRING_DATASOURCE_HIKARI_CONNECTION-TEST-QUERY
+      value: "SELECT 1"
 batch:
   image:
     registry: "{{ .Values.astrago.batch.registry }}"
@@ -78,6 +93,21 @@ batch:
       value: {{ .Values.astrago.mariadb.password }}
     - name: SPRING_DATASOURCE_HIKARI_MAX-LIFETIME
       value: {{ .Values.astrago.mariadb.maxLifetime | quote }}
+    # HikariCP 연결 풀 최적화 설정
+    - name: SPRING_DATASOURCE_HIKARI_CONNECTION-TIMEOUT
+      value: "30000"  # 30초
+    - name: SPRING_DATASOURCE_HIKARI_IDLE-TIMEOUT
+      value: "300000"  # 5분
+    - name: SPRING_DATASOURCE_HIKARI_MINIMUM-IDLE
+      value: "5"
+    - name: SPRING_DATASOURCE_HIKARI_MAXIMUM-POOL-SIZE
+      value: "20"
+    - name: SPRING_DATASOURCE_HIKARI_LEAK-DETECTION-THRESHOLD
+      value: "60000"  # 1분
+    - name: SPRING_DATASOURCE_HIKARI_VALIDATION-TIMEOUT
+      value: "5000"   # 5초
+    - name: SPRING_DATASOURCE_HIKARI_CONNECTION-TEST-QUERY
+      value: "SELECT 1"
     - name: SPRING_SECURITY_OAUTH2_RESOURCE-SERVER_JWT_ISSUER-URI
       {{ if .Values.astrago.keycloak.externalKeycloakUrl }}
       value: {{ .Values.astrago.keycloak.externalKeycloakUrl }}/realms/{{ .Values.astrago.keycloak.realm }}
@@ -137,6 +167,21 @@ monitor:
       value: {{ .Values.astrago.mariadb.password }}
     - name: SPRING_DATASOURCE_HIKARI_MAX-LIFETIME
       value: {{ .Values.astrago.mariadb.maxLifetime | quote }}
+    # HikariCP 연결 풀 최적화 설정
+    - name: SPRING_DATASOURCE_HIKARI_CONNECTION-TIMEOUT
+      value: "30000"  # 30초
+    - name: SPRING_DATASOURCE_HIKARI_IDLE-TIMEOUT
+      value: "300000"  # 5분
+    - name: SPRING_DATASOURCE_HIKARI_MINIMUM-IDLE
+      value: "3"
+    - name: SPRING_DATASOURCE_HIKARI_MAXIMUM-POOL-SIZE
+      value: "10"
+    - name: SPRING_DATASOURCE_HIKARI_LEAK-DETECTION-THRESHOLD
+      value: "60000"  # 1분
+    - name: SPRING_DATASOURCE_HIKARI_VALIDATION-TIMEOUT
+      value: "5000"   # 5초
+    - name: SPRING_DATASOURCE_HIKARI_CONNECTION-TEST-QUERY
+      value: "SELECT 1"
     - name: SPRING_MVC_PATHMATCH_MATCHING-STRATEGY
       value: ant_path_matcher
     - name: PROMETHEUS_URL
@@ -189,6 +234,8 @@ frontend:
       value: '0'    
     - name: NEXT_PUBLIC_ONEVIEW_ENABLED
       value: {{ .Values.astrago.oneview.enabled }} 
+    - name : NEXT_PUBLIC_ONLYADMIN_ENABLE
+      value: true
 
 proxy:
   service:
@@ -226,9 +273,15 @@ mariadb:
       character-set-server=UTF8
       collation-server=utf8_general_ci
       long_query_time=10.0
+      # 연결 최적화 설정
       interactive_timeout = 3600
-      wait_timeout = 3600
-      max_connections = 500
+      wait_timeout = 1800  # 30분으로 단축
+      max_connections = 200  # 연결 수 제한
+      connect_timeout = 30
+      # 연결 풀 최적화
+      thread_cache_size = 50
+      query_cache_type = 1
+      query_cache_size = 64M
       slow_query_log = 1
 
       #mysql logging

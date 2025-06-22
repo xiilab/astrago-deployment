@@ -38,11 +38,12 @@ print_usage() {
     echo "Available Apps:"
     echo "nfs-provisioner"
     echo "gpu-operator"
-echo "gpu-process-exporter"
-echo "loki-stack"
+    echo "gpu-process-exporter"
+    echo "loki-stack"
     echo "prometheus"
     echo "event-exporter"
     echo "keycloak"
+    echo "mpi-operator"
     echo "astrago"
     exit 0
 }
