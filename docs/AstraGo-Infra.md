@@ -352,6 +352,48 @@ Core → Batch → Kubernetes Job → GPU/MPI Operator → Worker Nodes
 All Services → Prometheus → Grafana → User Dashboard
 ```
 
+
+### 백앤드 / 프론트앤드 기술 스택
+
+### 백앤드
+```yaml
+Java: 17 (LTS)
+Spring Boot: 3.2.2
+Spring Cloud: 2023.0.2
+Spring Security: OAuth2 Resource Server (JWT)
+Spring Data JPA: 데이터 액세스 + QueryDSL 5.0.0
+Spring Data MongoDB: 문서 데이터베이스
+Spring WebFlux: 비동기 처리 (WebClient)
+Spring WebSocket: 실시간 터미널 액세스
+Gradle: 8.x (빌드 도구)
+Lombok: 1.18.30 (코드 생성)
+```
+
+### 프론트 앤드
+```yaml
+프레임워크 & 런타임
+Next.js 14.2.28: React 기반 풀스택 프레임워크
+React 18.2.0: UI 라이브러리
+TypeScript 5: 정적 타입 검사
+Node.js: >=18.17.0
+
+상태 관리
+Jotai 2.5.1: 원자 기반 상태 관리
+TanStack Query 5.8.4: 서버 상태 관리 및 캐싱
+React Hook Form 7.49.0: 폼 상태 관리
+UI/UX 라이브러리
+Ant Design 5.12.2: 메인 UI 컴포넌트 라이브러리
+Material-UI 5.14.20: 보조 UI 컴포넌트
+Emotion: CSS-in-JS 스타일링
+Tailwind CSS 3.3.0: 유틸리티 CSS 프레임워크
+Framer Motion 10.18.0: 애니메이션 라이브러리
+
+차트 & 시각화
+Ant Design Charts 2.0.3: 차트 라이브러리
+Recharts 2.12.7: React 차트 라이브러리
+ApexCharts 3.44.2: 고급 차트 라이브러리
+React Gauge Component 1.2.0: 게이지 차트
+```
 ---
 
 ## CI/CD 파이프라인
