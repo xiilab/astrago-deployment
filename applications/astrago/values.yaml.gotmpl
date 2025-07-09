@@ -57,11 +57,11 @@ core:
     - name: ASTRAGO_PRIVATE-REGISTRY-URL
       value: "{{ .Values.offline.registry | default "" }}" 
     - name: HARBOR_URL
-      value: {{ .Values.externalIP }}:{{ .Values.harbor.servicePort }}
+      value: {{ .Values.externalIP }}:{{ .Values.harbor.servicePort | default "30002" }}
     - name: HARBOR_ID
       value: "admin"
     - name: HARBOR_PASSWORD
-      value: "{{ .Values.harbor.adminPassword }}"
+      value: "{{ .Values.harbor.adminPassword | default "Harbor12345" }}"
     # HikariCP 연결 풀 최적화 설정
     - name: SPRING_DATASOURCE_HIKARI_CONNECTION-TIMEOUT
       value: "30000"  # 30초
@@ -145,11 +145,11 @@ batch:
     - name: ASTRAGO_PRIVATE-REGISTRY-URL
       value: "{{ .Values.offline.registry | default "" }}"
     - name: HARBOR_URL
-      value: {{ .Values.externalIP }}:{{ .Values.harbor.servicePort }}
+      value: {{ .Values.externalIP }}:{{ .Values.harbor.servicePort | default "30002" }}
     - name: HARBOR_ID
       value: "admin"
     - name: HARBOR_PASSWORD
-      value: "{{ .Values.harbor.adminPassword }}"
+      value: "{{ .Values.harbor.adminPassword | default "Harbor12345" }}"
 
 monitor:
   image:

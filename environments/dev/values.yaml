@@ -111,6 +111,8 @@ promtail:
 
 harbor:
   enabled: true
+  servicePort: 30002
+  adminPassword: Harbor12345
 offline:
   registry: # 192.168.56.11:35000
   httpServer: # http://192.168.56.11
