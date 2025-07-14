@@ -811,6 +811,13 @@ spec:
             {}          
           image: "docker.io/xiilab/astrago:core-stage-a8a4"
           imagePullPolicy: Always
+          command: ["java"]
+          args:
+          - "-Duser.timezone=Asia/Seoul"
+          - "-Djavax.net.ssl.trustStore=/root/astrago/certs/cacerts"
+          - "-Djavax.net.ssl.trustStorePassword=changeit"
+          - "-jar"
+          - "/java/app.jar"          
           env:
           - name: SPRING_JPA_HIBERNATE_DDL-AUTO
             value: "none"
