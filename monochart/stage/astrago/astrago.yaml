@@ -1118,7 +1118,7 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: "docker.io/library/nginx:1.26.0-alpine3.19"          
+          image: "docker.io/library/nginx:1.27.0-alpine3.19"          
           ports:
             - containerPort: 80
           volumeMounts:
