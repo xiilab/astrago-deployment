@@ -746,13 +746,13 @@ spec:
             - name: SPRING_DATASOURCE_HIKARI_CONNECTION-TEST-QUERY
               value: "SELECT 1"
             - name: SPRING_SECURITY_OAUTH2_RESOURCE-SERVER_JWT_ISSUER-URI
-              value: "https://10.61.3.12:9001/auth/realms/astrago"
+              value: "http://10.61.3.12:30080/auth/realms/astrago"
             - name: SPRING_SECURITY_OAUTH2_RESOURCE-SERVER_JWT_JWK-SET-URI
-              value: "https://10.61.3.12:9001/auth/realms/astrago/protocol/openid-connect/certs"
+              value: "http://10.61.3.12:30080/auth/realms/astrago/protocol/openid-connect/certs"
             - name: KEYCLOAK_REALM
               value: "astrago"
             - name: KEYCLOAK_AUTH-SERVER-URL
-              value: "https://10.61.3.12:9001/auth"
+              value: "http://10.61.3.12:30080/auth/"
             - name: KEYCLOAK_RESOURCE
               value: "astrago-client"
             - name: ADMIN_NAME
@@ -810,7 +810,7 @@ spec:
           securityContext:
             {}          
           image: "docker.io/xiilab/astrago:core-stag-25a4"
-          imagePullPolicy: Always
+          imagePullPolicy: Always      
           env:
           - name: SPRING_JPA_HIBERNATE_DDL-AUTO
             value: "none"
@@ -823,13 +823,13 @@ spec:
           - name: SPRING_DATASOURCE_HIKARI_MAX-LIFETIME
             value: "3595000"
           - name: SPRING_SECURITY_OAUTH2_RESOURCE-SERVER_JWT_ISSUER-URI
-            value: "https://10.61.3.12:9001/auth/realms/astrago"
+            value: "http://10.61.3.12:30080/auth/realms/astrago"
           - name: SPRING_SECURITY_OAUTH2_RESOURCE-SERVER_JWT_JWK-SET-URI
-            value: "https://10.61.3.12:9001/auth/realms/astrago/protocol/openid-connect/certs"
+            value: "http://10.61.3.12:30080/auth/realms/astrago/protocol/openid-connect/certs"
           - name: KEYCLOAK_REALM
             value: "astrago"
           - name: KEYCLOAK_AUTH-SERVER-URL
-            value: "https://10.61.3.12:9001/auth"
+            value: "http://10.61.3.12:30080/auth/"
           - name: KEYCLOAK_RESOURCE
             value: "astrago-client"
           - name: ADMIN_NAME
@@ -905,7 +905,7 @@ spec:
           image: "docker.io/xiilab/astrago:frontend-stag-e507"          
           env:
           - name: KEYCLOAK_HOST
-            value: "https://10.61.3.12:9001/auth"
+            value: "http://10.61.3.12:30080/auth/"
           - name: KEYCLOAK_REALME
             value: "astrago"
           - name: KEYCLOAK_CLIENT_ID
@@ -915,7 +915,7 @@ spec:
           - name: NODE_OPTIONS
             value: "--max-http-header-size=41960"
           - name: NEXTAUTH_URL
-            value: "https://10.61.3.12"
+            value: "http://10.61.3.12:30080"
           - name: NEXTAUTH_SECRET
             value: "uuNj1L0Yg2xKcBPVp7yOVlm2nigL3hoHOzbwQXAwx1I="
           - name: NEXT_PUBLIC_API_URL
