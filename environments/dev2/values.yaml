@@ -44,7 +44,7 @@ astrago:
   servicePort: 30080
   userInitPassword: astrago
   keycloak:
-    externalKeycloakUrl:
+    externalKeycloakUrl: https://10.61.3.12:9001/auth
     realm: astrago
     client: astrago-client
     clientSecret: astragosecret
