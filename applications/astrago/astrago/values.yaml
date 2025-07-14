@@ -238,7 +238,7 @@ proxy:
   image:
     registry: docker.io
     repository: library/nginx
-    tag: 1.26.0-alpine3.19
+    tag: 1.27.0-alpine3.19
   service:
     type: NodePort
     port: 80
