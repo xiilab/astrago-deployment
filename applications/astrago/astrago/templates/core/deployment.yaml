@@ -33,14 +33,7 @@ spec:
           securityContext:
             {{- toYaml .Values.core.securityContext | nindent 12 }}          
           image: "{{ default .Values.core.image.registry .Values.global.imageRegistry }}/{{ .Values.core.image.repository }}:{{ .Values.core.image.tag }}"
-          imagePullPolicy: {{ .Values.core.image.pullPolicy }}
-          command: ["java"]
-          args:
-          - "-Duser.timezone=Asia/Seoul"
-          - "-Djavax.net.ssl.trustStore=/root/astrago/certs/cacerts"
-          - "-Djavax.net.ssl.trustStorePassword=changeit"
-          - "-jar"
-          - "/java/app.jar"          
+          imagePullPolicy: {{ .Values.core.image.pullPolicy }}      
           env:
           {{- range $key, $obj := .Values.core.env }}
           - name: {{ $obj.name }}
