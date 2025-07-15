@@ -5,7 +5,7 @@
 loki:
   image:
     repository: {{ .Values.offline.registry | default "docker.io" }}/grafana/loki
-    tag: "2.9.6"
+    tag: "2.9.2"
     pullPolicy: IfNotPresent
     
   replicas: {{ .Values.loki.replicas | default 1 }}
@@ -44,7 +44,7 @@ loki:
 promtail:
   image:
     repository: {{ .Values.offline.registry | default "docker.io" }}/grafana/promtail
-    tag: "2.9.6"
+    tag: "2.9.2"
     pullPolicy: IfNotPresent
     
   resources:
