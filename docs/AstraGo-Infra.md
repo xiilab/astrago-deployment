@@ -438,4 +438,167 @@ Pull-based는 쿠버네티스 클러스터에 있는 GitOps agent가 주기적�
 
 ## AstraGo 온/오프라인 설치 방법
 
-*계속...*
+### 1. 오프라인(airgap) 설치 전체 플로우
+
+1. **오프라인 패키지 준비**
+   - 인터넷이 연결된 환경에서 AstraGo 및 Kubernetes 설치에 필요한 모든 컨테이너 이미지, OS 패키지, PyPI 패키지, Helm 차트 등을 다운로드하여 airgap 패키지로 생성
+2. **오프라인 패키지 이관**
+   - 생성된 airgap 패키지를 USB, 외장 HDD 등으로 실제 설치 대상 서버(내부망)로 복사
+3. **로컬 레지스트리/저장소 구성**
+   - 오프라인 서버에서 Nginx(HTTP), Private Registry, PyPI Mirror, OS 패키지 저장소를 로컬에 구성
+4. **컨테이너 이미지 로드 및 푸시**
+   - airgap 패키지 내 이미지들을 로컬 private registry에 로드 및 푸시
+5. **로컬 저장소 기반 환경설정**
+   - OS 패키지, PyPI, Helm 등 모든 설치 경로를 로컬 저장소로 변경
+6. **Kubernetes 및 AstraGo 설치**
+   - Kubespray(offline 모드)로 Kubernetes 클러스터 설치
+   - Helmfile/스크립트로 AstraGo 및 부가 서비스 설치
+
+---
+
+### 2. 단계별 상세 설명
+
+#### 1) 오프라인 패키지 다운로드 및 준비 (온라인 환경)
+
+```bash
+cd astrago-deployment/airgap/kubespray-offline
+./download-all.sh
+```
+- 설치할 OS와 동일한 환경에서 실행해야 함
+- 모든 컨테이너 이미지, 패키지, PyPI, Helm 차트가 outputs/에 저장됨
+
+#### 2) 오프라인 환경 준비 및 레지스트리/저장소 구성
+
+```bash
+./setup-all.sh
+```
+- outputs/ 디렉터리에서 실행 (nginx, registry, containerd 등 자동 구성)
+- 실행 후 `nerdctl ps`로 nginx, registry 컨테이너가 정상 실행 중인지 확인
+
+#### 3) Kubernetes 인벤토리 파일 수정
+
+```bash
+vi astrago-deployment/kubespray/inventory/offline/astrago.yaml
+```
+- 마스터/워커 노드의 IP, 사용자 계정 등 환경에 맞게 수정
+- 예시:
+  ```
+  [all]
+  master-1 ansible_host=192.168.1.100 ansible_user=astrago
+  worker-1 ansible_host=192.168.1.101 ansible_user=astrago
+  worker-2 ansible_host=192.168.1.102 ansible_user=astrago
+  ...
+  ```
+
+#### 4) Kubernetes 클러스터 배포
+
+```bash
+cd astrago-deployment/airgap
+./deploy_kubernetes.sh
+```
+- 배포 중 패스워드 입력 필요 (모든 노드 동일 계정/비밀번호 권장)
+- 에러 발생 시 로그 및 group_vars/all/all.yaml의 cert 옵션 등 확인
+
+#### 5) NFS 서버 설정
+
+```bash
+# NFS 유틸리티 설치
+sudo yum install -y nfs-utils    # CentOS/RHEL
+sudo apt install -y nfs-utils    # Ubuntu
+
+# NFS 서비스 시작
+sudo systemctl enable nfs-server
+sudo systemctl start nfs-server
+
+# 공유 디렉토리 생성
+sudo mkdir -p /nfs-data/astrago
+sudo chown -R nobody:nobody /nfs-data
+sudo chmod -R 755 /nfs-data
+
+# /etc/exports 파일에 추가
+sudo vi /etc/exports
+/nfs-data 10.1.61.0/24(no_root_squash,rw,no_subtree_check,insecure)
+
+# 적용
+sudo exportfs -a
+sudo systemctl reload nfs-server
+```
+
+#### 6) Astrago 환경 설정 (오프라인 환경)
+
+```bash
+cd astrago-deployment/airgap
+./offline_deploy_astrago.sh env
+```
+- 프롬프트에 따라 아래 정보 입력:
+  - Enter the connection URL (e.g. 10.61.3.12): <프론트엔드 접근 서버 주소>
+  - Enter the NFS server IP address: <NFS 서버 주소>
+  - Enter the base path of NFS: /nfs-data/astrago
+  - Enter the offline registry (e.g. 10.61.3.8:35000): <로컬 레지스트리 주소>
+  - Enter the HTTP server (e.g. http://10.61.3.8): <로컬 HTTP 서버>
+
+- 설정 파일 확인:
+```bash
+cat astrago-deployment/environments/astrago/values.yaml
+```
+
+#### 7) Astrago 애플리케이션 배포
+
+```bash
+./offline_deploy_astrago.sh sync
+```
+- Astrago 및 부가 서비스가 values.yaml 기반으로 배포됨
+
+#### 8) 설치 후 검증
+
+```bash
+kubectl get pod -A
+kubectl describe pod -n <namespace> <pod명>
+kubectl logs -n <namespace> <pod명>
+```
+- Astrago, Keycloak, NFS 등 주요 서비스가 정상적으로 Running 상태인지 확인
+- 서비스 접속 테스트:
+  ```bash
+  curl -I http://<EXTERNAL-IP>:30080   # Astrago
+  curl -I http://<EXTERNAL-IP>:30001   # Keycloak
+  ```
+
+---
+
+- 각 단계별 상세 이슈 및 추가 팁은 `docs/offline-deployment.md`를 참고하세요.
+
+---
+
+### 3. 트러블슈팅 (2025년 7월 14일 이후 suhyun-kim415 커밋 기준)
+
+#### 주요 트러블슈팅 포인트
+
+- **MPI Operator 이미지 Pull 오류**
+  - 오프라인 레지스트리에 0.5.0 버전이 없고 0.4.0만 존재할 경우, values.yaml에서 0.4.0으로 버전을 맞춰야 함
+  - 에러 메시지: "failed to pull image"
+  - 해결: `applications/mpi-operator/values.yaml.gotmpl`에서 `mpioperator/mpi-operator:0.4.0`으로 명시
+
+- **Loki/Promtail 이미지 Pull 오류**
+  - 오프라인 레지스트리에 2.9.6 버전이 없고 2.9.2만 존재할 경우, values.yaml에서 2.9.2로 버전을 맞춰야 함
+  - 에러 메시지: "failed to pull image"
+  - 해결: `applications/loki-stack/values.yaml.gotmpl`에서 `grafana/loki:2.9.2`, `grafana/promtail:2.9.2`로 명시
+
+- **nginx 버전 호환성**
+  - AstraGo 일부 서비스에서 nginx 1.27.0-alpine3.19 버전이 필요할 수 있음
+  - 해결: `applications/astrago/astrago/values.yaml` 등에서 nginx 버전이 올바르게 지정되어 있는지 확인
+
+- **오프라인 환경에서 이미지 Pull 실패**
+  - values.yaml, offline.yml 등에서 registry 주소와 이미지 태그가 실제 오프라인 레지스트리와 일치하는지 반드시 확인
+  - 오프라인 레지스트리에 없는 버전은 배포 시도 시 pull error 발생
+
+- **기타**
+  - 오프라인 환경에 맞는 버전만 패키징/등록되어야 하며, 신규 버전 추가 시 반드시 오프라인 레지스트리에 push 필요
+
+---
+
+> **참고:**  
+> 오프라인 설치 관련 모든 스크립트 파일은 `astrago-deployment/airgap/` 하위에 위치합니다.  
+> 실제 설치 환경에 맞게 config.sh, values.yaml, offline.yml 등을 반드시 수정 후 진행하세요.
+
+---
+
