@@ -1,3 +1,7 @@
+#repositories:
+#- name: volcano-sh 
+#  url: https://volcano-sh.github.io/helm-charts
+
 environments:
   prod:
     values:
@@ -65,3 +69,22 @@ helmfiles:
 - path: applications/harbor/helmfile.yaml
   values:
   - {{ toYaml .Values | nindent 4 }}
+
+releases:
+- name: volcano
+  namespace: volcano-system
+  createNamespace: true
+  chart: applications/volcano
+  version: 1.12.1
+  labels:
+    app: volcano
+  values:
+  - configs/values/volcano/values.yaml
+
+- name: volcano-vgpu-device-plugin
+  namespace: volcano-system
+  createNamespace: true
+  chart: applications/volcano-vgpu-device-plugin
+  version: 1.0.0
+  labels:
+    app: volcano
