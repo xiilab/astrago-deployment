@@ -30,10 +30,6 @@ helmDefaults:
   timeout: 600
 
 helmfiles:
-- path: applications/csi-driver-nfs/helmfile.yaml
-  values:
-  - {{ toYaml .Values | nindent 4 }}
-
 - path: applications/gpu-operator/helmfile.yaml
   values:
   - {{ toYaml .Values | nindent 4 }}
@@ -71,6 +67,15 @@ helmfiles:
   - {{ toYaml .Values | nindent 4 }}
 
 releases:
+- name: nfs-provisioner
+  namespace: nfs-provisioner
+  chart: applications/csi-driver-nfs
+  wait: true
+  labels:
+    app: nfs-provisioner
+  values:
+  - configs/values/csi-driver-nfs/values.yaml.gotmpl
+
 - name: volcano
   namespace: volcano-system
   createNamespace: true
