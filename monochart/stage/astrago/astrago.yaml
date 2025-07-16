@@ -537,6 +537,29 @@ spec:
   selector: 
     app.kubernetes.io/name: astrago-backend-core
 ---
+# Source: astrago/templates/experiment-hub/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: astrago-experiment-hub
+  namespace: astrago
+  labels:
+    helm.sh/chart: astrago-0.1.0
+    app.kubernetes.io/name: astrago
+    app.kubernetes.io/instance: astrago
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30084
+      protocol: TCP
+      name: http
+  selector: 
+    app.kubernetes.io/name: astrago-experiment-hub
+---
 # Source: astrago/templates/frontend/service.yaml
 apiVersion: v1
 kind: Service
@@ -862,6 +885,49 @@ spec:
             value: "5000"
           - name: SPRING_DATASOURCE_HIKARI_CONNECTION-TEST-QUERY
             value: "SELECT 1"
+          volumeMounts:
+            - name: astrago-workload-log
+              mountPath: /root/astrago
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          resources:
+            {}
+      volumes:
+        - name: astrago-workload-log
+          persistentVolumeClaim:
+            claimName: workload-log-pvc
+      terminationGracePeriodSeconds: 10
+---
+# Source: astrago/templates/experiment-hub/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: astrago-experiment-hub
+  namespace: astrago
+  labels:
+    app.kubernetes.io/name: astrago-experiment-hub
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: astrago-experiment-hub
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: astrago-experiment-hub
+    spec:
+      serviceAccountName: astrago-sa      
+      securityContext:
+        {}
+      containers:
+        - name: astrago
+          securityContext:
+            {}          
+          image: "docker.io/xiilab/astrago:experiment-v1.0.15"
+          imagePullPolicy: Always      
+          env:
           volumeMounts:
             - name: astrago-workload-log
               mountPath: /root/astrago
