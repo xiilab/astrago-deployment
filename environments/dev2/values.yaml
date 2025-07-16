@@ -39,12 +39,12 @@ keycloak:
   servicePort: 30001
 # Astrago Settings
 astrago:
-  proxyUrl: 
+  proxyUrl:
   #proxyUrl: http://59.10.103.94:30080
   servicePort: 30080
   userInitPassword: astrago
   keycloak:
-    externalKeycloakUrl: 
+    externalKeycloakUrl:
     realm: astrago
     client: astrago-client
     clientSecret: astragosecret
@@ -59,15 +59,15 @@ astrago:
   core:
     registry: "docker.io"
     repository: "xiilab/astrago"
-    imageTag: "core-stag-25a4"
+    imageTag: "core-stag-81cb"
   batch:
     registry: "docker.io"
     repository: "xiilab/astrago"
-    imageTag: "batch-stag-25a4"
+    imageTag: "batch-stag-81cb"
   monitor:
     registry: "docker.io"
     repository: "xiilab/astrago"
-    imageTag: "monitor-stag-25a4"
+    imageTag: "monitor-stag-81cb"
   frontend:
     registry: "docker.io"
     repository: "xiilab/astrago"
