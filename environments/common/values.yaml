@@ -31,3 +31,54 @@ promtail:
     requests:
       cpu: "100m"
       memory: "128Mi"
+
+# Redis Configuration
+redis:
+  enabled: true
+  password: "redis123!"
+  persistence:
+    size: "10Gi"
+  resources:
+    limits:
+      cpu: "1000m"
+      memory: "1Gi"
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+  metrics:
+    enabled: false
+  config:
+    maxmemory: "1gb"
+    maxmemoryPolicy: "allkeys-lru"
+    save: "900 1 300 10 60 10000"
+
+# TimescaleDB Configuration
+timescaledb:
+  enabled: true
+  superuserPassword: "timescale123!"
+  database: "timescaledb"
+  username: "timescale"
+  password: "timescale123!"
+  persistence:
+    size: "50Gi"
+  resources:
+    limits:
+      cpu: "2000m"
+      memory: "4Gi"
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+  metrics:
+    enabled: false
+  config:
+    sharedBuffers: "1GB"
+    effectiveCacheSize: "3GB"
+    maintenanceWorkMem: "256MB"
+    workMem: "64MB"
+    maxConnections: "200"
+    maxWalSize: "4GB"
+    minWalSize: "1GB"
+    walBuffers: "16MB"
+  timescale:
+    maxBackgroundWorkers: "8"
+    maxChunkTime: "7d"

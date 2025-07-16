@@ -1,0 +1,22 @@
+apiVersion: v2
+name: timescaledb
+description: A Helm chart for TimescaleDB
+version: 0.1.0
+appVersion: "2.12.1"
+
+keywords:
+  - timescaledb
+  - postgresql
+  - database
+  - timeseries
+  - analytics
+
+home: https://www.timescale.com/
+sources:
+  - https://github.com/timescale/timescaledb
+
+maintainers:
+  - name: AstraGo Team
+    email: devops@astrago.com
+
+type: application 

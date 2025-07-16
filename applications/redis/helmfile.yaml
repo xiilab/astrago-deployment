@@ -1,0 +1,10 @@
+releases:
+- name: redis
+  namespace: redis
+  chart: redis
+  wait: true
+  timeout: 600
+  labels:
+    app: redis
+  values:
+  - values.yaml.gotmpl 
