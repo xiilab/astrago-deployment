@@ -36,10 +36,6 @@ helmDefaults:
   timeout: 600
 
 helmfiles:
-- path: applications/gpu-process-exporter/helmfile.yaml
-  values:
-  - {{ toYaml .Values | nindent 4 }}
-
 - path: applications/loki-stack/helmfile.yaml
   values:
   - {{ toYaml .Values | nindent 4 }}
@@ -91,6 +87,14 @@ releases:
   labels:
     app: gpu-operator
     type: infra
+
+- name: gpu-process-exporter
+  chart: applications/gpu-process-exporter
+  namespace: gpu-operator
+  labels:
+    app: gpu-process-exporter
+  values:
+  - configs/values/gpu-process-exporter/values.yaml.gotmpl
 
 - name: volcano
   namespace: volcano-system

@@ -2,7 +2,7 @@
 # Exports GPU process metrics to Prometheus via Node Exporter textfile collector
 
 gpu-process-exporter:
-  enabled: {{ .Values.gpu.enabled | default true }}
+  enabled: {{ index .Values "gpu-process-exporter" "enabled" | default "true" }}
 
 # Collection settings
 collection:
@@ -40,7 +40,7 @@ prometheus:
 # GPU configuration
 gpu:
   # Number of GPUs to monitor (adjust based on your cluster)
-  count: {{ .Values.gpu.count | default 4 }}
+  count: {{ index .Values "gpu-process-exporter" "gpu" "count" | default 4 }}
   # GPU device indices to monitor
   devices: [0, 1, 2, 3]
 

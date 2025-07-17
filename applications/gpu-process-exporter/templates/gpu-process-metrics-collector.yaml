@@ -22,7 +22,7 @@ spec:
       - name: gpu-process-collector
         securityContext:
           privileged: true
-        image: "{{ .Values.offline.registry | default "nvcr.io" }}/nvidia/k8s/dcgm-exporter:3.3.9-3.6.1-ubuntu22.04"
+        image: "{{ if .Values.offline }}{{ .Values.offline.registry | default "nvcr.io" }}{{ else }}nvcr.io{{ end }}/nvidia/k8s/dcgm-exporter:3.3.9-3.6.1-ubuntu22.04"
         env:
           - name: NODE_NAME
             valueFrom:

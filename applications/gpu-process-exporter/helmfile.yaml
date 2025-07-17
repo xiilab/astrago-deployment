@@ -1,8 +1,0 @@
-releases:
-- name: gpu-process-exporter
-  chart: ./
-  namespace: gpu-operator
-  labels:
-    app: gpu-process-exporter
-  values:
-  - {{ toYaml .Values | nindent 4 }} 
