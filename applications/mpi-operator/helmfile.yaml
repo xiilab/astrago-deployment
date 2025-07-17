@@ -1,8 +1,15 @@
+environments:
+  default:
+    values:
+    - values.yaml.gotmpl
+
+---
+
 releases:
 - name: mpi-operator
-  chart: mpi-operator
-  wait: true
-  labels:
-    app: mpi-operator
+  chart: ./
+  namespace: {{ .Values.namespace | default "mpi-operator" }}
   values:
-  - values.yaml.gotmpl    
+  - values.yaml
+  wait: true
+  timeout: 300 

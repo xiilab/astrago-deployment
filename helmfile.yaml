@@ -13,6 +13,8 @@
 #  url: https://prometheus-community.github.io/helm-charts
 #- name: keycloak
 #  url: oci://registry-1.docker.io/bitnamicharts/keycloak
+#- name: kubeflow
+#  url: https://kubeflow.github.io/helm-charts
 
 environments:
   prod:
@@ -42,10 +44,6 @@ helmDefaults:
   timeout: 600
 
 helmfiles:
-- path: applications/mpi-operator/helmfile.yaml
-  values:
-  - {{ toYaml .Values | nindent 4 }}
-
 - path: applications/astrago/helmfile.yaml
   values:
   - {{ toYaml .Values | nindent 4 }}
@@ -152,3 +150,11 @@ releases:
   wait: true
   labels:
     app: keycloak
+
+- name: mpi-operator
+  chart: applications/mpi-operator
+  wait: true
+  labels:
+    app: mpi-operator
+  values:
+  - configs/values/mpi-operator/values.yaml.gotmpl
