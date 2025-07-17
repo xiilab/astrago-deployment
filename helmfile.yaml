@@ -45,11 +45,6 @@ helmDefaults:
   waitForJobs: true
   timeout: 600
 
-helmfiles:
-- path: applications/astrago/helmfile.yaml
-  values:
-  - {{ toYaml .Values | nindent 4 }}
-
 releases:
 - name: nfs-provisioner
   namespace: nfs-provisioner
@@ -166,3 +161,13 @@ releases:
     app: harbor
   values:
   - configs/values/harbor/values.yaml.gotmpl
+
+- name: astrago
+  namespace: astrago
+  chart: applications/astrago
+  wait: true
+  timeout: 600
+  labels:
+    app: astrago
+  values:
+  - configs/values/astrago/values.yaml.gotmpl
