@@ -9,6 +9,8 @@
 #  url: https://nvidia.github.io/gpu-operator
 #- name: grafana
 #  url: https://grafana.github.io/helm-charts
+#- name: prometheus-community
+#  url: https://prometheus-community.github.io/helm-charts
 
 environments:
   prod:
@@ -38,10 +40,6 @@ helmDefaults:
   timeout: 600
 
 helmfiles:
-- path: applications/prometheus/helmfile.yaml
-  values:
-  - {{ toYaml .Values | nindent 4 }}
-
 - path: applications/keycloak/helmfile.yaml
   values:
   - {{ toYaml .Values | nindent 4 }}
@@ -130,3 +128,12 @@ releases:
     component: logging
   values:
   - configs/values/loki-stack/values.yaml.gotmpl
+
+- name: prometheus
+  namespace: prometheus
+  chart: applications/kube-prometheus-stack
+  wait: true
+  labels:
+    app: prometheus
+  values:
+  - configs/values/kube-prometheus-stack/values.yaml.gotmpl
