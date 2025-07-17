@@ -35,6 +35,10 @@ environments:
     values:
     - environments/common/values.yaml
     - environments/stage/values.yaml
+  seoultech:
+    values:
+    - environments/common/values.yaml
+    - environments/seoultech/values.yaml
   astrago:
     values:
     - environments/common/values.yaml
@@ -48,126 +52,138 @@ helmDefaults:
 releases:
 - name: nfs-provisioner
   namespace: nfs-provisioner
-  chart: applications/csi-driver-nfs
+  chart: charts/csi-driver-nfs
+  version: v4.7.0
   wait: true
   labels:
     app: nfs-provisioner
   values:
-  - configs/values/csi-driver-nfs/values.yaml.gotmpl
+  - values/csi-driver-nfs/values.yaml.gotmpl
 
 - name: gpu-operator
   namespace: gpu-operator
-  chart: applications/gpu-operator
+  chart: charts/gpu-operator
+  version: v24.9.2
   wait: true
   labels:
     app: gpu-operator
     type: infra
   values:
-  - configs/values/gpu-operator/values.yaml.gotmpl
+  - values/gpu-operator/values.yaml.gotmpl
 
 - name: gpu-operator-extras
   namespace: gpu-operator
-  chart: applications/gpu-operator-extras
+  chart: charts/gpu-operator-extras
+  version: 1.0.0
   wait: true
   labels:
     app: gpu-operator
     type: infra
 
 - name: gpu-process-exporter
-  chart: applications/gpu-process-exporter
+  chart: charts/gpu-process-exporter
   namespace: gpu-operator
+  version: 1.0.0
   labels:
     app: gpu-process-exporter
   values:
-  - configs/values/gpu-process-exporter/values.yaml.gotmpl
+  - values/gpu-process-exporter/values.yaml.gotmpl
 
 - name: volcano
   namespace: volcano-system
   createNamespace: true
-  chart: applications/volcano
+  chart: charts/volcano
   version: 1.12.1
   labels:
     app: volcano
   values:
-  - configs/values/volcano/values.yaml
+  - values/volcano/values.yaml
 
 - name: volcano-vgpu-device-plugin
   namespace: volcano-system
   createNamespace: true
-  chart: applications/volcano-vgpu-device-plugin
+  chart: charts/volcano-vgpu-device-plugin
   version: 1.0.0
   labels:
     app: volcano
 
 - name: flux
   namespace: flux
-  chart: applications/flux2
+  chart: charts/flux2
+  version: 2.13.0
   wait: true
   labels:
     app: flux
   values:
-  - configs/values/flux/values.yaml.gotmpl
+  - values/flux/values.yaml.gotmpl
 
 - name: loki-stack
   namespace: loki-stack
-  chart: applications/loki-stack
+  chart: charts/loki-stack
+  version: 1.0.0
   wait: true
   labels:
     app: loki-stack
     component: logging
   values:
-  - configs/values/loki-stack/values.yaml.gotmpl
+  - values/loki-stack/values.yaml.gotmpl
 
 - name: prometheus
   namespace: prometheus
-  chart: applications/kube-prometheus-stack
+  chart: charts/kube-prometheus-stack
+  version: 55.4.0
   wait: true
   labels:
     app: prometheus
   values:
-  - configs/values/kube-prometheus-stack/values.yaml.gotmpl
+  - values/kube-prometheus-stack/values.yaml.gotmpl
 
 - name: keycloak
   namespace: keycloak
   # chart: oci://registry-1.docker.io/bitnamicharts/keycloak
-  chart: applications/keycloak
+  chart: charts/keycloak
+  version: 17.3.5
   wait: true
   labels:
     app: keycloak
   values:
-  - configs/values/keycloak/values.yaml.gotmpl
+  - values/keycloak/values.yaml.gotmpl
 
 - name: keycloak-extras
   namespace: keycloak
-  chart: applications/keycloak-extras
+  chart: charts/keycloak-extras
+  version: 1.0.0
   wait: true
   labels:
     app: keycloak
 
 - name: mpi-operator
-  chart: applications/mpi-operator
+  chart: charts/mpi-operator
+  version: 0.1.0
   wait: true
   labels:
     app: mpi-operator
   values:
-  - configs/values/mpi-operator/values.yaml.gotmpl
+  - values/mpi-operator/values.yaml.gotmpl
 
 - name: harbor
   namespace: harbor
-  chart: applications/harbor
+  chart: charts/harbor
+  version: 1.15.1
   wait: true
   condition: harbor.enabled
   labels:
     app: harbor
   values:
-  - configs/values/harbor/values.yaml.gotmpl
+  - values/harbor/values.yaml.gotmpl
 
 - name: astrago
   namespace: astrago
-  chart: applications/astrago
+  chart: charts/astrago
+  version: 0.1.0
   wait: true
   timeout: 600
   labels:
     app: astrago
   values:
-  - configs/values/astrago/values.yaml.gotmpl
+  - values/astrago/values.yaml.gotmpl

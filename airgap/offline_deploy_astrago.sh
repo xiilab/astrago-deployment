@@ -48,16 +48,16 @@ print_usage() {
 
 # Function to create environment directory
 create_environment_directory() {
-    if [ ! -d "environments/$environment_name" ]; then
+    if [ ! -d "../astrago-platform/environments/$environment_name" ]; then
         echo "Environment directory does not exist. Creating..."
-        mkdir "environments/$environment_name"
+        mkdir -p "../astrago-platform/environments/$environment_name"
         echo "Environment directory has been created."
     else
         echo "Environment directory already exists."
     fi
-    cp -r environments/prod/* "environments/$environment_name/"
+    cp -r ../astrago-platform/environments/prod/* "../astrago-platform/environments/$environment_name/"
     # Print the path of the created environment file
-    echo "Path where environment file is created: $(realpath "environments/$environment_name/values.yaml"), Please modify this file for detailed settings."
+    echo "Path where environment file is created: $(realpath "../astrago-platform/environments/$environment_name/values.yaml"), Please modify this file for detailed settings."
 }
 
 # Function to get the IP address from the user
@@ -110,7 +110,7 @@ main() {
             # Get the base path of NFS from the user
             get_base_path nfs_base_path "Enter the base path of NFS"
 
-            values_file="environments/$environment_name/values.yaml"
+            values_file="../astrago-platform/environments/$environment_name/values.yaml"
 
             # Modify externalIP
             yq -i ".externalIP = \"$external_ip\"" "$values_file"
@@ -130,14 +130,14 @@ main() {
             echo "values.yaml file has been modified."
             ;;
         "sync" | "destroy")
-            if [ ! -d "environments/$environment_name" ]; then
+            if [ ! -d "../astrago-platform/environments/$environment_name" ]; then
                 echo "Environment is not configured. Please run env first."
             elif [ -n "$2" ]; then
                 echo "Running helmfile -e $environment_name -l app=$2 $1."
-                helmfile -e "$environment_name" -l "app=$2" "$1"
+                cd ../astrago-platform && helmfile -e "$environment_name" -l "app=$2" "$1"
             else
                 echo "Running helmfile -e $environment_name $1."
-                helmfile -e "$environment_name" "$1"
+                cd ../astrago-platform && helmfile -e "$environment_name" "$1"
             fi
             ;;
         *)
