@@ -5,6 +5,8 @@
 #  url: https://volcano-sh.github.io/helm-charts
 #- name: fluxcd-community
 #  url: fluxcd-community https://fluxcd-community.github.io/helm-charts
+#- name: nvidia
+#  url: https://nvidia.github.io/gpu-operator
 
 environments:
   prod:
@@ -34,10 +36,6 @@ helmDefaults:
   timeout: 600
 
 helmfiles:
-- path: applications/gpu-operator/helmfile.yaml
-  values:
-  - {{ toYaml .Values | nindent 4 }}
-
 - path: applications/gpu-process-exporter/helmfile.yaml
   values:
   - {{ toYaml .Values | nindent 4 }}
@@ -75,6 +73,24 @@ releases:
     app: nfs-provisioner
   values:
   - configs/values/csi-driver-nfs/values.yaml.gotmpl
+
+- name: gpu-operator
+  namespace: gpu-operator
+  chart: applications/gpu-operator
+  wait: true
+  labels:
+    app: gpu-operator
+    type: infra
+  values:
+  - configs/values/gpu-operator/values.yaml.gotmpl
+
+- name: gpu-operator-extras
+  namespace: gpu-operator
+  chart: applications/gpu-operator-extras
+  wait: true
+  labels:
+    app: gpu-operator
+    type: infra
 
 - name: volcano
   namespace: volcano-system

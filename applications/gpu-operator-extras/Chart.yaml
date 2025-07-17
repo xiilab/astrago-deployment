@@ -1,0 +1,6 @@
+apiVersion: v2
+name: gpu-operator-extras
+description: Additional resources for Gpu Operator
+type: application
+version: 1.0.0
+appVersion: "1.0.0" 
