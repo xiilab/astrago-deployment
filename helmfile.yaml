@@ -15,6 +15,8 @@
 #  url: oci://registry-1.docker.io/bitnamicharts/keycloak
 #- name: kubeflow
 #  url: https://kubeflow.github.io/helm-charts
+#- name: harbor
+#  url: https://helm.goharbor.io
 
 environments:
   prod:
@@ -45,10 +47,6 @@ helmDefaults:
 
 helmfiles:
 - path: applications/astrago/helmfile.yaml
-  values:
-  - {{ toYaml .Values | nindent 4 }}
-
-- path: applications/harbor/helmfile.yaml
   values:
   - {{ toYaml .Values | nindent 4 }}
 
@@ -158,3 +156,13 @@ releases:
     app: mpi-operator
   values:
   - configs/values/mpi-operator/values.yaml.gotmpl
+
+- name: harbor
+  namespace: harbor
+  chart: applications/harbor
+  wait: true
+  condition: harbor.enabled
+  labels:
+    app: harbor
+  values:
+  - configs/values/harbor/values.yaml.gotmpl
