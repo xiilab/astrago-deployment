@@ -1,0 +1,5 @@
+apiVersion: v2
+name: keycloak-extras
+description: Additional configurations for Keycloak including realm settings
+version: 1.0.0
+appVersion: "1.0.0" 

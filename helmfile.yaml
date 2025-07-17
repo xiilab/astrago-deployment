@@ -11,6 +11,8 @@
 #  url: https://grafana.github.io/helm-charts
 #- name: prometheus-community
 #  url: https://prometheus-community.github.io/helm-charts
+#- name: keycloak
+#  url: oci://registry-1.docker.io/bitnamicharts/keycloak
 
 environments:
   prod:
@@ -40,10 +42,6 @@ helmDefaults:
   timeout: 600
 
 helmfiles:
-- path: applications/keycloak/helmfile.yaml
-  values:
-  - {{ toYaml .Values | nindent 4 }}
-
 - path: applications/mpi-operator/helmfile.yaml
   values:
   - {{ toYaml .Values | nindent 4 }}
@@ -137,3 +135,20 @@ releases:
     app: prometheus
   values:
   - configs/values/kube-prometheus-stack/values.yaml.gotmpl
+
+- name: keycloak
+  namespace: keycloak
+  # chart: oci://registry-1.docker.io/bitnamicharts/keycloak
+  chart: applications/keycloak
+  wait: true
+  labels:
+    app: keycloak
+  values:
+  - configs/values/keycloak/values.yaml.gotmpl
+
+- name: keycloak-extras
+  namespace: keycloak
+  chart: applications/keycloak-extras
+  wait: true
+  labels:
+    app: keycloak
