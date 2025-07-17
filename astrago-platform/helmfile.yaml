@@ -48,13 +48,13 @@ helmDefaults:
   wait: true
   waitForJobs: true
   timeout: 600
+  createNamespace: true
 
 releases:
 - name: nfs-provisioner
   namespace: nfs-provisioner
   chart: charts/csi-driver-nfs
   version: v4.7.0
-  wait: true
   labels:
     app: nfs-provisioner
   values:
@@ -64,7 +64,6 @@ releases:
   namespace: gpu-operator
   chart: charts/gpu-operator
   version: v24.9.2
-  wait: true
   labels:
     app: gpu-operator
     type: infra
@@ -75,10 +74,11 @@ releases:
   namespace: gpu-operator
   chart: charts/gpu-operator-extras
   version: 1.0.0
-  wait: true
   labels:
     app: gpu-operator
     type: infra
+  needs:
+  - gpu-operator
 
 - name: gpu-process-exporter
   chart: charts/gpu-process-exporter
@@ -91,7 +91,6 @@ releases:
 
 - name: volcano
   namespace: volcano-system
-  createNamespace: true
   chart: charts/volcano
   version: 1.12.1
   labels:
@@ -101,7 +100,6 @@ releases:
 
 - name: volcano-vgpu-device-plugin
   namespace: volcano-system
-  createNamespace: true
   chart: charts/volcano-vgpu-device-plugin
   version: 1.0.0
   labels:
@@ -111,7 +109,6 @@ releases:
   namespace: flux
   chart: charts/flux2
   version: 2.13.0
-  wait: true
   labels:
     app: flux
   values:
@@ -121,7 +118,6 @@ releases:
   namespace: loki-stack
   chart: charts/loki-stack
   version: 1.0.0
-  wait: true
   labels:
     app: loki-stack
     component: logging
@@ -132,7 +128,6 @@ releases:
   namespace: prometheus
   chart: charts/kube-prometheus-stack
   version: 55.4.0
-  wait: true
   labels:
     app: prometheus
   values:
@@ -140,10 +135,8 @@ releases:
 
 - name: keycloak
   namespace: keycloak
-  # chart: oci://registry-1.docker.io/bitnamicharts/keycloak
   chart: charts/keycloak
   version: 17.3.5
-  wait: true
   labels:
     app: keycloak
   values:
@@ -153,14 +146,14 @@ releases:
   namespace: keycloak
   chart: charts/keycloak-extras
   version: 1.0.0
-  wait: true
   labels:
     app: keycloak
+  needs:
+  - keycloak
 
 - name: mpi-operator
   chart: charts/mpi-operator
   version: 0.1.0
-  wait: true
   labels:
     app: mpi-operator
   values:
@@ -170,7 +163,6 @@ releases:
   namespace: harbor
   chart: charts/harbor
   version: 1.15.1
-  wait: true
   condition: harbor.enabled
   labels:
     app: harbor
@@ -181,8 +173,6 @@ releases:
   namespace: astrago
   chart: charts/astrago
   version: 0.1.0
-  wait: true
-  timeout: 600
   labels:
     app: astrago
   values:
