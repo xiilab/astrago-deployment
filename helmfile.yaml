@@ -1,6 +1,10 @@
 #repositories:
+#- name: csi-driver-nfs
+#  url: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
 #- name: volcano-sh 
 #  url: https://volcano-sh.github.io/helm-charts
+#- name: fluxcd-community
+#  url: fluxcd-community https://fluxcd-community.github.io/helm-charts
 
 environments:
   prod:
@@ -54,10 +58,6 @@ helmfiles:
   values:
   - {{ toYaml .Values | nindent 4 }}
 
-- path: applications/flux/helmfile.yaml
-  values:
-  - {{ toYaml .Values | nindent 4 }}
-
 - path: applications/astrago/helmfile.yaml
   values:
   - {{ toYaml .Values | nindent 4 }}
@@ -93,3 +93,12 @@ releases:
   version: 1.0.0
   labels:
     app: volcano
+
+- name: flux
+  namespace: flux
+  chart: applications/flux2
+  wait: true
+  labels:
+    app: flux
+  values:
+  - configs/values/flux/values.yaml.gotmpl
