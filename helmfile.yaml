@@ -7,6 +7,8 @@
 #  url: fluxcd-community https://fluxcd-community.github.io/helm-charts
 #- name: nvidia
 #  url: https://nvidia.github.io/gpu-operator
+#- name: grafana
+#  url: https://grafana.github.io/helm-charts
 
 environments:
   prod:
@@ -36,10 +38,6 @@ helmDefaults:
   timeout: 600
 
 helmfiles:
-- path: applications/loki-stack/helmfile.yaml
-  values:
-  - {{ toYaml .Values | nindent 4 }}
-
 - path: applications/prometheus/helmfile.yaml
   values:
   - {{ toYaml .Values | nindent 4 }}
@@ -122,3 +120,13 @@ releases:
     app: flux
   values:
   - configs/values/flux/values.yaml.gotmpl
+
+- name: loki-stack
+  namespace: loki-stack
+  chart: applications/loki-stack
+  wait: true
+  labels:
+    app: loki-stack
+    component: logging
+  values:
+  - configs/values/loki-stack/values.yaml.gotmpl
