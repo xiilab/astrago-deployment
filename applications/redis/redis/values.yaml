@@ -1,0 +1,38 @@
+image:
+  registry: "docker.io"
+  repository: "redis"
+  tag: "7.2-alpine"
+  pullPolicy: IfNotPresent
+
+auth:
+  enabled: true
+  password: "redis123!"
+
+persistence:
+  enabled: true
+  storageClass: "astrago-nfs-csi"
+  size: "10Gi"
+
+resources:
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+
+service:
+  type: ClusterIP
+  port: 6379
+
+metrics:
+  enabled: false
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+config:
+  maxmemory: "1gb"
+  maxmemoryPolicy: "allkeys-lru"
+  save: "900 1 300 10 60 10000" 

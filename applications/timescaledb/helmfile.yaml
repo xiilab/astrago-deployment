@@ -1,0 +1,10 @@
+releases:
+- name: timescaledb
+  namespace: timescaledb
+  chart: timescaledb
+  wait: true
+  timeout: 600
+  labels:
+    app: timescaledb
+  values:
+  - values.yaml.gotmpl 

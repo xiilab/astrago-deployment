@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "timescaledb.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "timescaledb.labels" . | nindent 4 }}
+data:
+  postgresql.conf: |
+    # PostgreSQL/TimescaleDB Configuration
+    listen_addresses = '*'
+    port = 5432
+    
+    # Memory Settings
+    shared_buffers = {{ .Values.config.sharedBuffers }}
+    effective_cache_size = {{ .Values.config.effectiveCacheSize }}
+    maintenance_work_mem = {{ .Values.config.maintenanceWorkMem }}
+    work_mem = {{ .Values.config.workMem }}
+    
+    # Connection Settings
+    max_connections = {{ .Values.config.maxConnections }}
+    
+    # WAL Settings
+    max_wal_size = {{ .Values.config.maxWalSize }}
+    min_wal_size = {{ .Values.config.minWalSize }}
+    wal_buffers = {{ .Values.config.walBuffers }}
+    wal_level = replica
+    
+    # Logging
+    log_destination = 'stderr'
+    logging_collector = on
+    log_directory = 'pg_log'
+    log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'
+    log_statement = 'all'
+    log_min_duration_statement = 1000
+    
+    # TimescaleDB Settings
+    shared_preload_libraries = 'timescaledb'
+    timescaledb.max_background_workers = {{ .Values.timescale.maxBackgroundWorkers }}
+    
+    # Performance
+    random_page_cost = 1.1
+    effective_io_concurrency = 200
+    
+  pg_hba.conf: |
+    # PostgreSQL Client Authentication Configuration File
+    local   all             all                                     trust
+    host    all             all             127.0.0.1/32            trust
+    host    all             all             ::1/128                 trust
+    host    all             all             0.0.0.0/0               md5
+    
+  init-timescaledb.sql: |
+    -- Initialize TimescaleDB
+    CREATE EXTENSION IF NOT EXISTS timescaledb; 
