@@ -126,7 +126,7 @@ releases:
   values:
   - values/loki-stack/values.yaml.gotmpl
   needs:
-  - nfs-provisioner
+  - nfs-provisioner/nfs-provisioner
 
 - name: prometheus
   namespace: prometheus
@@ -137,7 +137,7 @@ releases:
   values:
   - values/kube-prometheus-stack/values.yaml.gotmpl
   needs:
-  - nfs-provisioner
+  - nfs-provisioner/nfs-provisioner
 
 - name: keycloak
   namespace: keycloak
@@ -148,7 +148,7 @@ releases:
   values:
   - values/keycloak/values.yaml.gotmpl
   needs:
-  - nfs-provisioner
+  - nfs-provisioner/nfs-provisioner
 
 - name: keycloak-extras
   namespace: keycloak
@@ -177,7 +177,7 @@ releases:
   values:
   - values/harbor/values.yaml.gotmpl
   needs:
-  - nfs-provisioner
+  - nfs-provisioner/nfs-provisioner
 
 - name: astrago
   namespace: astrago
@@ -188,5 +188,5 @@ releases:
   values:
   - values/astrago/values.yaml.gotmpl
   needs:
-  - nfs-provisioner
-  - keycloak
+  - nfs-provisioner/nfs-provisioner
+  - keycloak/keycloak
