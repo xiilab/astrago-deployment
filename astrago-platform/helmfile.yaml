@@ -104,6 +104,8 @@ releases:
   version: 1.0.0
   labels:
     app: volcano
+  needs:
+  - volcano    
 
 - name: flux
   namespace: flux
@@ -123,6 +125,8 @@ releases:
     component: logging
   values:
   - values/loki-stack/values.yaml.gotmpl
+  needs:
+  - nfs-provisioner
 
 - name: prometheus
   namespace: prometheus
@@ -132,6 +136,8 @@ releases:
     app: prometheus
   values:
   - values/kube-prometheus-stack/values.yaml.gotmpl
+  needs:
+  - nfs-provisioner
 
 - name: keycloak
   namespace: keycloak
@@ -141,6 +147,8 @@ releases:
     app: keycloak
   values:
   - values/keycloak/values.yaml.gotmpl
+  needs:
+  - nfs-provisioner
 
 - name: keycloak-extras
   namespace: keycloak
@@ -168,6 +176,8 @@ releases:
     app: harbor
   values:
   - values/harbor/values.yaml.gotmpl
+  needs:
+  - nfs-provisioner
 
 - name: astrago
   namespace: astrago
@@ -177,3 +187,6 @@ releases:
     app: astrago
   values:
   - values/astrago/values.yaml.gotmpl
+  needs:
+  - nfs-provisioner
+  - keycloak
