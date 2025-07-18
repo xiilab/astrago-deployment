@@ -73,7 +73,7 @@ grafana:
         type: prometheus
         url: http://prometheus-kube-prometheus-prometheus.prometheus.svc.cluster.local:9090
         access: proxy
-        isDefault: true
+        isDefault: false  # kube-prometheus-stack 자체 datasource가 이미 default이므로 false로 변경
         
       # Loki 데이터소스 자동 추가
       - name: Loki

@@ -199,6 +199,9 @@ spec:
       # See https://kubernetes.io/docs/tasks/administer-cluster/guaranteed-scheduling-critical-addon-pods/
       priorityClassName: "system-node-critical"
       serviceAccount: volcano-device-plugin
+      # GPU 노드에서만 실행되도록 nodeSelector 추가
+      nodeSelector:
+        nvidia.com/gpu.present: "true"
       containers:
       - image: docker.io/projecthami/volcano-vgpu-device-plugin:v1.10.0
         args: ["--device-split-count=10"]
