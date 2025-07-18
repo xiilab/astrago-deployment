@@ -44,6 +44,7 @@ print_usage() {
     echo "event-exporter"
     echo "keycloak"
     echo "mpi-operator"
+    echo "kserve"
     echo "astrago"
     exit 0
 }

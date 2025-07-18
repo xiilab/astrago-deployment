@@ -65,3 +65,7 @@ helmfiles:
 - path: applications/harbor/helmfile.yaml
   values:
   - {{ toYaml .Values | nindent 4 }}
+
+- path: applications/kserve/helmfile.yaml
+  values:
+  - {{ toYaml .Values | nindent 4 }}

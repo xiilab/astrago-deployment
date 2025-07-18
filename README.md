@@ -239,6 +239,7 @@ echo "🔐 Keycloak: http://<YOUR-IP>:30001"
 | 🖥️ **GPU Operator** | GPU 리소스 관리 | `-` | ✅ | [상세보기](docs/applications.md#gpu-operator) |
 | ⚡ **MPI Operator** | 분산 컴퓨팅 | `-` | ✅ | [상세보기](docs/applications.md#mpi-operator) |
 | 🚢 **Harbor** | 컨테이너 레지스트리 | `30002` | ⚠️ | [상세보기](docs/applications.md#harbor) |
+| 🤖 **KServe** | ML 모델 서빙 플랫폼 | `8080` | ✅ | [상세보기](applications/kserve/README.md) |
 
 </div>
 
@@ -389,6 +390,9 @@ curl http://prometheus:9090/api/v1/query?query=gpu_process_count
 
 # 로그 수집 시스템 배포
 ./deploy_astrago.sh sync loki-stack
+
+# ML 모델 서빙 플랫폼 배포
+./deploy_astrago.sh sync kserve
 ```
 
 ### 🔄 업데이트 및 관리

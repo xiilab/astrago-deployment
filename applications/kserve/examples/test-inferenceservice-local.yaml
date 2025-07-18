@@ -1,0 +1,35 @@
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+  name: "sklearn-iris-local"
+  annotations:
+    serving.kserve.io/deploymentMode: "Serverless"
+spec:
+  predictor:
+    sklearn:
+      storageUri: "pvc://model-storage/sklearn-iris"
+      resources:
+        requests:
+          cpu: "100m"
+          memory: "256Mi"
+        limits:
+          cpu: "1000m"
+          memory: "2Gi"
+      env:
+        - name: "STORAGE_URI"
+          value: "pvc://model-storage/sklearn-iris"
+        - name: "MODEL_NAME"
+          value: "sklearn-iris"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: model-storage
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: astrago-nfs-csi
+  resources:
+    requests:
+      storage: 1Gi 

@@ -1,40 +1,13 @@
-keycloak:
-  themeVersion: v1.1.5
+# KServe Application Configuration
 
-# GPU Process Exporter - Exports GPU process metrics to Prometheus
-gpu-process-exporter:
-  enabled: true
+# Node selector for pod placement
+nodeSelector: {}
 
-# Loki Stack - Complete logging solution with Loki and Promtail
-loki:
-  enabled: true
-  retentionPeriod: "744h"  # 31 days
-  replicas: 1
-  resources:
-    limits:
-      cpu: "1000m"
-      memory: "2Gi"
-    requests:
-      cpu: "500m"
-      memory: "1Gi"
-  persistence:
-    enabled: true
-    size: "10Gi"
-    storageClass: "astrago-nfs-csi"
+# Tolerations for pod placement
+tolerations: []
 
-promtail:
-  enabled: true
-  resources:
-    limits:
-      cpu: "200m"
-      memory: "256Mi"
-    requests:
-      cpu: "100m"
-      memory: "128Mi"
-
-# KServe - ML Model Serving Platform
+# KServe specific configuration
 kserve:
-  enabled: true
   # Storage configuration
   storage:
     storageClass: "astrago-nfs-csi"
@@ -43,14 +16,17 @@ kserve:
   # Model registry configuration
   modelRegistry:
     enabled: false
+    # Add model registry specific settings here
   
   # Monitoring configuration
   monitoring:
     enabled: false
+    # Add monitoring specific settings here
   
   # Security configuration
   security:
     enabled: false
+    # Add security specific settings here
 
 # Knative Serving configuration
 knative:
@@ -84,4 +60,4 @@ certManager:
     enabled: true
     name: "letsencrypt-prod"
     email: "admin@example.com"
-    server: "https://acme-v02.api.letsencrypt.org/directory"
+    server: "https://acme-v02.api.letsencrypt.org/directory" 

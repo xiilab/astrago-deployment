@@ -1,0 +1,146 @@
+repositories:
+  - name: jetstack
+    url: https://charts.jetstack.io
+  - name: istio
+    url: https://istio-release.storage.googleapis.com/charts
+  - name: kserve
+    url: https://kserve.github.io/helm-charts
+  - name: knative
+    url: https://storage.googleapis.com/knative-releases/charts/helm/
+
+releases:
+  # cert-manager 설치
+  - name: cert-manager
+    namespace: cert-manager
+    createNamespace: true
+    chart: jetstack/cert-manager
+    version: v1.13.3
+    labels:
+      app: kserve
+      component: cert-manager
+    values:
+      - installCRDs: true
+      - global:
+          leaderElection:
+            namespace: cert-manager
+      - resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+      - replicaCount: 1
+
+  # Istio 설치
+  - name: istio-base
+    namespace: istio-system
+    createNamespace: true
+    chart: istio/base
+    version: 1.17.2
+    labels:
+      app: kserve
+      component: istio
+    values:
+      - global:
+          istioNamespace: istio-system
+          logging:
+            level: "default:info"
+
+  - name: istiod
+    namespace: istio-system
+    chart: istio/istiod
+    version: 1.17.2
+    needs:
+      - istio-system/istio-base
+    labels:
+      app: kserve
+      component: istio
+    values:
+      - global:
+          istioNamespace: istio-system
+          logging:
+            level: "default:info"
+      - pilot:
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2048Mi
+            limits:
+              cpu: 1000m
+              memory: 4096Mi
+          autoscaleEnabled: true
+          autoscaleMin: 1
+          autoscaleMax: 3
+
+  # Knative Operator 설치 (Knative Serving 관리)
+  - name: knative-operator
+    namespace: knative-operator
+    createNamespace: true
+    chart: knative/operator
+    version: 1.12.3
+    labels:
+      app: kserve
+      component: knative-operator
+    values:
+      - resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+
+  # KServe 설치
+  - name: kserve
+    namespace: kserve
+    createNamespace: true
+    chart: kserve/kserve
+    version: 0.15.2
+    needs:
+      - cert-manager/cert-manager
+      - istio-system/istiod
+      - knative-operator/knative-operator
+    labels:
+      app: kserve
+      component: kserve
+    values:
+      - kserve:
+          controller:
+            resources:
+              requests:
+                cpu: 100m
+                memory: 128Mi
+              limits:
+                cpu: 500m
+                memory: 512Mi
+            replicaCount: 1
+          dashboard:
+            enabled: false  # 현재 버전에서는 dashboard가 기본적으로 비활성화됨
+      - knative:
+          enabled: true
+          serving:
+            enabled: true
+            version: "1.12.3"
+            resources:
+              requests:
+                cpu: 100m
+                memory: 128Mi
+              limits:
+                cpu: 500m
+                memory: 512Mi
+      - istio:
+          enabled: true
+          gateway:
+            enabled: true
+            name: knative-local-gateway  # 실제 생성된 gateway 이름
+            namespace: istio-system
+      - storage:
+          enabled: true
+          storageClass: {{ .Values.kserve.storage.storageClass | default "astrago-nfs-csi" }}
+      - modelRegistry:
+          enabled: {{ .Values.kserve.modelRegistry.enabled | default false }}
+      - monitoring:
+          enabled: {{ .Values.kserve.monitoring.enabled | default false }}
+      - security:
+          enabled: {{ .Values.kserve.security.enabled | default false }} 
