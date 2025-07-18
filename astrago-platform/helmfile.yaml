@@ -149,6 +149,7 @@ releases:
   - values/keycloak/values.yaml.gotmpl
   needs:
   - nfs-provisioner/nfs-provisioner
+  - keycloak-extras
 
 - name: keycloak-extras
   namespace: keycloak
@@ -156,8 +157,6 @@ releases:
   version: 1.0.0
   labels:
     app: keycloak
-  needs:
-  - keycloak
 
 - name: mpi-operator
   chart: charts/mpi-operator

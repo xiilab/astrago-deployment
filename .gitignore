@@ -30,3 +30,6 @@
 
 environments/astrago
 .DS_Store
+
+nfs-servers.yaml
+nodes.yaml

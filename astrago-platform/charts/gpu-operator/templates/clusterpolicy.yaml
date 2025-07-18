@@ -12,10 +12,10 @@ metadata:
     "helm.sh/resource-policy": keep
   {{- end }}
 spec:
+  hostPaths:
+    rootFS: {{ .Values.hostPaths.rootFS }}
+    driverInstallDir: {{ .Values.hostPaths.driverInstallDir }}
   operator:
-    {{- if .Values.operator.defaultRuntime }}
-    defaultRuntime: {{ .Values.operator.defaultRuntime }}
-    {{- end }}
     {{- if .Values.operator.runtimeClass }}
     runtimeClass: {{ .Values.operator.runtimeClass }}
     {{- end }}
@@ -140,7 +140,7 @@ spec:
   driver:
     enabled: {{ .Values.driver.enabled }}
     useNvidiaDriverCRD: {{ .Values.driver.nvidiaDriverCRD.enabled }}
-    useOpenKernelModules: {{ .Values.driver.useOpenKernelModules }}
+    kernelModuleType: {{ .Values.driver.kernelModuleType }}
     usePrecompiled: {{ .Values.driver.usePrecompiled }}
     {{- if .Values.driver.repository }}
     repository: {{ .Values.driver.repository }}
@@ -482,9 +482,6 @@ spec:
     {{- if .Values.dcgm.args }}
     args: {{ toYaml .Values.dcgm.args | nindent 6 }}
     {{- end }}
-    {{- if .Values.dcgm.hostPort }}
-    hostPort: {{ .Values.dcgm.hostPort }}
-    {{- end }}
   dcgmExporter:
     enabled: {{ .Values.dcgmExporter.enabled }}
     {{- if .Values.dcgmExporter.repository }}
@@ -511,11 +508,15 @@ spec:
     {{- if .Values.dcgmExporter.args }}
     args: {{ toYaml .Values.dcgmExporter.args | nindent 6 }}
     {{- end }}
-    {{- if .Values.dcgmExporter.config }}
-    config: {{ toYaml .Values.dcgmExporter.config | nindent 6 }}
+    {{- if and (.Values.dcgmExporter.config) (.Values.dcgmExporter.config.name) }}
+    config:
+      name: {{ .Values.dcgmExporter.config.name }}
     {{- end }}
     {{- if .Values.dcgmExporter.serviceMonitor }}
     serviceMonitor: {{ toYaml .Values.dcgmExporter.serviceMonitor | nindent 6 }}
+    {{- end }}
+    {{- if .Values.dcgmExporter.service }}
+    service: {{ toYaml .Values.dcgmExporter.service | nindent 6 }}
     {{- end }}
   gfd:
     enabled: {{ .Values.gfd.enabled }}
@@ -570,7 +571,9 @@ spec:
     args: {{ toYaml .Values.migManager.args | nindent 6 }}
     {{- end }}
     {{- if .Values.migManager.config }}
-    config: {{ toYaml .Values.migManager.config | nindent 6 }}
+    config:
+      name: {{ .Values.migManager.config.name }}
+      default: {{ .Values.migManager.config.default }}
     {{- end }}
     {{- if .Values.migManager.gpuClientsConfig }}
     gpuClientsConfig: {{ toYaml .Values.migManager.gpuClientsConfig | nindent 6 }}
