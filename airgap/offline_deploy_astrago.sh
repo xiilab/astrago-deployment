@@ -25,11 +25,13 @@ install_binary() {
 
 # Function to print usage
 print_usage() {
-    echo "Usage: $0 [env|sync|destroy]"
+    echo "Usage: $0 [env|sync|destroy|destroy-all|destroy-nfs]"
     echo ""
     echo "env          : Create a new environment configuration file. Prompts the user for the external connection IP address, NFS server IP address, and base path of NFS."
     echo "sync         : Install (or update) the entire Astrago app for the already configured environment."
-    echo "destroy      : Uninstall the entire Astrago app for the already configured environment."
+    echo "destroy      : Uninstall the entire Astrago app EXCEPT nfs-provisioner (safe destroy)."
+    echo "destroy-all  : Uninstall the entire Astrago app INCLUDING nfs-provisioner."
+    echo "destroy-nfs  : Uninstall ONLY nfs-provisioner (use after destroy)."
     echo "sync <app name>    : Install (or update) a specific app."
     echo "                Usage: $0 sync <app name>"
     echo "destroy <app name> : Uninstall a specific app."
@@ -129,7 +131,7 @@ main() {
 
             echo "values.yaml file has been modified."
             ;;
-        "sync" | "destroy")
+        "sync")
             if [ ! -d "../astrago-platform/environments/$environment_name" ]; then
                 echo "Environment is not configured. Please run env first."
             elif [ -n "$2" ]; then
@@ -138,6 +140,39 @@ main() {
             else
                 echo "Running helmfile -e $environment_name $1."
                 cd ../astrago-platform && helmfile -e "$environment_name" "$1"
+            fi
+            ;;
+        "destroy")
+            if [ ! -d "../astrago-platform/environments/$environment_name" ]; then
+                echo "Environment is not configured. Please run env first."
+            elif [ -n "$2" ]; then
+                echo "Running helmfile -e $environment_name -l app=$2 destroy."
+                cd ../astrago-platform && helmfile -e "$environment_name" -l "app=$2" destroy
+            else
+                echo "🛡️  Safe destroy: Uninstalling all apps EXCEPT nfs-provisioner..."
+                echo "Running helmfile -e $environment_name -l 'app!=nfs-provisioner' destroy."
+                cd ../astrago-platform && helmfile -e "$environment_name" -l "app!=nfs-provisioner" destroy
+                echo ""
+                echo "✅ All apps destroyed except nfs-provisioner."
+                echo "💡 To destroy nfs-provisioner later, run: $0 destroy-nfs"
+            fi
+            ;;
+        "destroy-all")
+            if [ ! -d "../astrago-platform/environments/$environment_name" ]; then
+                echo "Environment is not configured. Please run env first."
+            else
+                echo "⚠️  FULL destroy: Uninstalling ALL apps INCLUDING nfs-provisioner..."
+                echo "Running helmfile -e $environment_name destroy."
+                cd ../astrago-platform && helmfile -e "$environment_name" destroy
+            fi
+            ;;
+        "destroy-nfs")
+            if [ ! -d "../astrago-platform/environments/$environment_name" ]; then
+                echo "Environment is not configured. Please run env first."
+            else
+                echo "🗑️  Destroying nfs-provisioner..."
+                echo "Running helmfile -e $environment_name -l app=nfs-provisioner destroy."
+                cd ../astrago-platform && helmfile -e "$environment_name" -l "app=nfs-provisioner" destroy
             fi
             ;;
         *)
