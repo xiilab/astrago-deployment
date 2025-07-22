@@ -49,20 +49,20 @@ jobs:
           
           # Update dev environment values
           if [ -f "environments/dev/values.yaml" ]; then
-            yq eval '.keycloak.image.repository = "xiilab/astrago-keycloak-theme"' -i environments/dev/values.yaml
-            yq eval ".keycloak.image.tag = \"$THEME_VERSION\"" -i environments/dev/values.yaml
-            yq eval '.keycloak.image.pullPolicy = "Always"' -i environments/dev/values.yaml
+            yq eval '.keycloak.image.repository = "xiilab/astrago-keycloak-theme"' -i environments/theme/values.yaml
+            yq eval ".keycloak.image.tag = \"$THEME_VERSION\"" -i environments/theme/values.yaml
+            yq eval '.keycloak.image.pullPolicy = "Always"' -i environments/theme/values.yaml
             echo "Updated dev environment with tag: $THEME_VERSION"
           fi
 
       # Runs a set of commands using the runners shell
       - name: Run a dev monochart template script
         run: |
-          helmfile -e dev -l app=astrago template > monochart/develop/astrago/astrago.yaml
-          helmfile -e dev -l app=prometheus template --include-crds > monochart/develop/prometheus/prometheus.yaml
-          helmfile -e dev -l app=keycloak template > monochart/develop/keycloak/keycloak.yaml
-          helmfile -e dev -l app=nfs-provisioner template > monochart/develop/nfs-provisioner/nfs-provisioner.yaml
-          helmfile -e dev -l app=gpu-operator -n gpu-operator template --include-crds > monochart/develop/gpu-operator/gpu-operator.yaml
+          helmfile -e dev -l app=astrago template > monochart/theme/astrago/astrago.yaml
+          helmfile -e dev -l app=prometheus template --include-crds > monochart/theme/prometheus/prometheus.yaml
+          helmfile -e dev -l app=keycloak template > monochart/theme/keycloak/keycloak.yaml
+          helmfile -e dev -l app=nfs-provisioner template > monochart/theme/nfs-provisioner/nfs-provisioner.yaml
+          helmfile -e dev -l app=gpu-operator -n gpu-operator template --include-crds > monochart/theme/gpu-operator/gpu-operator.yaml
 
       # Runs a set of commands using the runners shell
       - uses: stefanzweifel/git-auto-commit-action@v5

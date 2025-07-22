@@ -2,7 +2,7 @@
 
 ## 개요
 
-이 문서는 Uyuni Keycloak 테마 자동화 설정을 위한 가이드입니다. uyuni-login-theme 레포지토리에서 테마가 변경될 때마다 Docker 이미지가 자동으로 빌드되고, astrago-deployment에서는 최신 이미지를 동적으로 가져와서 사용합니다.
+이 문서는 Uyuni Keycloak 테마 자동화 설정을 위한 가이드입니다. uyuni-login-theme 레포지토리에서 테마가 변경될 때마다 Docker 이미지가 자동으로 빌드되고, astrago-deployment에서는 `environments/common/values.yaml`의 `themeVersion`을 기준으로 모든 환경의 이미지 태그를 동기화합니다.
 
 ## 워크플로우 동작 방식
 
@@ -27,9 +27,9 @@ Docker Hub에 푸시 (xiilab/astrago-keycloak-theme:a1b2)
     ↓
 GitHub Actions 워크플로우 실행
     ↓
-Docker Hub에서 최신 커밋 해시 태그 조회
+common/values.yaml에서 themeVersion 읽기
     ↓
-values.yaml 파일 자동 업데이트
+모든 환경의 values.yaml 파일 자동 업데이트
     ↓
 monochart 파일 생성
     ↓
@@ -71,10 +71,10 @@ monochart 파일 생성
 
 #### 2.2 수정된 파일들
 - **`applications/keycloak/values.yaml.gotmpl`**: Keycloak 이미지 설정 추가, JAR 다운로드 로직 제거
-- **`.github/workflows/develop-deploy.yml`**: 동적 태그 업데이트 로직 추가
-- **`.github/workflows/develop2-deploy.yml`**: 동적 태그 업데이트 로직 추가
-- **`.github/workflows/production-deploy.yml`**: 동적 태그 업데이트 로직 추가
-- **`environments/common/values.yaml`**: keycloak.themeVersion 필드 자동 업데이트
+- **`.github/workflows/develop-deploy.yml`**: themeVersion 기반 태그 업데이트 로직 추가
+- **`.github/workflows/develop2-deploy.yml`**: themeVersion 기반 태그 업데이트 로직 추가
+- **`.github/workflows/production-deploy.yml`**: themeVersion 기반 태그 업데이트 로직 추가
+- **`environments/common/values.yaml`**: keycloak.themeVersion 필드 (중앙 관리)
 - **`environments/dev/values.yaml`**: Keycloak 이미지 설정 추가
 - **`environments/dev2/values.yaml`**: Keycloak 이미지 설정 추가
 - **`environments/stage/values.yaml`**: Keycloak 이미지 설정 추가
@@ -91,22 +91,25 @@ monochart 파일 생성
 | 구분 | 기존 방식 | 새로운 방식 |
 |------|-----------|-------------|
 | **테마 배포** | JAR 다운로드 | Docker 이미지 |
-| **버전 관리** | 하드코딩 | 동적 커밋 해시 |
+| **버전 관리** | 하드코딩 | 중앙 집중식 themeVersion |
 | **자동화** | 수동 업데이트 | 자동 감지 및 업데이트 |
 | **성능** | 런타임 다운로드 | 미리 빌드된 이미지 |
 | **안정성** | 네트워크 의존성 | 로컬 이미지 사용 |
+| **일관성** | 환경별 개별 관리 | 중앙 집중식 관리 |
 
 ### 2. 워크플로우 개선
 - **단순화**: 복잡한 웹훅 제거, 기존 패턴 활용
 - **효율성**: JAR 다운로드 제거로 컨테이너 시작 시간 단축
-- **정확성**: 4자리 커밋 해시로 정확한 버전 추적
+- **정확성**: 중앙 집중식 themeVersion으로 정확한 버전 관리
 - **유연성**: 환경별로 다른 태그 사용 가능
+- **안정성**: Docker Hub API 호출 제거로 네트워크 의존성 제거
 
 ### 3. 개발자 경험 개선
 - **자동화**: 테마 변경시 자동으로 최신 이미지 사용
 - **롤백**: 이전 커밋 해시로 쉽게 되돌릴 수 있음
 - **테스트**: 통합 테스트 스크립트 제공
 - **문서화**: 상세한 설정 가이드 제공
+- **중앙 관리**: common/values.yaml에서 버전 관리
 
 ## 설정 단계
 
@@ -217,7 +220,7 @@ uyuni-login-theme 레포지토리에서:
 `applications/keycloak/values.yaml.gotmpl` 파일이 이미 수정되어 있습니다:
 - `xiilab/astrago-keycloak-theme` 이미지 사용
 - JAR 다운로드 관련 initContainer 및 volumes 제거
-- 동적 이미지 태그 사용
+- 중앙 집중식 이미지 태그 사용
 
 **변경 내용:**
 ```yaml
@@ -228,43 +231,32 @@ image:
   pullPolicy: "{{ .Values.keycloak.image.pullPolicy | default \"Always\" }}"
 ```
 
-#### 2.2 Keycloak Theme 전용 워크플로우
+#### 2.2 중앙 집중식 버전 관리
 
-`feature/keycloak-astrago-theme` 브랜치 전용 워크플로우가 생성되었습니다:
-- `keycloak-theme-deploy.yml`: Keycloak 테마 자동화 (feature/keycloak-astrago-theme 브랜치)
+`environments/common/values.yaml`에서 모든 환경의 테마 버전을 중앙 관리합니다:
 
-**주요 기능:**
-- 모든 환경(dev, dev2, stage, prod)의 values.yaml 업데이트
-- 모든 환경의 monochart 파일 생성
-- 동적 태그 업데이트
-- keycloak.themeVersion 자동 업데이트
-
-#### 2.3 기존 워크플로우 업데이트
-
-기존 워크플로우들에 동적 태그 업데이트 기능이 추가되었습니다:
-- `develop-deploy.yml`: dev 환경 (develop 브랜치)
-- `develop2-deploy.yml`: dev2 환경 (master 브랜치)
-- `production-deploy.yml`: stage/prod 환경 (master 브랜치)
-
-**추가된 기능:**
 ```yaml
-# Update Keycloak image tag with latest commit hash
+keycloak:
+  themeVersion: "latest"  # 모든 환경의 기준 버전
+```
+
+#### 2.3 환경별 워크플로우 업데이트
+
+모든 워크플로우가 `common/values.yaml`의 `themeVersion`을 기준으로 동작합니다:
+
+**주요 변경사항:**
+```yaml
+# Update Keycloak image tag from common themeVersion
 - name: Update Keycloak image tag
   run: |
-    # Get latest commit hash tag from Docker Hub (excluding 'latest')
-    LATEST_TAG=$(curl -s "https://registry.hub.docker.com/v2/repositories/xiilab/astrago-keycloak-theme/tags/" | jq -r '.results[] | select(.name != "latest") | .name' | head -1)
-    
-    if [ -z "$LATEST_TAG" ]; then
-      echo "No commit hash tag found, using latest"
-      LATEST_TAG="latest"
-    fi
-    
-    echo "Latest Keycloak image tag: $LATEST_TAG"
+    # Get themeVersion from common/values.yaml
+    THEME_VERSION=$(yq eval '.keycloak.themeVersion' environments/common/values.yaml)
+    echo "Theme version from common/values.yaml: $THEME_VERSION"
     
     # Update environment values
-    yq eval '.keycloak.image.repository = "xiilab/astrago-keycloak-theme"' -i environments/$ENV/values.yaml
-    yq eval ".keycloak.image.tag = \"$LATEST_TAG\"" -i environments/$ENV/values.yaml
-    yq eval '.keycloak.image.pullPolicy = "Always"' -i environments/$ENV/values.yaml
+    yq eval '.keycloak.image.repository = "xiilab/astrago-keycloak-theme"' -i environments/{env}/values.yaml
+    yq eval ".keycloak.image.tag = \"$THEME_VERSION\"" -i environments/{env}/values.yaml
+    yq eval '.keycloak.image.pullPolicy = "Always"' -i environments/{env}/values.yaml
 ```
 
 #### 2.4 환경별 values.yaml 설정
@@ -275,12 +267,10 @@ image:
 keycloak:
   image:
     repository: "xiilab/astrago-keycloak-theme"
-    tag: "a1b2"  # 자동으로 최신 4자리 커밋 해시로 업데이트
+    tag: "latest"  # common/values.yaml의 themeVersion과 동기화
     pullPolicy: "Always"
-  themeVersion: "a1b2"  # common/values.yaml에서도 자동 업데이트
+  themeVersion: "latest"  # common/values.yaml과 동기화
 ```
-
-**참고**: 태그는 워크플로우 실행시 Docker Hub에서 최신 커밋 해시를 자동으로 가져와서 업데이트됩니다.
 
 ## 워크플로우 정상작동 확인 방법
 
@@ -322,12 +312,12 @@ git push origin feature/keycloak-astrago-theme
 
 #### **2단계: GitHub Actions 확인**
 1. **GitHub 레포지토리** → **Actions** 탭
-2. **Keycloak Theme Automation** 워크플로우 실행 확인
+2. **CI_keycloak_theme** 워크플로우 실행 확인
 3. **단계별 실행 상태** 확인:
    - ✅ Checkout code
    - ✅ install helmfile and yq
    - ✅ Update Keycloak image tag
-   - ✅ Generate monochart files
+   - ✅ Run a dev monochart template script
    - ✅ Commit changes
 
 #### **3단계: 변경사항 확인**
@@ -352,15 +342,14 @@ Using version: a1b2
 Pushing image to Docker Hub...
 
 # astrago-deployment 워크플로우
-Latest Keycloak image tag: a1b2
-Updated dev environment with tag: a1b2
-Generated monochart for dev environment
+Theme version from common/values.yaml: latest
+Updated dev environment with tag: latest
 ```
 
 #### **문제 발생시 확인사항:**
 - **Docker Hub 로그인**: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` 시크릿 확인
 - **이미지 빌드**: Dockerfile 경로 및 JAR 파일 존재 확인
-- **태그 조회**: Docker Hub API 응답 확인
+- **themeVersion 읽기**: common/values.yaml 파일 존재 및 형식 확인
 - **파일 업데이트**: yq 명령어 실행 결과 확인
 
 ## 동작 방식
@@ -375,9 +364,9 @@ Generated monochart for dev environment
 - Docker Hub에 `xiilab/astrago-keycloak-theme:a1b2` (4자리 커밋 해시) 푸시
 
 ### 3. astrago-deployment에서 사용
-- 기존 워크플로우 실행시 Docker Hub에서 최신 커밋 해시 태그 자동 가져오기
-- values.yaml 파일의 Keycloak 이미지 태그 자동 업데이트
-- monochart 생성시 최신 이미지 사용
+- 기존 워크플로우 실행시 `common/values.yaml`에서 `themeVersion` 읽기
+- 모든 환경의 `values.yaml` 파일에서 이미지 태그 자동 업데이트
+- monochart 생성시 중앙 관리된 이미지 사용
 
 ## 테스트 방법
 
@@ -391,15 +380,15 @@ Generated monochart for dev environment
 1. **Keycloak Theme 전용 워크플로우**: `feature/keycloak-astrago-theme` 브랜치에서 실행
 2. **기존 워크플로우**: develop-deploy, develop2-deploy, production-deploy
 3. 생성된 monochart 파일에서 이미지 태그 확인
-4. 최신 이미지가 사용되는지 확인
+4. 중앙 관리된 이미지가 사용되는지 확인
 
 ## 브랜치 제한
 
 - **uyuni-login-theme**: 릴리즈 태그(`v*`) 생성시에만 이미지 빌드
 - **astrago-deployment**: 
   - `feature/keycloak-astrago-theme` 브랜치 → keycloak-theme-deploy.yml (Keycloak 테마 전용)
-  - `develop` 브랜치 → develop-deploy.yml (기존 + 동적 태그 업데이트)
-  - `master` 브랜치 → develop2-deploy.yml, production-deploy.yml (기존 + 동적 태그 업데이트)
+  - `develop` 브랜치 → develop-deploy.yml (기존 + themeVersion 기반 업데이트)
+  - `master` 브랜치 → develop2-deploy.yml, production-deploy.yml (기존 + themeVersion 기반 업데이트)
 
 ## 장점
 
@@ -407,9 +396,11 @@ Generated monochart for dev environment
 2. **안정성**: 기존 워크플로우 구조 유지
 3. **자동화**: 테마 변경시 자동으로 최신 이미지 사용
 4. **유연성**: 환경별로 다른 태그 사용 가능
-5. **정확한 버전 추적**: 4자리 커밋 해시로 정확한 버전 관리
+5. **정확한 버전 추적**: 중앙 집중식 themeVersion으로 정확한 버전 관리
 6. **롤백 가능**: 이전 커밋 해시로 쉽게 되돌릴 수 있음
 7. **효율성**: JAR 다운로드 제거로 컨테이너 시작 시간 단축
+8. **일관성**: 모든 환경이 동일한 버전 사용
+9. **안정성**: Docker Hub API 호출 제거로 네트워크 의존성 제거
 
 ## 주의사항
 
@@ -418,6 +409,8 @@ Generated monochart for dev environment
 3. **이미지 태그**: 4자리 커밋 해시 태그 사용으로 정확한 버전 추적
 4. **Pull Policy**: `Always`로 설정하여 최신 이미지 보장
 5. **JAR 파일**: Dockerfile에서 빌드된 JAR를 직접 복사하여 사용
+6. **중앙 관리**: common/values.yaml의 themeVersion이 모든 환경의 기준
+7. **동기화**: 모든 환경의 이미지 태그가 themeVersion과 동기화됨
 
 ## 수동 설정 체크리스트
 
@@ -429,10 +422,12 @@ Generated monochart for dev environment
 ### astrago-deployment 레포지토리
 - [ ] `applications/keycloak/values.yaml.gotmpl` 파일 수정 완료
 - [ ] `.github/workflows/keycloak-theme-deploy.yml` 파일 생성 완료
-- [ ] 기존 워크플로우들에 동적 태그 업데이트 로직 추가 완료
+- [ ] 기존 워크플로우들에 themeVersion 기반 업데이트 로직 추가 완료
+- [ ] `environments/common/values.yaml`에서 themeVersion 설정 완료
 
 ### 테스트
 - [ ] uyuni-login-theme에서 릴리즈 태그 생성 테스트
 - [ ] Docker Hub에 이미지 푸시 확인
-- [ ] astrago-deployment에서 동적 태그 업데이트 테스트
-- [ ] monochart 파일 생성 확인 
+- [ ] astrago-deployment에서 themeVersion 기반 업데이트 테스트
+- [ ] monochart 파일 생성 확인
+- [ ] 모든 환경의 이미지 태그 동기화 확인 
