@@ -27,14 +27,14 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      # Runs a single command using the runners shell
+            # Runs a single command using the runners shell
       - name: install helmfile
         run: |
           wget https://github.com/helmfile/helmfile/releases/download/v0.159.0/helmfile_0.159.0_linux_amd64.tar.gz -P /tmp/
           tar -zxvf /tmp/helmfile_0.159.0_linux_amd64.tar.gz -C /tmp/
           chmod +x /tmp/helmfile
           mv /tmp/helmfile /usr/local/bin
-          
+
       # Runs a set of commands using the runners shell
       - name: Run a dev monochart template script
         run: |
