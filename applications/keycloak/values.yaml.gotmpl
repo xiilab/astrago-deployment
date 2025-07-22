@@ -3,9 +3,9 @@ global:
 
 # Use custom Keycloak image with theme
 image:
-  repository: "{{ .Values.keycloak.image.repository | default \"xiilab/astrago-keycloak-theme\" }}"
-  tag: "{{ .Values.keycloak.image.tag | default \"latest\" }}"
-  pullPolicy: "{{ .Values.keycloak.image.pullPolicy | default \"Always\" }}"
+  repository: {{ .Values.keycloak.image.repository | default "xiilab/astrago-keycloak-theme" }}
+  tag: {{ .Values.keycloak.image.tag | default .Values.keycloak.themeVersion | default "latest" }}
+  pullPolicy: {{ .Values.keycloak.image.pullPolicy | default "Always" }}
 
 proxy: edge
 production: true
