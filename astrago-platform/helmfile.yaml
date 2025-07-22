@@ -1,22 +1,22 @@
-repositories:
-- name: csi-driver-nfs
-  url: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
-- name: volcano-sh 
-  url: https://volcano-sh.github.io/helm-charts
-- name: fluxcd-community
-  url: https://fluxcd-community.github.io/helm-charts
-- name: nvidia
-  url: https://nvidia.github.io/gpu-operator
-- name: grafana
-  url: https://grafana.github.io/helm-charts
-- name: prometheus-community
-  url: https://prometheus-community.github.io/helm-charts
-- name: keycloak
-  url: oci://registry-1.docker.io/bitnamicharts/keycloak
-- name: kubeflow
-  url: https://kubeflow.github.io/helm-charts
-- name: harbor
-  url: https://helm.goharbor.io
+#repositories:
+#- name: csi-driver-nfs
+#  url: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
+#- name: volcano-sh 
+#  url: https://volcano-sh.github.io/helm-charts
+#- name: fluxcd-community
+#  url: https://fluxcd-community.github.io/helm-charts
+#- name: nvidia
+#  url: https://nvidia.github.io/gpu-operator
+#- name: grafana
+#  url: https://grafana.github.io/helm-charts
+#- name: prometheus-community
+#  url: https://prometheus-community.github.io/helm-charts
+#- name: keycloak
+#  url: oci://registry-1.docker.io/bitnamicharts/keycloak
+#- name: kubeflow
+#  url: https://kubeflow.github.io/helm-charts
+#- name: harbor
+#  url: https://helm.goharbor.io
 
 environments:
   prod:
@@ -116,31 +116,17 @@ releases:
   values:
   - values/flux/values.yaml.gotmpl
 
-# Loki (log storage and query engine)
-- name: loki
+- name: loki-stack
   namespace: loki-stack
-  chart: grafana/loki
-  version: 6.32.0
+  chart: charts/loki-stack
+  version: 1.0.0
   labels:
-    app: loki
+    app: loki-stack
     component: logging
   values:
-  - values/loki/values.yaml.gotmpl
+  - values/loki-stack/values.yaml.gotmpl
   needs:
   - nfs-provisioner/nfs-provisioner
-
-# Promtail (log collection agent)  
-- name: promtail
-  namespace: loki-stack
-  chart: grafana/promtail
-  version: 6.17.0
-  labels:
-    app: promtail
-    component: logging
-  values:
-  - values/promtail/values.yaml.gotmpl
-  needs:
-  - loki-stack/loki
 
 - name: prometheus
   namespace: prometheus
