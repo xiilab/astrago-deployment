@@ -44,7 +44,7 @@ jobs:
       - name: Update Keycloak image tag
         run: |
           # Get latest commit hash tag from Docker Hub (excluding 'latest')
-          LATEST_TAG=$(curl -s "https://registry.hub.docker.com/v2/repositories/xiilab/astrago-keycloak/tags/" | jq -r '.results[] | select(.name != "latest") | .name' | head -1)
+          LATEST_TAG=$(curl -s "https://registry.hub.docker.com/v2/repositories/xiilab/astrago-keycloak-theme/tags/" | jq -r '.results[] | select(.name != "latest") | .name' | head -1)
           
           if [ -z "$LATEST_TAG" ]; then
             echo "No commit hash tag found, using latest"
@@ -55,7 +55,7 @@ jobs:
           
           # Update dev2 environment values
           if [ -f "environments/dev2/values.yaml" ]; then
-            yq eval '.keycloak.image.repository = "xiilab/astrago-keycloak"' -i environments/dev2/values.yaml
+            yq eval '.keycloak.image.repository = "xiilab/astrago-keycloak-theme"' -i environments/dev2/values.yaml
             yq eval ".keycloak.image.tag = \"$LATEST_TAG\"" -i environments/dev2/values.yaml
             yq eval '.keycloak.image.pullPolicy = "Always"' -i environments/dev2/values.yaml
             echo "Updated dev2 environment with tag: $LATEST_TAG"

@@ -38,15 +38,15 @@ if [ -f "$KEYCLOAK_TXT" ]; then
     
     if [ -z "$THEME_VERSION" ]; then
         # Auto-detect latest version
-        THEME_VERSION=$(grep "astrago-keycloak:" "$KEYCLOAK_TXT" | tail -1 | sed 's/.*astrago-keycloak://')
+        THEME_VERSION=$(grep "astrago-keycloak-theme:" "$KEYCLOAK_TXT" | tail -1 | sed 's/.*astrago-keycloak-theme://')
         if [ -z "$THEME_VERSION" ]; then
-            echo "astrago-keycloak image not found in keycloak.txt."
+            echo "astrago-keycloak-theme image not found in keycloak.txt."
             exit 1
         fi
         echo "Auto-detected theme version: $THEME_VERSION"
     fi
     
-    if grep -q "astrago-keycloak:$THEME_VERSION" "$KEYCLOAK_TXT"; then
+    if grep -q "astrago-keycloak-theme:$THEME_VERSION" "$KEYCLOAK_TXT"; then
         echo "Image is registered in keycloak.txt."
     else
         echo "Image is not registered in keycloak.txt."

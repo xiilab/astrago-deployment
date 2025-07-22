@@ -39,8 +39,8 @@ keycloak:
   servicePort: 30001
   themeVersion: "null"
   image:
-    repository: xiilab/astrago-keycloak
-    tag: "null"
+    repository: xiilab/astrago-keycloak-theme
+    tag: "latest"
     pullPolicy: Always
 # Astrago Settings
 astrago:

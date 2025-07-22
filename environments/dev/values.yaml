@@ -36,10 +36,10 @@ keycloak:
   adminUser: admin
   adminPassword: xiirocks
   servicePort: 30001
-  themeVersion: "null"
+  themeVersion: "latest"
   image:
-    repository: xiilab/astrago-keycloak
-    tag: "null"
+    repository: xiilab/astrago-keycloak-theme
+    tag: "latest"
     pullPolicy: Always
 # Astrago Settings
 astrago:

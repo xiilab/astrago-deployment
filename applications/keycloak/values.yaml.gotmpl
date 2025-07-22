@@ -3,7 +3,7 @@ global:
 
 # Use custom Keycloak image with theme
 image:
-  repository: "{{ .Values.keycloak.image.repository | default \"xiilab/astrago-keycloak\" }}"
+  repository: "{{ .Values.keycloak.image.repository | default \"xiilab/astrago-keycloak-theme\" }}"
   tag: "{{ .Values.keycloak.image.tag | default \"latest\" }}"
   pullPolicy: "{{ .Values.keycloak.image.pullPolicy | default \"Always\" }}"
 
