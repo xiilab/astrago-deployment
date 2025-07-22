@@ -1984,14 +1984,6 @@ prometheus-node-exporter:
   extraArgs:
     - --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|var/lib/docker/.+|var/lib/kubelet/.+)($|/)
     - --collector.filesystem.fs-types-exclude=^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$
-    - --collector.textfile.directory=/var/lib/node_exporter/textfile_collector
-  # GPU Process Exporter textfile collector를 위한 볼륨 마운트 추가
-  extraHostVolumeMounts:
-    - name: textfile-collector
-      hostPath: /var/lib/node_exporter/textfile_collector
-      mountPath: /var/lib/node_exporter/textfile_collector
-      readOnly: true
-      mountPropagation: HostToContainer
   service:
     portName: http-metrics
   prometheus:

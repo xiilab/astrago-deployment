@@ -11,12 +11,6 @@ httpServer:
   # Metrics collection interval (seconds)
   interval: 30
   
-  # Image settings
-  image:
-    repository: busybox
-    tag: "1.35"
-    pullPolicy: IfNotPresent
-  
   # Resource limits
   resources:
     limits:
@@ -46,12 +40,17 @@ serviceMonitor:
     matchLabels:
       app: gpu-process-exporter
 
-# GPU configuration
-gpu:
-  # Number of GPUs to monitor (adjust based on your cluster)
-  count: 4
-  # GPU device indices to monitor
-  devices: [0, 1, 2, 3]
+# Security context for GPU access
+securityContext:
+  privileged: true
+
+# Host access for GPU monitoring
+hostAccess:
+  # Use host PID namespace to see all processes
+  hostPID: true
+
+# Note: GPU devices are automatically detected via nvidia-smi
+# No manual configuration needed for GPU count or device indices
 
 # Node selection
 nodeSelector:

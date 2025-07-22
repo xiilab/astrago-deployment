@@ -1,22 +1,44 @@
 # GPU Process Exporter Configuration
-# Exports GPU process metrics to Prometheus via Node Exporter textfile collector
+# Exports GPU process metrics to Prometheus via HTTP API + ServiceMonitor
 
 gpu-process-exporter:
   enabled: {{ index .Values "gpu-process-exporter" "enabled" | default "true" }}
 
-# Collection settings
-collection:
-  # CronJob schedule (every minute)
-  schedule: "*/1 * * * *"
+# HTTP Server settings
+httpServer:
+  # Port for metrics endpoint
+  port: 8080
+  # Metrics collection interval (seconds)
+  interval: 30
   
   # Resource limits
   resources:
     limits:
       cpu: 100m
-      memory: 64Mi
+      memory: 128Mi
     requests:
       cpu: 50m
-      memory: 32Mi
+      memory: 64Mi
+
+# Service configuration
+service:
+  enabled: true
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+  labels: {}
+  annotations: {}
+
+# ServiceMonitor configuration for Prometheus Operator
+serviceMonitor:
+  enabled: {{ index .Values "gpu-process-exporter" "serviceMonitor" "enabled" | default "true" }}
+  interval: 30s
+  scrapeTimeout: 10s
+  labels: {}
+  # Selector labels for the service
+  selector:
+    matchLabels:
+      app: gpu-process-exporter
 
 # Security context for GPU access
 securityContext:
@@ -24,25 +46,11 @@ securityContext:
 
 # Host access for GPU monitoring
 hostAccess:
-  # Mount host /dev for GPU device access
-  devices: true
   # Use host PID namespace to see all processes
   hostPID: true
 
-# Prometheus integration
-prometheus:
-  # Node Exporter textfile collector directory
-  textfileCollectorPath: /var/lib/node_exporter/textfile_collector
-  
-  # Prometheus server service for metric queries
-  serverService: prometheus-kube-prometheus-prometheus.prometheus.svc:9090
-
-# GPU configuration
-gpu:
-  # Number of GPUs to monitor (adjust based on your cluster)
-  count: {{ index .Values "gpu-process-exporter" "gpu" "count" | default 4 }}
-  # GPU device indices to monitor
-  devices: [0, 1, 2, 3]
+# Note: GPU devices are automatically detected via nvidia-smi
+# No manual configuration needed for GPU count or device indices
 
 # Node selection
 nodeSelector:
