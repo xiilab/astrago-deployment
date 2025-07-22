@@ -1,303 +1,452 @@
 {{- if index .Values "gpu-process-exporter" "enabled" }}
+---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: gpu-process-metrics-collector
+  name: gpu-process-exporter
   namespace: {{ .Release.Namespace }}
+  labels:
+    app: gpu-process-exporter
+    chart: {{ include "gpu-process-exporter.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
   selector:
     matchLabels:
-      app: gpu-process-metrics-collector
+      app: gpu-process-exporter
   template:
     metadata:
       labels:
-        app: gpu-process-metrics-collector
+        app: gpu-process-exporter
+        release: {{ .Release.Name }}
     spec:
       nodeSelector:
         {{- toYaml .Values.nodeSelector | nindent 8 }}
       tolerations:
-        {{- toYaml .Values.tolerations | nindent 6 }}
+        {{- toYaml .Values.tolerations | nindent 8 }}
       hostPID: true
       containers:
-      - name: gpu-process-collector
-        securityContext:
-          privileged: true
+      - name: gpu-process-exporter
         image: "{{ if .Values.offline }}{{ .Values.offline.registry | default "nvcr.io" }}{{ else }}nvcr.io{{ end }}/nvidia/k8s/dcgm-exporter:3.3.9-3.6.1-ubuntu22.04"
+        ports:
+        - name: metrics
+          containerPort: {{ .Values.httpServer.port }}
+          protocol: TCP
         env:
-          - name: NODE_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: spec.nodeName
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: METRICS_PORT
+          value: {{ .Values.httpServer.port | quote }}
+        - name: COLLECTION_INTERVAL
+          value: {{ .Values.httpServer.interval | quote }}
         command:
         - /bin/bash
         - -c
         - |
-          # 주기적으로 GPU 프로세스 메트릭 수집 (1분마다)
-          while true; do
-            echo "$(date): Starting GPU process metrics collection..."
-            
-            # textfile collector 디렉터리 생성
-              mkdir -p /host/var/lib/node_exporter/textfile_collector
-              
-              # 메트릭 헤더 생성
-              echo "# HELP gpu_process_count Number of active GPU processes per GPU" > /tmp/gpu_processes.prom
-              echo "# TYPE gpu_process_count gauge" >> /tmp/gpu_processes.prom
-              echo "# HELP gpu_total_processes Total number of GPU processes across all GPUs" >> /tmp/gpu_processes.prom
-              echo "# TYPE gpu_total_processes gauge" >> /tmp/gpu_processes.prom
-              echo "# HELP gpu_process_utilization GPU utilization per process with detailed info" >> /tmp/gpu_processes.prom
-              echo "# TYPE gpu_process_utilization gauge" >> /tmp/gpu_processes.prom
-              echo "# HELP gpu_process_memory_utilization GPU memory utilization per process" >> /tmp/gpu_processes.prom
-              echo "# TYPE gpu_process_memory_utilization gauge" >> /tmp/gpu_processes.prom
-              echo "# HELP gpu_process_info GPU process information with Pod/Container details" >> /tmp/gpu_processes.prom
-              echo "# TYPE gpu_process_info gauge" >> /tmp/gpu_processes.prom
-              echo "# HELP gpu_process_start_time_seconds Process start time in seconds since epoch" >> /tmp/gpu_processes.prom
-              echo "# TYPE gpu_process_start_time_seconds gauge" >> /tmp/gpu_processes.prom
-              
-              # GPU 프로세스 상세 정보 수집 (nvidia-smi 기반)
-              total_processes=0
-              
-              echo "Collecting GPU process information from nvidia-smi..."
-              echo "Checking MIG mode status..."
-              
-              # MIG 모드 확인
-              mig_enabled=$(nvidia-smi --query-gpu=mig.mode.current --format=csv,noheader,nounits 2>/dev/null | grep -v "N/A" | head -1 || echo "")
-              
-              if [ -n "$mig_enabled" ] && [ "$mig_enabled" = "Enabled" ]; then
-                echo "MIG mode detected - using MIG-aware GPU detection"
-                # MIG 인스턴스 정보 수집 (index, uuid, memory 등)
-                nvidia-smi -L > /tmp/gpu_list.txt
-                # MIG 인스턴스의 경우 UUID 기반으로 매핑 테이블 생성
-                nvidia-smi --query-gpu=index,uuid --format=csv,noheader | grep -E "(GPU|MIG)" | tr -d ' ' > /tmp/gpu_mapping.txt
-                # MIG CI ID 정보도 수집
-                nvidia-smi --query-gpu=index,uuid,mig.gpu_instance_id,mig.compute_instance_id --format=csv,noheader | grep -E "(GPU|MIG)" | tr -d ' ' > /tmp/gpu_ci_mapping.txt
-              else
-                echo "Standard GPU mode detected - using traditional GPU detection"
-                # 기존 방식: GPU 인덱스와 Bus ID 매핑 테이블 생성
-                nvidia-smi --query-gpu=index,pci.bus_id --format=csv,noheader,nounits | tr -d ' ' > /tmp/gpu_mapping.txt
-                # 일반 GPU에서는 CI ID가 없으므로 기본값으로 설정
-                nvidia-smi --query-gpu=index,pci.bus_id --format=csv,noheader,nounits | tr -d ' ' | awk -F',' '{print $1","$2",N/A,N/A"}' > /tmp/gpu_ci_mapping.txt
-              fi
-              
-              # 동적으로 GPU/MIG 인스턴스 목록 생성
-              gpu_list=$(nvidia-smi --query-gpu=index --format=csv,noheader,nounits)
-              
-              # GPU별로 프로세스 카운트 초기화 (동적)
-              echo "$gpu_list" | while read gpu_index; do
-                gpu_index=$(echo "$gpu_index" | tr -d ' ')
-                echo "0" > /tmp/gpu_${gpu_index}_count.tmp
-              done
-              
-              # 모든 GPU 프로세스 정보를 한번에 조회
-              if [ -n "$mig_enabled" ] && [ "$mig_enabled" = "Enabled" ]; then
-                # MIG 환경에서는 UUID 기반으로 프로세스 매핑 (CI ID 포함)
-                all_gpu_processes=$(nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_gpu_memory --format=csv,noheader,nounits 2>/dev/null | grep -v "No running processes found" || true)
-              else
-                # 기존 방식: Bus ID 기반
-                all_gpu_processes=$(nvidia-smi --query-compute-apps=gpu_bus_id,pid,process_name,used_gpu_memory --format=csv,noheader,nounits 2>/dev/null | grep -v "No running processes found" || true)
-              fi
-              
-              # 모든 프로세스를 처리하여 정확한 GPU 매칭
-              if [ -n "$all_gpu_processes" ]; then
-                echo "$all_gpu_processes" | while IFS=',' read -r gpu_identifier actual_pid process_name gpu_memory; do
-                  # 공백 제거
-                  actual_pid=$(echo "$actual_pid" | tr -d ' ')
-                  process_name=$(echo "$process_name" | tr -d ' ')
-                  gpu_memory=$(echo "$gpu_memory" | tr -d ' ')
-                  gpu_identifier=$(echo "$gpu_identifier" | tr -d ' ')
+          set -e
+          
+          # Install necessary packages
+          apt-get update && apt-get install -y python3 python3-pip curl
+          pip3 install prometheus_client
+          
+          # Create metrics collection script
+          cat > /tmp/gpu_metrics_server.py << 'EOF'
+          #!/usr/bin/env python3
+          import time
+          import os
+          import subprocess
+          import json
+          import re
+          from prometheus_client import start_http_server, Gauge, Info
+          from prometheus_client.core import CollectorRegistry
+          import threading
+          import logging
+          
+          # Configure logging
+          logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+          logger = logging.getLogger(__name__)
+          
+          # Environment variables
+          NODE_NAME = os.environ.get('NODE_NAME', 'unknown')
+          METRICS_PORT = int(os.environ.get('METRICS_PORT', '8080'))
+          COLLECTION_INTERVAL = int(os.environ.get('COLLECTION_INTERVAL', '30'))
+          
+          # Create custom registry
+          registry = CollectorRegistry()
+          
+          # Define metrics
+          gpu_process_count = Gauge(
+              'gpu_process_count', 
+              'Number of active GPU processes per GPU',
+              ['gpu', 'gi_id', 'ci_id'],
+              registry=registry
+          )
+          
+          gpu_total_processes = Gauge(
+              'gpu_total_processes',
+              'Total number of GPU processes across all GPUs',
+              registry=registry
+          )
+          
+          gpu_process_utilization = Gauge(
+              'gpu_process_utilization',
+              'GPU utilization per process with detailed info',
+              ['node', 'gpu', 'pid', 'command', 'pod', 'namespace', 'container', 'gpu_memory', 'start_time', 'gi_id', 'ci_id'],
+              registry=registry
+          )
+          
+          gpu_process_memory_utilization = Gauge(
+              'gpu_process_memory_utilization',
+              'GPU memory utilization per process',
+              ['node', 'gpu', 'pid', 'command', 'pod', 'namespace', 'container', 'gpu_memory', 'start_time', 'gi_id', 'ci_id'],
+              registry=registry
+          )
+          
+          gpu_process_info = Gauge(
+              'gpu_process_info',
+              'GPU process information with Pod/Container details',
+              ['node', 'gpu', 'pid', 'command', 'pod', 'namespace', 'container', 'status', 'gpu_memory', 'start_time', 'gi_id', 'ci_id'],
+              registry=registry
+          )
+          
+          class GPUMetricsCollector:
+              def __init__(self):
+                  self.lock = threading.Lock()
                   
-                  # 프로세스가 실행 중인지 확인
-                  if [ -n "$actual_pid" ] && [ "$actual_pid" != "-" ] && [ "$actual_pid" != "N/A" ]; then
-                    
-                    # GPU 식별자에서 GPU 인덱스 찾기
-                    if [ -n "$mig_enabled" ] && [ "$mig_enabled" = "Enabled" ]; then
-                      # MIG 환경: UUID 기반 매핑
-                      gpu_id=$(awk -F',' -v id="$gpu_identifier" '$2==id {print $1}' /tmp/gpu_mapping.txt)
-                      # CI ID 정보 가져오기
-                      ci_info=$(awk -F',' -v id="$gpu_identifier" '$2==id {print $3","$4}' /tmp/gpu_ci_mapping.txt)
-                      gi_id=$(echo "$ci_info" | cut -d',' -f1)
-                      ci_id=$(echo "$ci_info" | cut -d',' -f2)
+              def run_nvidia_smi(self, query, index=None):
+                  """Run nvidia-smi command and return output"""
+                  try:
+                      cmd = ['nvidia-smi']
+                      if index is not None:
+                          cmd.extend(['-i', str(index)])
+                      cmd.extend(['--query-gpu=' + query, '--format=csv,noheader,nounits'])
                       
-                      # CI ID가 없거나 N/A인 경우 기본값 설정
-                      if [ -z "$gi_id" ] || [ "$gi_id" = "N/A" ]; then
-                        gi_id="none"
-                      fi
-                      if [ -z "$ci_id" ] || [ "$ci_id" = "N/A" ]; then
-                        ci_id="none"
-                      fi
-                    else
-                      # 기존 환경: Bus ID 기반 매핑
-                      gpu_id=$(awk -F',' -v id="$gpu_identifier" '$2==id {print $1}' /tmp/gpu_mapping.txt)
-                                              # 일반 GPU에서는 CI ID 없음
-                        gi_id="none"
-                        ci_id="none"
-                    fi
-                    
-                    if [ -z "$gpu_id" ]; then
-                      echo "Warning: Could not find GPU index for identifier: $gpu_identifier"
-                      gpu_id="0"  # 기본값
-                    fi
-                    
-                    echo "Process PID $actual_pid detected on GPU $gpu_id (Identifier: $gpu_identifier)"
-                    
-                    # GPU 사용률 및 메모리 사용률은 기본값 설정
-                    gpu_util="0"  # 기본값
-                    mem_util="0"  # 기본값
-                    
-                    # 노드 이름 가져오기
-                    node_name=$NODE_NAME
-                    
-                    # 프로세스별 GPU 사용률 정보 수집 (nvidia-smi pmon 사용)
-                    if [ -n "$mig_enabled" ] && [ "$mig_enabled" = "Enabled" ]; then
-                      # MIG 환경에서는 UUID 기반으로 프로세스 매핑
-                      gpu_index=$(echo "$gpu_id" | cut -d'-' -f1)
-                    else
-                      # 기존 환경: Bus ID 기반
-                      gpu_index=$(echo "$gpu_id" | cut -d':' -f1)
-                    fi
-                    
-                    # nvidia-smi pmon으로 프로세스 정보 수집
-                    echo "▶️ Running nvidia-smi pmon for GPU index: $gpu_index, PID: $actual_pid"
-                    
-                    process_stats=$(nvidia-smi pmon -i "$gpu_index" -s um -c 1 2>/dev/null | tail -n +3 | grep "$actual_pid" || echo "")
-                    
-                    echo "📋 Raw process_stats:"
-                    echo "$process_stats"
-                    
-                    if [ -n "$process_stats" ]; then
-                      # GPU 사용률과 메모리 사용량 추출
-                      gpu_util=$(echo "$process_stats" | awk '{print $4}')
-                      used_mem=$(echo "$process_stats" | awk '{print $10}')
+                      result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+                      if result.returncode == 0:
+                          return result.stdout.strip()
+                      else:
+                          logger.error(f"nvidia-smi error: {result.stderr}")
+                          return ""
+                  except Exception as e:
+                      logger.error(f"Error running nvidia-smi: {e}")
+                      return ""
+              
+              def get_process_info(self, pid):
+                  """Get process information from /proc"""
+                  try:
+                      # Process start time
+                      stat_path = f"/host/proc/{pid}/stat"
+                      if os.path.exists(stat_path):
+                          with open(stat_path, 'r') as f:
+                              stat_data = f.read().split()
+                              start_time_jiffies = int(stat_data[21])
+                              # Convert to epoch time (approximate)
+                              start_time = int(time.time()) - (start_time_jiffies // 100)
+                      else:
+                          start_time = 0
                       
-                      echo "✅ Parsed values:"
-                      echo "GPU Utilization : $gpu_util"
-                      echo "Used GPU Memory : $used_mem MiB"
+                      # Pod information from cgroup
+                      pod_name = "unknown"
+                      namespace = "unknown"
+                      container_name = "unknown"
                       
-                      # 전체 GPU 메모리 가져오기
-                      total_mem=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits -i "$gpu_index")
-                      echo "Total GPU Memory: $total_mem MiB"
+                      cgroup_path = f"/host/proc/{pid}/cgroup"
+                      if os.path.exists(cgroup_path):
+                          with open(cgroup_path, 'r') as f:
+                              cgroup_content = f.read()
+                              if 'kubepods' in cgroup_content:
+                                  # Extract pod UID from cgroup
+                                  pod_match = re.search(r'pod([a-f0-9-]+)', cgroup_content)
+                                  if pod_match:
+                                      pod_name = f"pod-{pod_match.group(1)}"
+                                      namespace = "detected"
                       
-                      # 메모리 사용률 계산 (소수점 한 자리)
-                      if [[ $total_mem =~ ^[0-9]+$ && $used_mem =~ ^[0-9]+$ ]]; then
-                        mem_util=$(awk -v u="$used_mem" -v t="$total_mem" 'BEGIN{printf "%.1f", (u/t)*100}')
-                        echo "🧮 Memory Utilization: $mem_util %"
-                      else
-                        echo "⚠️ Memory values are not numeric: used_mem='$used_mem', total_mem='$total_mem'"
-                      fi
-                    else
-                      echo "🚫 No matching process found in nvidia-smi pmon for PID $actual_pid on GPU $gpu_index"
-                    fi
-                    
-                    # Pod/Container 정보를 /proc에서 조회
-                    pod_name="unknown"
-                    container_name="unknown"
-                    namespace="unknown"
-                    process_start_time="0"
-                    
-                    # 프로세스 시작 시간 조회
-                    if [ -f "/host/proc/$actual_pid/stat" ]; then
-                      # /proc/[pid]/stat의 22번째 필드가 프로세스 시작 시간 (jiffies)
-                      start_time_jiffies=$(cat /host/proc/$actual_pid/stat 2>/dev/null | awk '{print $22}' || echo "0")
-                      if [ "$start_time_jiffies" != "0" ]; then
-                        # 시스템 부팅 시간 계산
-                        if [ -f "/host/proc/uptime" ]; then
-                          uptime_seconds=$(awk '{print int($1)}' /host/proc/uptime)
-                          current_time=$(date +%s)
-                          boot_time=$((current_time - uptime_seconds))
-                          # jiffies를 초로 변환하고 부팅 시간을 더해 실제 시작 시간 계산
-                          process_start_time=$((boot_time + (start_time_jiffies / 100)))
-                        fi
-                      fi
-                    fi
-                    
-                    # cgroup에서 Pod 정보 추출 시도
-                    if [ -f "/host/proc/$actual_pid/cgroup" ]; then
-                      cgroup_info=$(cat /host/proc/$actual_pid/cgroup 2>/dev/null || echo "")
-                      if echo "$cgroup_info" | grep -q "kubepods"; then
-                        # Kubernetes Pod인 경우 Pod UID 추출
-                        pod_uid=$(echo "$cgroup_info" | grep -o 'pod[a-f0-9-]*' | head -1 | sed 's/pod//' || echo "unknown")
-                        if [ "$pod_uid" != "unknown" ]; then
-                          pod_name="pod-$pod_uid"
-                          namespace="detected"
-                        fi
-                      fi
-                    fi
-                    
-                    # MIG 환경에서는 gpu_id에 MIG 정보 포함 가능 (예: "0/0/0")
-                    gpu_display=$(echo "$gpu_id" | sed 's/\//_/g')  # 슬래시를 언더스코어로 변경
-                    
-                    # 해당 GPU에만 메트릭 생성 (CI ID 라벨 추가)
-                    echo "gpu_process_utilization{node=\"$node_name\",gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\",gpu_memory=\"${gpu_memory}MiB\",start_time=\"$process_start_time\",gi_id=\"$gi_id\",ci_id=\"$ci_id\"} $gpu_util" >> /tmp/gpu_processes.prom
-                    echo "gpu_process_memory_utilization{node=\"$node_name\",gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\",gpu_memory=\"${gpu_memory}MiB\",start_time=\"$process_start_time\",gi_id=\"$gi_id\",ci_id=\"$ci_id\"} $mem_util" >> /tmp/gpu_processes.prom
-                    echo "gpu_process_info{node=\"$node_name\",gpu=\"$gpu_display\",pid=\"$actual_pid\",command=\"$process_name\",pod=\"$pod_name\",namespace=\"$namespace\",container=\"$container_name\",status=\"active\",gpu_memory=\"${gpu_memory}MiB\",start_time=\"$process_start_time\",gi_id=\"$gi_id\",ci_id=\"$ci_id\"} 1" >> /tmp/gpu_processes.prom
-                    
-                    # 해당 GPU의 프로세스 카운트 증가
-                    current_count=$(cat /tmp/gpu_${gpu_id}_count.tmp 2>/dev/null || echo "0")
-                    echo $((current_count + 1)) > /tmp/gpu_${gpu_id}_count.tmp
-                    total_processes=$((total_processes + 1))
-                  fi
-                done
-              fi
+                      return {
+                          'pod_name': pod_name,
+                          'namespace': namespace,
+                          'container_name': container_name,
+                          'start_time': str(start_time)
+                      }
+                  except Exception as e:
+                      logger.warning(f"Error getting process info for PID {pid}: {e}")
+                      return {
+                          'pod_name': 'unknown',
+                          'namespace': 'unknown', 
+                          'container_name': 'unknown',
+                          'start_time': '0'
+                      }
               
-              # 각 GPU별 프로세스 카운트 및 idle 상태 처리 (동적)
-              echo "$gpu_list" | while read gpu_index; do
-                gpu_index=$(echo "$gpu_index" | tr -d ' ')
-                gpu_display=$(echo "$gpu_index" | sed 's/\//_/g')  # 슬래시를 언더스코어로 변경
-                process_count=$(cat /tmp/gpu_${gpu_index}_count.tmp 2>/dev/null || echo "0")
-                
-                # CI ID 정보 가져오기 (idle 상태용)
-                if [ -n "$mig_enabled" ] && [ "$mig_enabled" = "Enabled" ]; then
-                  ci_info=$(awk -F',' -v idx="$gpu_index" '$1==idx {print $3","$4}' /tmp/gpu_ci_mapping.txt)
-                  gi_id=$(echo "$ci_info" | cut -d',' -f1)
-                  ci_id=$(echo "$ci_info" | cut -d',' -f2)
-                  if [ -z "$gi_id" ] || [ "$gi_id" = "N/A" ]; then
-                    gi_id="none"
-                  fi
-                  if [ -z "$ci_id" ] || [ "$ci_id" = "N/A" ]; then
-                    ci_id="none"
-                  fi
-                else
-                  gi_id="none"
-                  ci_id="none"
-                fi
-                
-                echo "gpu_process_count{gpu=\"$gpu_display\",gi_id=\"$gi_id\",ci_id=\"$ci_id\"} $process_count" >> /tmp/gpu_processes.prom
-                
-                # 프로세스가 없는 GPU는 idle 상태로 표시 (CI ID 포함)
-                if [ "$process_count" -eq 0 ]; then
-                  echo "gpu_process_info{node=\"$node_name\",gpu=\"$gpu_display\",pid=\"none\",command=\"none\",pod=\"none\",namespace=\"none\",container=\"none\",status=\"idle\",gpu_memory=\"0MiB\",gi_id=\"$gi_id\",ci_id=\"$ci_id\"} 0" >> /tmp/gpu_processes.prom
-                fi
-              done
+              def collect_metrics(self):
+                  """Collect GPU process metrics"""
+                  with self.lock:
+                      try:
+                          logger.info("Starting GPU metrics collection...")
+                          
+                          # Clear all metrics
+                          gpu_process_count.clear()
+                          gpu_process_utilization.clear()
+                          gpu_process_memory_utilization.clear()
+                          gpu_process_info.clear()
+                          
+                          # Check MIG mode
+                          mig_mode = self.run_nvidia_smi('mig.mode.current')
+                          mig_enabled = mig_mode and 'Enabled' in mig_mode
+                          logger.info(f"MIG mode: {'Enabled' if mig_enabled else 'Disabled'}")
+                          
+                          # Get GPU list
+                          gpu_indices = self.run_nvidia_smi('index').split('\n')
+                          gpu_indices = [idx.strip() for idx in gpu_indices if idx.strip()]
+                          
+                          # Get GPU mapping
+                          if mig_enabled:
+                              gpu_mapping = {}
+                              uuid_list = self.run_nvidia_smi('index,uuid').split('\n')
+                              for line in uuid_list:
+                                  if line.strip():
+                                      parts = line.split(',')
+                                      if len(parts) >= 2:
+                                          gpu_mapping[parts[1].strip()] = parts[0].strip()
+                          else:
+                              gpu_mapping = {}
+                              bus_list = self.run_nvidia_smi('index,pci.bus_id').split('\n')
+                              for line in bus_list:
+                                  if line.strip():
+                                      parts = line.split(',')
+                                      if len(parts) >= 2:
+                                          gpu_mapping[parts[1].strip()] = parts[0].strip()
+                          
+                          # Get running processes
+                          total_processes = 0
+                          gpu_process_counts = {gpu_idx: 0 for gpu_idx in gpu_indices}
+                          
+                          try:
+                              if mig_enabled:
+                                  processes_output = subprocess.run([
+                                      'nvidia-smi', '--query-compute-apps=gpu_uuid,pid,process_name,used_gpu_memory',
+                                      '--format=csv,noheader,nounits'
+                                  ], capture_output=True, text=True, timeout=30)
+                              else:
+                                  processes_output = subprocess.run([
+                                      'nvidia-smi', '--query-compute-apps=gpu_bus_id,pid,process_name,used_gpu_memory', 
+                                      '--format=csv,noheader,nounits'
+                                  ], capture_output=True, text=True, timeout=30)
+                              
+                              if processes_output.returncode == 0 and processes_output.stdout.strip():
+                                  process_lines = processes_output.stdout.strip().split('\n')
+                                  
+                                  for line in process_lines:
+                                      if 'No running processes found' in line:
+                                          continue
+                                          
+                                      parts = [p.strip() for p in line.split(',')]
+                                      if len(parts) >= 4:
+                                          gpu_identifier, pid, process_name, gpu_memory = parts[:4]
+                                          
+                                          if pid and pid != '-' and pid.isdigit():
+                                              # Map GPU identifier to index
+                                              gpu_index = gpu_mapping.get(gpu_identifier, '0')
+                                              
+                                              # Get process info
+                                              proc_info = self.get_process_info(pid)
+                                              
+                                              # Get GPU utilization (simplified)
+                                              gpu_util = 0
+                                              mem_util = 0
+                                              
+                                              # Try to get utilization from nvidia-smi pmon
+                                              try:
+                                                  pmon_output = subprocess.run([
+                                                      'nvidia-smi', 'pmon', '-i', gpu_index, '-s', 'um', '-c', '1'
+                                                  ], capture_output=True, text=True, timeout=10)
+                                                  
+                                                  if pmon_output.returncode == 0:
+                                                      pmon_lines = pmon_output.stdout.split('\n')[2:]  # Skip header
+                                                      for pmon_line in pmon_lines:
+                                                          if pid in pmon_line:
+                                                              pmon_parts = pmon_line.split()
+                                                              if len(pmon_parts) >= 10:
+                                                                  try:
+                                                                      gpu_util = float(pmon_parts[3]) if pmon_parts[3].isdigit() else 0
+                                                                      used_mem = float(pmon_parts[9]) if pmon_parts[9].isdigit() else 0
+                                                                      total_mem_str = self.run_nvidia_smi('memory.total', gpu_index)
+                                                                      if total_mem_str.isdigit():
+                                                                          total_mem = float(total_mem_str)
+                                                                          mem_util = (used_mem / total_mem) * 100 if total_mem > 0 else 0
+                                                                  except:
+                                                                      pass
+                                                              break
+                                              except:
+                                                  pass
+                                              
+                                              # Create labels
+                                              labels = {
+                                                  'node': NODE_NAME,
+                                                  'gpu': gpu_index.replace('/', '_'),
+                                                  'pid': pid,
+                                                  'command': process_name,
+                                                  'pod': proc_info['pod_name'],
+                                                  'namespace': proc_info['namespace'],
+                                                  'container': proc_info['container_name'],
+                                                  'gpu_memory': f"{gpu_memory}MiB",
+                                                  'start_time': proc_info['start_time'],
+                                                  'gi_id': 'none',
+                                                  'ci_id': 'none'
+                                              }
+                                              
+                                              # Set metrics
+                                              gpu_process_utilization.labels(**labels).set(gpu_util)
+                                              gpu_process_memory_utilization.labels(**labels).set(mem_util)
+                                              gpu_process_info.labels(**{**labels, 'status': 'active'}).set(1)
+                                              
+                                              gpu_process_counts[gpu_index] += 1
+                                              total_processes += 1
+                              
+                          except Exception as e:
+                              logger.error(f"Error collecting process information: {e}")
+                          
+                          # Set process counts for each GPU
+                          for gpu_idx in gpu_indices:
+                              count = gpu_process_counts.get(gpu_idx, 0)
+                              gpu_process_count.labels(
+                                  gpu=gpu_idx.replace('/', '_'),
+                                  gi_id='none',
+                                  ci_id='none'
+                              ).set(count)
+                              
+                              # Set idle status for GPUs with no processes
+                              if count == 0:
+                                  gpu_process_info.labels(
+                                      node=NODE_NAME,
+                                      gpu=gpu_idx.replace('/', '_'),
+                                      pid='none',
+                                      command='none',
+                                      pod='none',
+                                      namespace='none',
+                                      container='none',
+                                      status='idle',
+                                      gpu_memory='0MiB',
+                                      start_time='0',
+                                      gi_id='none',
+                                      ci_id='none'
+                                  ).set(0)
+                          
+                          # Set total processes
+                          gpu_total_processes.set(total_processes)
+                          
+                          logger.info(f"Collected metrics for {len(gpu_indices)} GPUs, {total_processes} total processes")
+                          
+                      except Exception as e:
+                          logger.error(f"Error in metrics collection: {e}")
               
-              echo "gpu_total_processes $total_processes" >> /tmp/gpu_processes.prom
+              def start_collection_loop(self):
+                  """Start the metrics collection loop"""
+                  logger.info(f"Starting metrics collection loop (interval: {COLLECTION_INTERVAL}s)")
+                  while True:
+                      self.collect_metrics()
+                      time.sleep(COLLECTION_INTERVAL)
+          
+          def main():
+              logger.info(f"Starting GPU Process Exporter on port {METRICS_PORT}")
               
-              # 타임스탬프 추가
-              echo "# Generated at $(date)" >> /tmp/gpu_processes.prom
+              # Create collector
+              collector = GPUMetricsCollector()
               
-              # 임시 파일 정리
-              rm -f /tmp/gpu_mapping.txt /tmp/gpu_ci_mapping.txt /tmp/gpu_*_count.tmp /tmp/gpu_list.txt
+              # Start HTTP server
+              start_http_server(METRICS_PORT, registry=registry)
+              logger.info(f"HTTP server started on port {METRICS_PORT}")
               
-              # 메트릭 파일 이동
-              mv /tmp/gpu_processes.prom /host/var/lib/node_exporter/textfile_collector/gpu_processes.prom
+              # Initial collection
+              collector.collect_metrics()
               
-              echo "$(date): GPU process metrics collected with MIG-aware GPU mapping"
-              cat /host/var/lib/node_exporter/textfile_collector/gpu_processes.prom
-            
-            # 60초 대기 (1분마다 실행)
-            sleep 60
-          done
+              # Start collection loop
+              collector.start_collection_loop()
+          
+          if __name__ == '__main__':
+              main()
+          EOF
+          
+          # Make script executable and run
+          chmod +x /tmp/gpu_metrics_server.py
+          python3 /tmp/gpu_metrics_server.py
+        securityContext:
+          privileged: true
         resources:
-          {{- toYaml .Values.collection.resources | nindent 10 }}
+          {{- toYaml .Values.httpServer.resources | nindent 10 }}
         volumeMounts:
-        - name: host-var
-          mountPath: /host/var
         - name: host-proc
           mountPath: /host/proc
           readOnly: true
+        livenessProbe:
+          httpGet:
+            path: /metrics
+            port: {{ .Values.httpServer.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /metrics
+            port: {{ .Values.httpServer.port }}
+          initialDelaySeconds: 10
+          periodSeconds: 10
       volumes:
-      - name: host-var
-        hostPath:
-          path: /var
       - name: host-proc
         hostPath:
           path: /proc
+
+{{- if .Values.service.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gpu-process-exporter
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: gpu-process-exporter
+    chart: {{ include "gpu-process-exporter.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    {{- with .Values.service.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+  - port: {{ .Values.service.port }}
+    targetPort: {{ .Values.service.targetPort }}
+    protocol: TCP
+    name: metrics
+  selector:
+    app: gpu-process-exporter
+{{- end }}
+
+{{- if .Values.serviceMonitor.enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: gpu-process-exporter
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: gpu-process-exporter
+    chart: {{ include "gpu-process-exporter.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    {{- with .Values.serviceMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    {{- toYaml .Values.serviceMonitor.selector | nindent 4 }}
+  endpoints:
+  - port: metrics
+    interval: {{ .Values.serviceMonitor.interval }}
+    scrapeTimeout: {{ .Values.serviceMonitor.scrapeTimeout }}
+    path: /metrics
+{{- end }}
 {{- end }}

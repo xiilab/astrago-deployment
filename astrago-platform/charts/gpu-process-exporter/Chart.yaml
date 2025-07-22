@@ -1,18 +1,18 @@
 apiVersion: v2
 name: gpu-process-exporter
-description: GPU Process Exporter - Exports GPU process metrics to Prometheus via Node Exporter textfile collector
+description: GPU Process Exporter - Exports GPU process metrics to Prometheus via HTTP API + ServiceMonitor
 
 # A chart can be either an 'application' or a 'library' chart.
 type: application
 
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates. Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 1.0.0
+version: 2.0.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are expected to follow
 # Semantic Versioning (https://semver.org/)
-appVersion: "1.0.0"
+appVersion: "2.0.0"
 maintainers:
 - name: Astrago Team
   email: support@astrago.io
@@ -21,4 +21,6 @@ keywords:
 - monitoring
 - sessions
 - processes
-- prometheus 
+- prometheus
+- http-api
+- servicemonitor 
