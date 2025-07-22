@@ -37,6 +37,11 @@ keycloak:
   adminUser: admin
   adminPassword: xiirocks
   servicePort: 30001
+  themeVersion: "null"
+  image:
+    repository: xiilab/astrago-keycloak
+    tag: "null"
+    pullPolicy: Always
 # Astrago Settings
 astrago:
   proxyUrl:

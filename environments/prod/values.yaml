@@ -10,6 +10,11 @@ keycloak:
   adminUser: admin
   adminPassword: xiirocks
   servicePort: 30001
+  themeVersion: "null"
+  image:
+    repository: xiilab/astrago-keycloak
+    tag: "null"
+    pullPolicy: Always
 # Astrago Settings
 astrago:
   proxyUrl:
@@ -64,7 +69,6 @@ loki:
     compaction_interval: "10m"
     delete_delay: "2h"
     delete_worker_count: 150
-
 # Promtail Settings
 promtail:
   resources:
@@ -74,7 +78,6 @@ promtail:
     requests:
       cpu: "200m"
       memory: "512Mi"
-
 harbor:
   servicePort: 30002
   enabled: true

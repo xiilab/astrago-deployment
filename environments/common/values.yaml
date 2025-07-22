@@ -1,14 +1,12 @@
 keycloak:
-  themeVersion: v1.1.5
-
+  themeVersion: "null"
 # GPU Process Exporter - Exports GPU process metrics to Prometheus
 gpu-process-exporter:
   enabled: true
-
 # Loki Stack - Complete logging solution with Loki and Promtail
 loki:
   enabled: true
-  retentionPeriod: "744h"  # 31 days
+  retentionPeriod: "744h" # 31 days
   replicas: 1
   resources:
     limits:
@@ -21,7 +19,6 @@ loki:
     enabled: true
     size: "10Gi"
     storageClass: "astrago-nfs-csi"
-
 promtail:
   enabled: true
   resources:
