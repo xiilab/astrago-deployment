@@ -137,6 +137,23 @@ main() {
                 helmfile -e "$environment_name" -l "app=$2" "$1"
             else
                 echo "Running helmfile -e $environment_name $1."
+                
+                # Uyuni theme auto-update (only for sync)
+                if [ "$1" = "sync" ]; then
+                    echo "=== Uyuni Theme Auto-Update ==="
+                    if [ -f "scripts/offline-uyuni-theme.sh" ]; then
+                        echo "Updating Uyuni theme version automatically..."
+                        if ./scripts/offline-uyuni-theme.sh; then
+                            echo "Uyuni theme update completed"
+                        else
+                            echo "Uyuni theme update failed (continuing...)"
+                        fi
+                    else
+                        echo "offline-uyuni-theme.sh script not found (continuing...)"
+                    fi
+                    echo ""
+                fi
+                
                 helmfile -e "$environment_name" "$1"
             fi
             ;;

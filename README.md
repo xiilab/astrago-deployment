@@ -85,6 +85,9 @@
 🔗 **[Prometheus ↔ Loki 자동 연동](docs/prometheus-loki-integration.md)**  
 *설치 시 자동으로 모니터링 통합 환경 구축*
 
+🎨 **[Uyuni 테마 자동화](docs/uyuni-theme-automation-setup.md)**  
+*테마 변경 자동 감지 및 배포*
+
 </td>
 </tr>
 </table>
