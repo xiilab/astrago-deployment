@@ -2730,8 +2730,8 @@ spec:
       initContainers:
       containers:
         - name: keycloak
-          image: docker.io/bitnami/keycloak:22.0.5-debian-11-r2
-          imagePullPolicy: IfNotPresent
+          image: docker.io/xiilab/astrago-keycloak-theme:latest
+          imagePullPolicy: Always
           lifecycle:
             postStart:
               exec:

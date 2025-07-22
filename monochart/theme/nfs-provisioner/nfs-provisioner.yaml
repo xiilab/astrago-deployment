@@ -39,7 +39,7 @@ metadata:
 provisioner: nfs.csi.k8s.io
 parameters:
   server: 10.61.3.2
-  share: /kube_storage/stage-astrago
+  share: /kube_storage/develop-astrago
 reclaimPolicy: Retain
 volumeBindingMode: Immediate
 mountOptions:

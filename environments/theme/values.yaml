@@ -39,7 +39,7 @@ keycloak:
   themeVersion: "latest"
   image:
     repository: xiilab/astrago-keycloak-theme
-    tag: "latest"
+    tag: "05dc"
     pullPolicy: Always
 # Astrago Settings
 astrago:
