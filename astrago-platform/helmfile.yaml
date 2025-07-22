@@ -51,6 +51,7 @@ helmDefaults:
   createNamespace: true
 
 releases:
+# 1단계: 기반 인프라 (의존성 없음)
 - name: nfs-provisioner
   namespace: nfs-provisioner
   chart: charts/csi-driver-nfs
@@ -59,6 +60,13 @@ releases:
     app: nfs-provisioner
   values:
   - values/csi-driver-nfs/values.yaml.gotmpl
+
+- name: keycloak-extras
+  namespace: keycloak
+  chart: charts/keycloak-extras
+  version: 1.0.0
+  labels:
+    app: keycloak
 
 - name: gpu-operator
   namespace: gpu-operator
@@ -70,25 +78,6 @@ releases:
   values:
   - values/gpu-operator/values.yaml.gotmpl
 
-- name: gpu-operator-extras
-  namespace: gpu-operator
-  chart: charts/gpu-operator-extras
-  version: 1.0.0
-  labels:
-    app: gpu-operator
-    type: infra
-  needs:
-  - gpu-operator
-
-- name: gpu-process-exporter
-  chart: charts/gpu-process-exporter
-  namespace: gpu-operator
-  version: 1.0.0
-  labels:
-    app: gpu-process-exporter
-  values:
-  - values/gpu-process-exporter/values.yaml.gotmpl
-
 - name: volcano
   namespace: volcano-system
   chart: charts/volcano
@@ -97,15 +86,6 @@ releases:
     app: volcano
   values:
   - values/volcano/values.yaml
-
-- name: volcano-vgpu-device-plugin
-  namespace: volcano-system
-  chart: charts/volcano-vgpu-device-plugin
-  version: 1.0.0
-  labels:
-    app: volcano
-  needs:
-  - volcano    
 
 - name: flux
   namespace: flux
@@ -116,29 +96,46 @@ releases:
   values:
   - values/flux/values.yaml.gotmpl
 
-- name: loki-stack
-  namespace: loki-stack
-  chart: charts/loki-stack
+- name: mpi-operator
+  chart: charts/mpi-operator
+  version: 0.1.0
+  labels:
+    app: mpi-operator
+  values:
+  - values/mpi-operator/values.yaml.gotmpl
+
+# 2단계: 확장 구성요소 (명확한 의존성은 needs 유지)
+- name: gpu-operator-extras
+  namespace: gpu-operator
+  chart: charts/gpu-operator-extras
   version: 1.0.0
   labels:
-    app: loki-stack
-    component: logging
-  values:
-  - values/loki-stack/values.yaml.gotmpl
+    app: gpu-operator
+    type: infra
   needs:
-  - nfs-provisioner/nfs-provisioner
+  - gpu-operator/gpu-operator
 
-- name: prometheus
-  namespace: prometheus
-  chart: charts/kube-prometheus-stack
-  version: 55.4.0
+- name: gpu-process-exporter
+  chart: charts/gpu-process-exporter
+  namespace: gpu-operator
+  version: 1.0.0
   labels:
-    app: prometheus
+    app: gpu-process-exporter
   values:
-  - values/kube-prometheus-stack/values.yaml.gotmpl
+  - values/gpu-process-exporter/values.yaml.gotmpl
   needs:
-  - nfs-provisioner/nfs-provisioner
+  - gpu-operator/gpu-operator
 
+- name: volcano-vgpu-device-plugin
+  namespace: volcano-system
+  chart: charts/volcano-vgpu-device-plugin
+  version: 1.0.0
+  labels:
+    app: volcano
+  needs:
+  - volcano-system/volcano
+
+# 3단계: 미들웨어 서비스 (순서로 nfs 의존성 해결)
 - name: keycloak
   namespace: keycloak
   chart: charts/keycloak
@@ -148,23 +145,26 @@ releases:
   values:
   - values/keycloak/values.yaml.gotmpl
   needs:
-  - nfs-provisioner/nfs-provisioner
-  - keycloak-extras
+  - keycloak/keycloak-extras
 
-- name: keycloak-extras
-  namespace: keycloak
-  chart: charts/keycloak-extras
+- name: loki-stack
+  namespace: loki-stack
+  chart: charts/loki-stack
   version: 1.0.0
   labels:
-    app: keycloak
-
-- name: mpi-operator
-  chart: charts/mpi-operator
-  version: 0.1.0
-  labels:
-    app: mpi-operator
+    app: loki-stack
+    component: logging
   values:
-  - values/mpi-operator/values.yaml.gotmpl
+  - values/loki-stack/values.yaml.gotmpl
+
+- name: prometheus
+  namespace: prometheus
+  chart: charts/kube-prometheus-stack
+  version: 55.4.0
+  labels:
+    app: prometheus
+  values:
+  - values/kube-prometheus-stack/values.yaml.gotmpl
 
 - name: harbor
   namespace: harbor
@@ -175,9 +175,8 @@ releases:
     app: harbor
   values:
   - values/harbor/values.yaml.gotmpl
-  needs:
-  - nfs-provisioner/nfs-provisioner
 
+# 4단계: 메인 애플리케이션 (순서로 keycloak 의존성 해결)
 - name: astrago
   namespace: astrago
   chart: charts/astrago
@@ -186,6 +185,3 @@ releases:
     app: astrago
   values:
   - values/astrago/values.yaml.gotmpl
-  needs:
-  - nfs-provisioner/nfs-provisioner
-  - keycloak/keycloak
