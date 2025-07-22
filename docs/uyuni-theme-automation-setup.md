@@ -6,9 +6,9 @@
 
 ## 🎯 워크플로우 동작 과정
 
-1. **uyuni-login-theme**에서 테마 파일 변경 감지
-2. **astrago-deployment** 워크플로우 자동 트리거
-3. **uyuni-login-theme** 체크아웃하여 최신 버전 확인
+1. **uyuni-login-theme**의 `feature/keycloak-astrago-theme` 브랜치에서 테마 파일 변경 감지
+2. **astrago-deployment**의 `feature/keycloak-astrago-theme` 브랜치 워크플로우 자동 트리거
+3. **uyuni-login-theme**의 `feature/keycloak-astrago-theme` 브랜치 체크아웃하여 최신 버전 확인
 4. **Dockerfile.keycloak**로 도커 이미지 빌드 (JAR 파일 다운로드 포함)
 5. **Docker Hub**에 `xiilab/astrago-keycloak:버전` 푸시
 6. **astrago-deployment**의 모든 환경 `values.yaml` 업데이트
@@ -119,8 +119,8 @@ Docker Hub 액세스 토큰이 없다면:
 
 ### 2. 자동 트리거 테스트
 
-1. uyuni-login-theme에서 새로운 릴리즈 생성
-2. astrago-deployment의 Actions 탭에서 워크플로우 자동 실행 확인
+1. uyuni-login-theme의 `feature/keycloak-astrago-theme` 브랜치에서 새로운 릴리즈 생성
+2. astrago-deployment의 `feature/keycloak-astrago-theme` 브랜치 Actions 탭에서 워크플로우 자동 실행 확인
 3. 생성된 Docker 이미지 확인: `docker.io/xiilab/astrago-keycloak:버전`
 4. monochart 파일 업데이트 확인
 
@@ -164,9 +164,15 @@ Docker Hub 액세스 토큰이 없다면:
 
 설정이 완료되면 다음을 확인하세요:
 
-1. **uyuni-login-theme**에서 테마 변경시 자동으로 워크플로우 실행
+1. **uyuni-login-theme**의 `feature/keycloak-astrago-theme` 브랜치에서 테마 변경시 자동으로 워크플로우 실행
 2. **Docker Hub**에 새로운 이미지 푸시
-3. **astrago-deployment**의 monochart 파일 자동 업데이트
+3. **astrago-deployment**의 `feature/keycloak-astrago-theme` 브랜치 monochart 파일 자동 업데이트
 4. **Git 커밋** 및 **태그** 자동 생성
 
-이제 uyuni 테마 변경이 완전히 자동화됩니다! 🚀 
+이제 uyuni 테마 변경이 완전히 자동화됩니다! 🚀
+
+## 📝 브랜치 제한 사항
+
+- **uyuni-login-theme**: `feature/keycloak-astrago-theme` 브랜치의 변경사항만 감지
+- **astrago-deployment**: `feature/keycloak-astrago-theme` 브랜치에서만 워크플로우 실행
+- **다른 브랜치**: master, develop 등 다른 브랜치의 변경사항은 감지하지 않음 
