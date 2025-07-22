@@ -1,0 +1,182 @@
+# Promtail Configuration - Official Grafana Helm Chart  
+# Deploy Promtail as DaemonSet to collect logs from all nodes
+
+# Override service name for consistency (keep existing naming convention)
+nameOverride: loki-stack-promtail
+fullnameOverride: loki-stack-promtail
+
+global:
+  # Use offline registry if configured
+  imageRegistry: {{ .Values.offline.registry | default "docker.io" }}
+
+# DaemonSet configuration (default and recommended)
+daemonset:
+  enabled: true
+  
+# Deployment mode disabled  
+deployment:
+  enabled: false
+
+# Image configuration
+image:
+  registry: {{ .Values.offline.registry | default "docker.io" }}
+  repository: grafana/promtail
+  tag: "3.5.1"  # Latest stable version
+  pullPolicy: IfNotPresent
+
+# Resource limits
+resources:
+  limits:
+    cpu: {{ .Values.promtail.resources.limits.cpu | default "200m" | quote }}
+    memory: {{ .Values.promtail.resources.limits.memory | default "512Mi" | quote }}
+  requests:
+    cpu: {{ .Values.promtail.resources.requests.cpu | default "100m" | quote }}
+    memory: {{ .Values.promtail.resources.requests.memory | default "256Mi" | quote }}
+
+# Promtail configuration
+config:
+  # Server configuration
+  server:
+    http_listen_port: 3101
+    grpc_listen_port: 0
+    
+  # Position file location
+  positions:
+    filename: /run/promtail/positions.yaml
+    
+  # Loki client configuration
+  clients:
+    - url: http://loki-stack-loki.loki-stack.svc.cluster.local:3100/loki/api/v1/push
+      
+  # Scrape configuration for Kubernetes logs
+  scrape_configs:
+    - job_name: kubernetes-pods
+      kubernetes_sd_configs:
+        - role: pod
+      pipeline_stages:
+        - cri: {}
+      relabel_configs:
+        # Add namespace label
+        - source_labels:
+            - __meta_kubernetes_namespace
+          target_label: namespace
+          
+        # Add pod name label  
+        - source_labels:
+            - __meta_kubernetes_pod_name
+          target_label: pod
+          
+        # Add container name label
+        - source_labels:
+            - __meta_kubernetes_pod_container_name
+          target_label: container
+          
+        # Add node name label
+        - source_labels:
+            - __meta_kubernetes_pod_node_name
+          target_label: node_name
+          
+        # Add app label from various sources
+        - source_labels:
+            - __meta_kubernetes_pod_label_app_kubernetes_io_name
+            - __meta_kubernetes_pod_label_app
+            - __meta_kubernetes_pod_controller_name
+          regex: ^([^;]+).*|^;([^;]+).*|^;;(.+)$
+          target_label: app
+          replacement: $1$2$3
+          
+        # Add component label
+        - source_labels:
+            - __meta_kubernetes_pod_label_app_kubernetes_io_component
+            - __meta_kubernetes_pod_label_component
+          regex: ^([^;]+).*|^;([^;]+).*$
+          target_label: component
+          replacement: $1$2
+          
+        # Create job label
+        - source_labels:
+            - namespace
+            - app
+          target_label: job
+          separator: /
+          replacement: $1/$2
+          
+        # Set log file path
+        - source_labels:
+            - __meta_kubernetes_pod_uid
+            - __meta_kubernetes_pod_container_name
+          target_label: __path__
+          separator: /
+          replacement: /var/log/pods/*$1/*.log
+
+# Security context for accessing host logs
+securityContext:
+  runAsUser: 0
+  runAsGroup: 0
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+# Pod security context
+podSecurityContext:
+  runAsUser: 0
+  runAsGroup: 0
+
+# Volume mounts for log access
+extraVolumes:
+  - name: varlog
+    hostPath:
+      path: /var/log
+  - name: varlibdockercontainers
+    hostPath:
+      path: /var/lib/docker/containers
+      
+extraVolumeMounts:
+  - name: varlog
+    mountPath: /var/log
+    readOnly: true
+  - name: varlibdockercontainers
+    mountPath: /var/lib/docker/containers
+    readOnly: true
+
+# Service account configuration
+serviceAccount:
+  create: true
+  name: promtail
+
+# RBAC configuration  
+rbac:
+  create: true
+  pspEnabled: false
+
+# Service monitor for Prometheus (optional)
+serviceMonitor:
+  enabled: false
+
+# Tolerations to run on all nodes
+tolerations:
+  - key: node-role.kubernetes.io/master
+    operator: Exists
+    effect: NoSchedule
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
+
+# Node selector (run on all nodes)
+nodeSelector: {}
+
+# Update strategy
+updateStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 1
+
+# Pod annotations
+podAnnotations: {}
+
+# Pod labels
+podLabels: {}
+
+# Priority class
+priorityClassName: "" 

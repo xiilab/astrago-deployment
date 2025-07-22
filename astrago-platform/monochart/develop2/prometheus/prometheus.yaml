@@ -42554,7 +42554,7 @@ data:
         maxLines: 1000
       name: Loki
       type: loki
-      url: http://loki-stack.loki-stack.svc.cluster.local:3100
+      url: http://loki-stack-loki.loki-stack.svc.cluster.local:3100
   dashboardproviders.yaml: |
     apiVersion: 1
     providers:
