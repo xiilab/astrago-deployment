@@ -14,7 +14,7 @@ keycloak:
   servicePort: 30001
   image:
     repository: xiilab/astrago-keycloak-theme
-    tag: "7a26" # common/values.yaml의 themeVersion과 동기화
+    tag: "45fc" # common/values.yaml의 themeVersion과 동기화
     pullPolicy: Always
 # Astrago Settings
 astrago:
