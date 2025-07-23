@@ -1,5 +1,5 @@
 # externalIP:
-externalIP: 10.61.3.161
+externalIP: 10.61.3.31
 # externalIP: 59.10.103.94
 # Volume Settings
 nfs:
@@ -12,10 +12,9 @@ keycloak:
   adminUser: admin
   adminPassword: xiirocks
   servicePort: 30001
-  themeVersion: "null"
   image:
     repository: xiilab/astrago-keycloak-theme
-    tag: "7a26"
+    tag: "7a26"  # common/values.yaml의 themeVersion과 동기화
     pullPolicy: Always
 # Astrago Settings
 astrago:

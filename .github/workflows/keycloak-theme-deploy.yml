@@ -48,7 +48,7 @@ jobs:
           echo "Theme version from common/values.yaml: $THEME_VERSION"
           
           # Update dev environment values
-          if [ -f "environments/dev/values.yaml" ]; then
+          if [ -f "environments/theme/values.yaml" ]; then
             yq eval '.keycloak.image.repository = "xiilab/astrago-keycloak-theme"' -i environments/theme/values.yaml
             yq eval ".keycloak.image.tag = \"$THEME_VERSION\"" -i environments/theme/values.yaml
             yq eval '.keycloak.image.pullPolicy = "Always"' -i environments/theme/values.yaml
