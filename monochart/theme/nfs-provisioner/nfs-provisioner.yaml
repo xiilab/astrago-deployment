@@ -38,8 +38,8 @@ metadata:
     helm.sh/chart: "csi-driver-nfs-v4.7.0"
 provisioner: nfs.csi.k8s.io
 parameters:
-  server: 10.61.3.2
-  share: /kube_storage/develop-astrago
+  server: 
+  share: 
 reclaimPolicy: Retain
 volumeBindingMode: Immediate
 mountOptions:
