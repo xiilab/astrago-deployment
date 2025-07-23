@@ -19,6 +19,10 @@ environments:
     values:
     - environments/common/values.yaml
     - environments/astrago/values.yaml
+  theme:
+    values:
+    - environments/common/values.yaml
+    - environments/theme/values.yaml
 
 helmDefaults:
   wait: true
