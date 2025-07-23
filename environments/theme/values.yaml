@@ -15,7 +15,7 @@ keycloak:
   themeVersion: "null"
   image:
     repository: xiilab/astrago-keycloak-theme
-    tag: "9ea3"
+    tag: "7a26"
     pullPolicy: Always
 # Astrago Settings
 astrago:
