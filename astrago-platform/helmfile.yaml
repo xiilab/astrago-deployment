@@ -43,7 +43,7 @@ environments:
     values:
     - environments/common/values.yaml
     - environments/astrago/values.yaml
-
+---
 helmDefaults:
   wait: true
   waitForJobs: true

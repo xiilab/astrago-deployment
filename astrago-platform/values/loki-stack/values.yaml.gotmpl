@@ -1,127 +1,39 @@
-# Loki Stack Configuration - Official Grafana loki-stack Chart
-# Complete logging solution with Loki and Promtail
+# Loki Stack Configuration - Override only what we need
 
-# Test pod configuration
+# Test pod 비활성화
 test_pod:
-  enabled: false  # Disable test pod
+  enabled: false
 
-# Loki configuration
+# Loki 설정 override
 loki:
-  enabled: true
-  isDefault: true
-  
+  # 오프라인 레지스트리 설정
   image:
     registry: {{ .Values.offline.registry | default "docker.io" }}
     repository: grafana/loki
     tag: "2.9.6"
     pullPolicy: IfNotPresent
   
-  # Resource limits
-  resources:
-    limits:
-      cpu: {{ .Values.loki.resources.limits.cpu | default "1000m" | quote }}
-      memory: {{ .Values.loki.resources.limits.memory | default "2Gi" | quote }}
-    requests:
-      cpu: {{ .Values.loki.resources.requests.cpu | default "500m" | quote }}
-      memory: {{ .Values.loki.resources.requests.memory | default "1Gi" | quote }}
-  
-  # Persistence configuration
+  # Persistence 설정 (NFS 사용)
   persistence:
     enabled: {{ .Values.loki.persistence.enabled | default true }}
     size: {{ .Values.loki.persistence.size | default "10Gi" | quote }}
     storageClassName: {{ .Values.loki.persistence.storageClass | default "astrago-nfs-csi" | quote }}
-  
-  # Loki configuration
-  config:
-    auth_enabled: false
-    
-    server:
-      http_listen_port: 3100
-      grpc_listen_port: 9095
-      
-    ingester:
-      wal:
-        enabled: true
-        dir: /loki/wal
-      lifecycler:
-        address: 127.0.0.1
-        ring:
-          kvstore:
-            store: inmemory
-          replication_factor: 1
-          
-    schema_config:
-      configs:
-        - from: 2020-10-24
-          store: boltdb-shipper
-          object_store: filesystem
-          schema: v11
-          index:
-            prefix: index_
-            period: 24h
-            
-    storage_config:
-      boltdb_shipper:
-        active_index_directory: /loki/boltdb-shipper-active
-        cache_location: /loki/boltdb-shipper-cache
-        shared_store: filesystem
-      filesystem:
-        directory: /loki/chunks
-        
-    compactor:
-      working_directory: /loki/compactor
-      retention_enabled: {{ .Values.loki.retention.enabled | default true }}
-      retention_delete_delay: {{ .Values.loki.retention.delete_delay | default "2h" | quote }}
-      retention_delete_worker_count: {{ .Values.loki.retention.delete_worker_count | default 150 }}
-      
-    limits_config:
-      retention_period: {{ .Values.loki.retention.period | default "720h" | quote }}  # 30 days
-      ingestion_rate_mb: 16
-      ingestion_burst_size_mb: 32
-      reject_old_samples: true
-      reject_old_samples_max_age: 168h  # 7 days
-      
-  # Service configuration  
-  service:
-    type: ClusterIP
-    port: 3100
 
-# Promtail configuration
+# Promtail 설정 override  
 promtail:
-  enabled: true
-  
+  # 오프라인 레지스트리 설정
   image:
     registry: {{ .Values.offline.registry | default "docker.io" }}
     repository: grafana/promtail
     tag: "2.9.6"
     pullPolicy: IfNotPresent
-  
-  # Resource limits
-  resources:
-    limits:
-      cpu: {{ .Values.promtail.resources.limits.cpu | default "200m" | quote }}
-      memory: {{ .Values.promtail.resources.limits.memory | default "512Mi" | quote }}
-    requests:
-      cpu: {{ .Values.promtail.resources.requests.cpu | default "100m" | quote }}
-      memory: {{ .Values.promtail.resources.requests.memory | default "256Mi" | quote }}
-  
-  # Promtail configuration
-  config:
-    logLevel: info
-    serverPort: 3101
-    clients:
-      - url: http://{{ .Release.Name }}:3100/loki/api/v1/push
-        
-  # Security context for accessing host logs
+
+  # 호스트 로그 접근을 위한 권한 설정
   securityContext:
     runAsUser: 0
     runAsGroup: 0
-    readOnlyRootFilesystem: true
-    capabilities:
-      drop:
-        - ALL
 
-  # Tolerations to run on all nodes
+  # 모든 노드에서 실행하기 위한 toleration
   tolerations:
     - key: node-role.kubernetes.io/master
       operator: Exists
@@ -130,7 +42,7 @@ promtail:
       operator: Exists
       effect: NoSchedule
 
-# Disable other components
+# 다른 컴포넌트들 명시적으로 비활성화 (이미 기본값이지만 명확하게)
 grafana:
   enabled: false
 
@@ -145,9 +57,3 @@ filebeat:
 
 logstash:
   enabled: false
-
-# Proxy configuration (disabled)
-proxy:
-  http_proxy: ""
-  https_proxy: ""
-  no_proxy: "" 
