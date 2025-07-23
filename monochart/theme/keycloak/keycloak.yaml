@@ -2730,7 +2730,7 @@ spec:
       initContainers:
       containers:
         - name: keycloak
-          image: docker.io/xiilab/astrago-keycloak-theme:0baf
+          image: docker.io/xiilab/astrago-keycloak-theme:dfd5
           imagePullPolicy: Always
           lifecycle:
             postStart:
