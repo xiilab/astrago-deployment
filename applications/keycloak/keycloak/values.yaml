@@ -93,14 +93,14 @@ diagnosticMode:
 ##
 image:
   registry: docker.io
-  repository: bitnami/keycloak
-  tag: 22.0.5-debian-11-r2
+  repository: xiilab/astrago-keycloak-spi-userattribute
+  tag: latest
   digest: ""
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
   ##
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -1112,3 +1112,15 @@ cache:
 logging:
   output: default
   level: INFO
+
+## @section Astrago SPI parameters
+
+## Astrago User Storage Provider configuration
+## @param astragoSpi.enabled Enable Astrago User Storage Provider
+## @param astragoSpi.apiUrl Astrago LDAP API URL
+## @param astragoSpi.apiToken Astrago LDAP API Token
+##
+astragoSpi:
+  enabled: true
+  apiUrl: "http://astrago-ldap:8080"
+  apiToken: ""

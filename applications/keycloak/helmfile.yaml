@@ -8,3 +8,12 @@ releases:
     app: keycloak
   values:
   - values.yaml.gotmpl
+  set:
+  - name: keycloak.adminUser
+    value: admin
+  - name: keycloak.adminPassword
+    value: xiirocks
+  - name: keycloak.servicePort
+    value: 30001
+  - name: nfs.storageClassName
+    value: astrago-nfs-csi

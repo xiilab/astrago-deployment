@@ -1,6 +1,19 @@
 auth:
   adminUser: admin
   adminPassword: "xiirocks"
+
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  hostname: 10.61.3.33.nip.io
+  path: /auth
+  pathType: Prefix
+  servicePort: http
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
 service:
   type: NodePort
   nodePorts:
