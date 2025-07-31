@@ -47,9 +47,8 @@ SPI JAR 파일이 복사되는 것은 내부 로직이지만, **외부(웹)에�
 
 #### 등록 경로:
 1. Keycloak Admin Console 접속 (`http://your-keycloak-url/auth/admin/`)
-2. **Events** → **Config** 탭
-3. **Event Listeners** 섹션에서 `astrago-event-listener` 추가
-4. **Save** 버튼 클릭
+2. **astrago Realm 선택** → **Realm setting 선택** → **Events** → **Events listeners** → **astrago-event-listener** 클릭
+3. **Save** 버튼 클릭
 
 #### Event Listener ID:
 ```
@@ -80,8 +79,7 @@ docker push xiilab/astrago-keycloak-spi-userattribute:latest
 
 #### 배포:
 ```bash
-cd ../applications/keycloak
-helmfile apply
+./deploy_astrago.sh sync keycloak
 ```
 
 ## SPI가 필요한 이유
@@ -90,9 +88,8 @@ helmfile apply
 LDAP 연동 사용자가 Keycloak에 로그인할 때, Astrago 시스템에서 필요한 기본 속성들을 자동으로 추가하기 위함입니다.
 
 ### 동작 원리
-- 사용자 LOGIN 또는 REGISTER 이벤트 발생 시
-- LDAP 사용자인지 확인 (federationLink 존재 여부)
-- LDAP 사용자인 경우 3가지 속성을 자동 추가
+- 사용자 LOGIN 이벤트 발생 시
+- LDAP 사용자, keycloak 에서 직접 등록한 사용자 상관없이 모두 추가됨.
 
 ## 추가되는 3가지 속성
 
@@ -113,17 +110,10 @@ LDAP 연동 사용자가 Keycloak에 로그인할 때, Astrago 시스템에서 �
 - **Docker Hub 이미지**: `xiilab/astrago-keycloak-spi-userattribute:latest`
 - **기반 이미지**: `bitnami/keycloak:22.0.5`
 
-## 테스트 계정
-
-- **admin** / admin123
-- **user1** / user123
 
 ## 주의 사항
 
 1. **빌드 순서 중요**: Docker 이미지 빌드 전에 반드시 `mvn clean package -DskipTests`로 JAR 파일을 먼저 생성해야 합니다.
-
 2. **Event Listener 등록**: SPI가 제대로 동작하려면 Keycloak Admin Console에서 Event Listener를 수동으로 등록해야 합니다.
-
 3. **LDAP 사용자만 대상**: 로컬 사용자가 아닌 LDAP 연동 사용자에게만 속성이 추가됩니다.
-
 4. **중복 방지**: 이미 속성이 존재하는 경우 중복으로 추가하지 않습니다.
