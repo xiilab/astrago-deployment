@@ -50,6 +50,12 @@ helmfiles:
   values:
   - {{ toYaml .Values | nindent 4 }}
 
+# LDAP 연동을 위한 OpenLDAP 애플리케이션 (현재 주석처리됨)
+# 해당 설정은 docs/ldap-integration-work-plan.md의 "주석처리된 LDAP 관련 설정" 섹션 참조
+# - path: applications/openldap/helmfile.yaml
+#   values:
+#   - {{ toYaml .Values | nindent 4 }}
+
 - path: applications/mpi-operator/helmfile.yaml
   values:
   - {{ toYaml .Values | nindent 4 }}

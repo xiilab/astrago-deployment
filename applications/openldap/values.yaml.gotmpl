@@ -1,0 +1,36 @@
+# LDAP 연동을 위한 OpenLDAP Values 설정 (현재 주석처리됨)
+# 해당 설정은 docs/ldap-integration-work-plan.md의 "주석처리된 LDAP 관련 설정" 섹션 참조
+
+# # OpenLDAP Configuration
+# LDAP_DOMAIN: {{ .Values.ldap.domain | default "example.com" }}
+# LDAP_TLS: {{ .Values.ldap.tls | default false }}
+# 
+# # Persistence
+# persistence:
+#   enabled: {{ .Values.persistence.enabled | default true }}
+#   storageClass: {{ .Values.persistence.storageClass | default "astrago-nfs-csi" }}
+#   size: {{ .Values.persistence.size | default "8Gi" }}
+# 
+# # Admin credentials
+# adminPassword: {{ .Values.admin.password | default "admin" }}
+# configPassword: {{ .Values.config.password | default "admin" }}
+# 
+# # Service configuration
+# service:
+#   type: ClusterIP
+#   port: 389
+# 
+# # Resources
+# resources:
+#   requests:
+#     memory: {{ .Values.resources.requests.memory | default "256Mi" }}
+#     cpu: {{ .Values.resources.requests.cpu | default "100m" }}
+#   limits:
+#     memory: {{ .Values.resources.limits.memory | default "512Mi" }}
+#     cpu: {{ .Values.resources.limits.cpu | default "200m" }}
+# 
+# # Security context
+# securityContext:
+#   enabled: true
+#   runAsUser: 1001
+#   fsGroup: 1001 

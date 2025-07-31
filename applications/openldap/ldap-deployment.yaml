@@ -1,0 +1,371 @@
+# LDAP Integration Deployment Configuration
+# This file contains all the deployment configurations for LDAP integration with AstraGo
+
+---
+# OpenLDAP Deployment
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ldap
+  labels:
+    name: ldap
+    app: ldap-integration
+
+---
+# OpenLDAP ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ldap-config
+  namespace: ldap
+data:
+  LDAP_DOMAIN: "example.com"
+  LDAP_TLS: "false"
+  LDAP_ORGANISATION: "AstraGo"
+  LDAP_BASE_DN: "dc=example,dc=com"
+  LDAP_USERS_DN: "ou=users,dc=example,dc=com"
+  LDAP_GROUPS_DN: "ou=groups,dc=example,dc=com"
+
+---
+# OpenLDAP Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ldap-secret
+  namespace: ldap
+type: Opaque
+data:
+  adminPassword: YWRtaW4=  # admin
+  configPassword: YWRtaW4=  # admin
+
+---
+# OpenLDAP PersistentVolumeClaim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ldap-data
+  namespace: ldap
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: astrago-nfs-csi
+  resources:
+    requests:
+      storage: 8Gi
+
+---
+# OpenLDAP Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: ldap-openldap
+  namespace: ldap
+  labels:
+    app: ldap-openldap
+spec:
+  type: ClusterIP
+  ports:
+    - port: 389
+      targetPort: 389
+      protocol: TCP
+      name: ldap
+  selector:
+    app: ldap-openldap
+
+---
+# phpLDAPadmin ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: phpldapadmin-config
+  namespace: ldap
+data:
+  PHPLDAPADMIN_LDAP_HOSTS: "ldap-openldap.ldap.svc.cluster.local"
+  PHPLDAPADMIN_HTTPS: "false"
+  PHPLDAPADMIN_TRUST_PROXY_SSL: "true"
+
+---
+# phpLDAPadmin Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: phpldapadmin
+  namespace: ldap
+  labels:
+    app: phpldapadmin
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+  selector:
+    app: phpldapadmin
+
+---
+# LDAP Initialization Job
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ldap-init
+  namespace: ldap
+spec:
+  template:
+    spec:
+      containers:
+      - name: ldap-init
+        image: osixia/openldap:1.5.0
+        command:
+        - /bin/bash
+        - -c
+        - |
+          # Wait for LDAP server to be ready
+          sleep 30
+          
+          # Add organizational units
+          ldapadd -x -H ldap://ldap-openldap:389 -D "cn=admin,dc=example,dc=com" -w admin << EOF
+          dn: ou=users,dc=example,dc=com
+          objectClass: organizationalUnit
+          ou: users
+          
+          dn: ou=groups,dc=example,dc=com
+          objectClass: organizationalUnit
+          ou: groups
+          EOF
+          
+          # Add test user
+          ldapadd -x -H ldap://ldap-openldap:389 -D "cn=admin,dc=example,dc=com" -w admin << EOF
+          dn: uid=testuser,ou=users,dc=example,dc=com
+          objectClass: inetOrgPerson
+          objectClass: top
+          cn: Test User
+          sn: User
+          uid: testuser
+          mail: testuser@example.com
+          userPassword: testpass123
+          signUpPath: ASTRAGO
+          workspaceCreateLimit: 10
+          approvalYN: true
+          EOF
+          
+          # Add test group
+          ldapadd -x -H ldap://ldap-openldap:389 -D "cn=admin,dc=example,dc=com" -w admin << EOF
+          dn: cn=astrago-users,ou=groups,dc=example,dc=com
+          objectClass: groupOfNames
+          objectClass: top
+          cn: astrago-users
+          member: uid=testuser,ou=users,dc=example,dc=com
+          EOF
+      restartPolicy: OnFailure
+      serviceAccountName: ldap-init-sa
+
+---
+# ServiceAccount for LDAP initialization
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ldap-init-sa
+  namespace: ldap
+
+---
+# Keycloak LDAP Integration ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-ldap-config
+  namespace: keycloak
+data:
+  ldap-provider.json: |
+    {
+      "id": "ldap",
+      "providerId": "ldap",
+      "providerType": "org.keycloak.storage.UserStorageProvider",
+      "parentId": "astrago",
+      "config": {
+        "enabled": ["true"],
+        "priority": ["0"],
+        "fullSyncPeriod": ["-1"],
+        "changedSyncPeriod": ["-1"],
+        "cachePolicy": ["DEFAULT"],
+        "evictionDay": [],
+        "evictionHour": [],
+        "evictionMinute": [],
+        "maxLifespan": [],
+        "batchSizeForSync": ["1000"],
+        "editMode": ["WRITABLE"],
+        "importEnabled": ["true"],
+        "syncRegistrations": ["false"],
+        "vendor": ["other"],
+        "usernameLDAPAttribute": ["uid"],
+        "rdnLDAPAttribute": ["uid"],
+        "uuidLDAPAttribute": ["entryUUID"],
+        "userObjectClasses": ["inetOrgPerson, organizationalPerson, person, top"],
+        "connectionUrl": ["ldap://ldap-openldap.ldap.svc.cluster.local:389"],
+        "usersDn": ["ou=users,dc=example,dc=com"],
+        "authType": ["simple"],
+        "bindDn": ["cn=admin,dc=example,dc=com"],
+        "bindCredential": ["admin"],
+        "customUserSearchFilter": ["(objectClass=inetOrgPerson)"],
+        "searchScope": ["1"],
+        "readTimeout": [],
+        "pagination": ["true"],
+        "connectionPooling": ["true"],
+        "connectionPoolingAuthentication": [],
+        "connectionPoolingDebug": [],
+        "connectionPoolingInitSize": [],
+        "connectionPoolingMaxSize": [],
+        "connectionPoolingPrefSize": [],
+        "connectionPoolingProtocol": [],
+        "connectionPoolingTimeout": [],
+        "connectionUrl": ["ldap://ldap-openldap.ldap.svc.cluster.local:389"],
+        "bindDn": ["cn=admin,dc=example,dc=com"],
+        "bindCredential": ["admin"],
+        "startTls": ["false"],
+        "useTruststoreSpi": ["ldapsOnly"],
+        "connectionPooling": ["true"],
+        "connectionTimeout": [],
+        "readTimeout": [],
+        "pagination": ["true"],
+        "allowKerberosAuthentication": ["false"],
+        "serverPrincipal": [],
+        "keyTab": [],
+        "kerberosRealm": [],
+        "debug": ["false"],
+        "useKerberosForPasswordAuthentication": ["false"]
+      }
+    }
+
+---
+# LDAP User Management Scripts ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ldap-scripts
+  namespace: ldap
+data:
+  create-user.sh: |
+    #!/bin/bash
+    # Usage: ./create-user.sh <username> <email> <first_name> <last_name> [password]
+    
+    USERNAME=$1
+    EMAIL=$2
+    FIRST_NAME=$3
+    LAST_NAME=$4
+    PASSWORD=${5:-"defaultpass123"}
+    
+    LDAP_HOST="ldap-openldap"
+    LDAP_BIND_DN="cn=admin,dc=example,dc=com"
+    LDAP_BIND_PASSWORD="admin"
+    LDAP_BASE_DN="dc=example,dc=com"
+    
+    # Create user
+    ldapadd -x -H ldap://${LDAP_HOST}:389 -D "$LDAP_BIND_DN" -w $LDAP_BIND_PASSWORD << EOF
+    dn: uid=$USERNAME,ou=users,${LDAP_BASE_DN}
+    objectClass: top
+    objectClass: inetOrgPerson
+    objectClass: organizationalPerson
+    objectClass: person
+    uid: $USERNAME
+    cn: $FIRST_NAME $LAST_NAME
+    sn: $LAST_NAME
+    mail: $EMAIL
+    userPassword: $PASSWORD
+    signUpPath: ASTRAGO
+    workspaceCreateLimit: 10
+    approvalYN: true
+    EOF
+    
+    if [ $? -eq 0 ]; then
+      echo "User $USERNAME created successfully"
+    else
+      echo "Failed to create user $USERNAME"
+      exit 1
+    fi
+
+  add-default-attributes.sh: |
+    #!/bin/bash
+    # Add default attributes to all existing LDAP users
+    
+    LDAP_HOST="ldap-openldap"
+    LDAP_BIND_DN="cn=admin,dc=example,dc=com"
+    LDAP_BIND_PASSWORD="admin"
+    LDAP_BASE_DN="dc=example,dc=com"
+    
+    # Get all users
+    USERS=$(ldapsearch -x -H ldap://${LDAP_HOST}:389 -D "$LDAP_BIND_DN" -w $LDAP_BIND_PASSWORD -b "$LDAP_BASE_DN" "(objectClass=inetOrgPerson)" | grep "dn: uid=" | sed 's/dn: //')
+    
+    for USER_DN in $USERS; do
+      echo "Adding default attributes to $USER_DN"
+      
+      ldapmodify -x -H ldap://${LDAP_HOST}:389 -D "$LDAP_BIND_DN" -w $LDAP_BIND_PASSWORD << EOF
+      dn: $USER_DN
+      changetype: modify
+      add: signUpPath
+      signUpPath: ASTRAGO
+      -
+      add: workspaceCreateLimit
+      workspaceCreateLimit: 10
+      -
+      add: approvalYN
+      approvalYN: true
+      EOF
+      
+      if [ $? -eq 0 ]; then
+        echo "Successfully added default attributes to $USER_DN"
+      else
+        echo "Failed to add default attributes to $USER_DN"
+      fi
+    done
+
+---
+# LDAP Health Check Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: ldap-health
+  namespace: ldap
+  labels:
+    app: ldap-health
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: health
+  selector:
+    app: ldap-health
+
+---
+# LDAP Health Check Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ldap-health
+  namespace: ldap
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ldap-health
+  template:
+    metadata:
+      labels:
+        app: ldap-health
+    spec:
+      containers:
+      - name: ldap-health
+        image: busybox:1.35
+        command:
+        - /bin/sh
+        - -c
+        - |
+          while true; do
+            if ldapsearch -x -H ldap://ldap-openldap:389 -D "cn=admin,dc=example,dc=com" -w admin -b "dc=example,dc=com" "(objectClass=*)"; then
+              echo "LDAP is healthy"
+            else
+              echo "LDAP health check failed"
+            fi
+            sleep 60
+          done 

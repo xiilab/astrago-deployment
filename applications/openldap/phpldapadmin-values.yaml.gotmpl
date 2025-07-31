@@ -1,0 +1,38 @@
+# LDAP 연동을 위한 phpLDAPadmin Values 설정 (현재 주석처리됨)
+# 해당 설정은 docs/ldap-integration-work-plan.md의 "주석처리된 LDAP 관련 설정" 섹션 참조
+
+# # phpLDAPadmin Configuration
+# env:
+#   PHPLDAPADMIN_LDAP_HOSTS: {{ .Values.ldap.hosts | default "ldap-openldap.ldap.svc.cluster.local" }}
+#   PHPLDAPADMIN_HTTPS: {{ .Values.https.enabled | default false }}
+#   PHPLDAPADMIN_TRUST_PROXY_SSL: {{ .Values.https.trustProxy | default true }}
+# 
+# # Service configuration
+# service:
+#   type: ClusterIP
+#   port: 80
+# 
+# # Ingress configuration (optional)
+# ingress:
+#   enabled: {{ .Values.ingress.enabled | default false }}
+#   className: {{ .Values.ingress.className | default "nginx" }}
+#   hosts:
+#     - host: {{ .Values.ingress.host | default "phpldapadmin.local" }}
+#       paths:
+#         - path: /
+#           pathType: Prefix
+# 
+# # Resources
+# resources:
+#   requests:
+#     memory: {{ .Values.resources.requests.memory | default "128Mi" }}
+#     cpu: {{ .Values.resources.requests.cpu | default "50m" }}
+#   limits:
+#     memory: {{ .Values.resources.limits.memory | default "256Mi" }}
+#     cpu: {{ .Values.resources.limits.cpu | default "100m" }}
+# 
+# # Security context
+# securityContext:
+#   enabled: true
+#   runAsUser: 1001
+#   fsGroup: 1001 

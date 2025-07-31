@@ -1,0 +1,44 @@
+# LDAP 연동을 위한 OpenLDAP Helm Chart 설정 (현재 주석처리됨)
+# 해당 설정은 docs/ldap-integration-work-plan.md의 "주석처리된 LDAP 관련 설정" 섹션 참조
+
+# repositories:
+#   - name: stable
+#     url: https://charts.helm.sh/stable
+#   - name: cetic
+#     url: https://cetic.github.io/helm-charts
+# 
+# releases:
+#   - name: ldap-openldap
+#     namespace: ldap
+#     createNamespace: true
+#     chart: stable/openldap
+#     version: 1.2.30
+#     values:
+#       - values.yaml.gotmpl
+#     set:
+#       - name: LDAP_DOMAIN
+#         value: example.com
+#       - name: LDAP_TLS
+#         value: false
+#       - name: persistence.enabled
+#         value: true
+#       - name: persistence.storageClass
+#         value: astrago-nfs-csi
+#       - name: adminPassword
+#         value: admin
+#       - name: configPassword
+#         value: admin
+# 
+#   - name: phpldapadmin
+#     namespace: ldap
+#     chart: cetic/phpldapadmin
+#     version: 0.1.0
+#     values:
+#       - phpldapadmin-values.yaml.gotmpl
+#     set:
+#       - name: env.PHPLDAPADMIN_LDAP_HOSTS
+#         value: ldap-openldap.ldap.svc.cluster.local
+#       - name: env.PHPLDAPADMIN_HTTPS
+#         value: false
+#       - name: env.PHPLDAPADMIN_TRUST_PROXY_SSL
+#         value: true 
