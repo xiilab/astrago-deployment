@@ -1,10 +1,10 @@
-language: "ko-KR" # 한국말로 설정
+system_language: ko-KR
 early_access: false
 reviews:
-  profile: "chill" # 리뷰 너무 빡세게는 안한다는 뜻
-  request_changes_workflow: true # 코드래빗이 리뷰 끝나면 알아서 PR 승인하게끔
+  profile: chill
+  request_changes_workflow: true
   high_level_summary: true
-  poem: false 
+  poem: false
   review_status: true
   collapse_walkthrough: false
   auto_review:
