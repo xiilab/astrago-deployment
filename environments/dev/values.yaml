@@ -43,6 +43,16 @@ astrago:
   proxyUrl: https://10.61.3.12
   servicePort: 30080
   userInitPassword: astrago
+  # Ingress 설정 (enable/disable 가능)
+  ingress:
+    enabled: true  # Ingress 사용 여부
+    className: "nginx"  # Ingress Class
+    host: "10.61.3.33.nip.io"  # 도메인 또는 IP
+    annotations: {}  # 추가 nginx ingress annotations
+    #  cert-manager.io/cluster-issuer: "selfsigned-issuer"  # 예시
+    tls:
+      enabled: true  # TLS 사용 여부
+      secretName: "astrago-tls-secret"  # TLS 인증서 시크릿명
   keycloak:
     externalKeycloakUrl:
     realm: astrago
