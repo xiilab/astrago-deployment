@@ -1,0 +1,9 @@
+releases:
+- name: ingress-nginx
+  namespace: ingress-nginx
+  chart: ingress-nginx
+  wait: true
+  labels:
+    app: ingress-nginx
+  values:
+  - values.yaml 

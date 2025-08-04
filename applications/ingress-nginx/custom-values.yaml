@@ -1,4 +1,0 @@
-controller:
-  hostNetwork: true
-  dnsPolicy: ClusterFirstWithHostNet
-  kind: DaemonSet
