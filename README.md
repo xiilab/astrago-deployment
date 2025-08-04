@@ -126,6 +126,7 @@ graph TB
     subgraph "🔐 인증 및 보안"
         KC[🔑 Keycloak<br/>포트: 30001]
         PROXY[🛡️ Astrago Proxy]
+        TLS[🔒 TLS 인증서<br/>사용자 정의 Secret]
     end
     
     subgraph "⚙️ 핵심 애플리케이션"
@@ -219,6 +220,83 @@ graph TB
 echo "🎉 Astrago 설치 완료!"
 echo "🌐 웹 접속: http://<YOUR-IP>:30080"
 echo "🔐 Keycloak: http://<YOUR-IP>:30001"
+```
+
+---
+
+## 🔒 TLS 인증서 관리
+
+### 사용자 정의 TLS Secret 설정
+
+Astrago는 **환경별 TLS Secret 이름 지정**을 지원하여 유연한 인증서 관리가 가능합니다.
+
+#### 📋 기본 설정
+
+```yaml
+# environments/dev/values.yaml
+astrago:
+  tls:
+    secretName: "astrago-tls-secret"  # 원하는 Secret 이름 설정
+  
+  ingress:
+    enabled: true
+    tls:
+      enabled: true  # TLS 활성화
+  
+  truststore:
+    enabled: true  # Java Truststore 설정
+```
+
+#### 🔧 인증서 생성 및 적용
+
+```bash
+# 1️⃣ TLS Secret 생성 (기본 이름)
+kubectl create secret tls astrago-tls-secret \
+  --cert=/path/to/cert.pem \
+  --key=/path/to/key.pem \
+  -n astrago
+
+# 2️⃣ 사용자 정의 Secret 이름으로 생성
+kubectl create secret tls my-custom-secret \
+  --cert=/path/to/cert.pem \
+  --key=/path/to/key.pem \
+  -n astrago
+
+# 3️⃣ values.yaml에서 해당 Secret 이름 설정
+# astrago.tls.secretName: "my-custom-secret"
+
+# 4️⃣ 배포
+./deploy_astrago.sh sync astrago
+```
+
+#### ✨ 주요 특징
+
+<div align="center">
+
+| 기능 | 설명 | 지원 여부 |
+|:---:|:---|:---:|
+| 🎯 **환경별 Secret 이름** | dev/stage/prod 각각 다른 Secret 사용 가능 | ✅ |
+| 🔄 **자동 적용** | Ingress TLS + Java Truststore 동시 설정 | ✅ |
+| 🛡️ **Manual Secret 관리** | values.yaml에 인증서 내용 노출 방지 | ✅ |
+| 📦 **단일 Secret 방식** | 하나의 Secret으로 모든 TLS 요구사항 충족 | ✅ |
+| 🔧 **하위 호환성** | 기본값 제공으로 기존 설정 유지 | ✅ |
+
+</div>
+
+#### 🌍 환경별 설정 예시
+
+```bash
+# 개발 환경
+environments/dev/values.yaml:
+  tls.secretName: "dev-tls-secret"
+
+# 스테이징 환경  
+environments/stage/values.yaml:
+  tls.secretName: "stage-tls-secret"
+
+# 프로덕션 환경
+environments/prod/values.yaml:
+  tls.secretName: "prod-tls-secret"
 ```
 
 ---

@@ -46,6 +46,10 @@ astrago:
   servicePort: 30080
   userInitPassword: astrago
   
+  # === TLS 인증서 설정 ===
+  tls:
+    secretName: "astrago-tls-secret"  # 사용할 TLS Secret 이름
+  
   # === Ingress 설정 (Secret은 수동 생성) ===
   ingress:
     enabled: true

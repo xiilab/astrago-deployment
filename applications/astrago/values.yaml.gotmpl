@@ -325,6 +325,9 @@ nfs:
 # TLS 인증서는 Manual Secret 방식으로 관리됨
 
 astrago:
+  tls:
+    secretName: "{{ .Values.astrago.tls.secretName | default "astrago-tls-secret" }}"
+  
   ingress:
     enabled: {{ .Values.astrago.ingress.enabled | default true }}
     className: "{{ .Values.astrago.ingress.className | default "nginx" }}"

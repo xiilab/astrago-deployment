@@ -300,6 +300,7 @@ ingress:
 astrago:
   # TLS 인증서 설정
   tls:
+    secretName: "astrago-tls-secret"  # TLS Secret 이름 (환경별로 설정 가능)
     cert: ""  # 환경별로 설정
     key: ""   # 환경별로 설정
   

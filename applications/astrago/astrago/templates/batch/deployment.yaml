@@ -44,7 +44,7 @@ spec:
           volumeMounts:
             - name: truststore
               mountPath: /opt/truststore
-            - name: astrago-tls-secret
+            - name: {{ .Values.astrago.tls.secretName | default "astrago-tls-secret" }}
               mountPath: /tmp/certs
       {{- else }}
       {{- with .Values.batch.initContainers }}
@@ -98,9 +98,9 @@ spec:
         {{- if .Values.astrago.truststore.enabled }}
         - name: truststore
           emptyDir: {}
-        - name: astrago-tls-secret
+        - name: {{ .Values.astrago.tls.secretName | default "astrago-tls-secret" }}
           secret:
-            secretName: astrago-tls-secret
+            secretName: {{ .Values.astrago.tls.secretName | default "astrago-tls-secret" }}
         {{- end }}
         {{- with .Values.batch.volumes }}
         {{- toYaml . | nindent 8 }}
