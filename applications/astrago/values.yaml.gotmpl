@@ -7,6 +7,7 @@ core:
     registry: "{{ .Values.astrago.core.registry }}"
     repository: "{{ .Values.astrago.core.repository }}"
     tag: "{{ .Values.astrago.core.imageTag }}"
+
   env:
     - name: SPRING_JPA_HIBERNATE_DDL-AUTO
       value: none
@@ -77,39 +78,17 @@ core:
       value: "5000"   # 5초
     - name: SPRING_DATASOURCE_HIKARI_CONNECTION-TEST-QUERY
       value: "SELECT 1"
-    # SSL truststore 설정 (astrago-deployment 방식 적용)
+    {{- if .Values.astrago.truststore.enabled }}
+    # SSL truststore 설정 (외부 HTTPS 서비스 통신용)
     - name: JAVA_OPTS
       value: "-Djavax.net.ssl.trustStore=/opt/truststore/cacerts -Djavax.net.ssl.trustStorePassword=changeit"
-  # truststore volume 및 init container
-  initContainers:
-    - name: setup-truststore
-      image: openjdk:11-jre-slim
-      command: ["/bin/bash"]
-      args:
-        - -c
-        - |
-          cp $JAVA_HOME/lib/security/cacerts /opt/truststore/cacerts
-          keytool -import -alias keycloak-cert -file /tmp/certs/keycloak-cert.pem -keystore /opt/truststore/cacerts -storepass changeit -noprompt
-          echo "Certificate imported successfully"
-      volumeMounts:
-        - name: truststore
-          mountPath: /opt/truststore
-        - name: keycloak-cert
-          mountPath: /tmp/certs
-  volumes:
-    - name: truststore
-      emptyDir: {}
-    - name: keycloak-cert
-      secret:
-        secretName: keycloak-cert
-  volumeMounts:
-    - name: truststore
-      mountPath: /opt/truststore
+    {{- end }}
 batch:
   image:
     registry: "{{ .Values.astrago.batch.registry }}"
     repository: "{{ .Values.astrago.batch.repository }}"
     tag: "{{ .Values.astrago.batch.imageTag }}"
+
   env:
     - name: SPRING_JPA_HIBERNATE_DDL-AUTO
       value: none
@@ -178,6 +157,11 @@ batch:
       value: "admin"
     - name: HARBOR_PASSWORD
       value: "{{ .Values.harbor.adminPassword | default "Harbor12345" }}"
+    {{- if .Values.astrago.truststore.enabled }}
+    # SSL truststore 설정 (외부 HTTPS 서비스 통신용)
+    - name: JAVA_OPTS
+      value: "-Djavax.net.ssl.trustStore=/opt/truststore/cacerts -Djavax.net.ssl.trustStorePassword=changeit"
+    {{- end }}
 
 monitor:
   image:
@@ -337,14 +321,32 @@ nfs:
   - ReadWriteOnce
   storageClassName: {{ .Values.nfs.storageClassName }}
 
-# Ingress configuration for environment-specific settings
+# === 환경별 ASTRAGO 설정을 Chart 구조로 변환 ===
+# TLS 인증서는 Manual Secret 방식으로 관리됨
+
+astrago:
+  ingress:
+    enabled: {{ .Values.astrago.ingress.enabled | default true }}
+    className: "{{ .Values.astrago.ingress.className | default "nginx" }}"
+    host: "{{ .Values.astrago.ingress.host | default .Values.externalIP }}"
+    annotations:
+      {{- if .Values.astrago.ingress.annotations }}
+      {{- toYaml .Values.astrago.ingress.annotations | nindent 6 }}
+      {{- end }}
+    tls:
+      enabled: {{ .Values.astrago.ingress.tls.enabled | default false }}
+  
+  truststore:
+    enabled: {{ .Values.astrago.truststore.enabled | default false }}
+
+# Ingress configuration (기존 Chart 구조 유지)
 ingress:
   enabled: {{ .Values.astrago.ingress.enabled | default false }}
   className: "{{ .Values.astrago.ingress.className | default "nginx" }}"
   annotations:
-    {{ if .Values.astrago.ingress.annotations }}
+    {{- if .Values.astrago.ingress.annotations }}
     {{- toYaml .Values.astrago.ingress.annotations | nindent 4 }}
-    {{ end }}
+    {{- end }}
   hosts:
     - host: {{ .Values.astrago.ingress.host | default .Values.externalIP }}
       paths:
@@ -352,9 +354,4 @@ ingress:
           pathType: Prefix
           service: nginx-service
           port: 80
-  {{ if .Values.astrago.ingress.tls.enabled }}
-  tls:
-    - secretName: {{ .Values.astrago.ingress.tls.secretName | default "astrago-tls-secret" }}
-      hosts:
-        - {{ .Values.astrago.ingress.host | default .Values.externalIP }}
-  {{ end }}
+  {{/* TLS 설정은 ingress.yaml 템플릿에서 certificates 시스템을 통해 자동 처리됨 */}}

@@ -1,5 +1,6 @@
 # externalIP:
-externalIP: 10.61.3.12
+externalIP: 10.61.3.33
+
 # Volume Settings
 nfs:
   storageClassName: astrago-nfs-csi
@@ -38,21 +39,27 @@ keycloak:
   adminUser: admin
   adminPassword: xiirocks
   servicePort: 30001
+
 # Astrago Settings
 astrago:
-  proxyUrl: https://10.61.3.12
+  proxyUrl: https://10.61.3.33.nip.io
   servicePort: 30080
   userInitPassword: astrago
-  # Ingress 설정 (enable/disable 가능)
+  
+  # === Ingress 설정 (Secret은 수동 생성) ===
   ingress:
-    enabled: true  # Ingress 사용 여부
-    className: "nginx"  # Ingress Class
-    host: "10.61.3.33.nip.io"  # 도메인 또는 IP
-    annotations: {}  # 추가 nginx ingress annotations
-    #  cert-manager.io/cluster-issuer: "selfsigned-issuer"  # 예시
+    enabled: true
+    className: "nginx"
+    host: "10.61.3.33.nip.io"
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
     tls:
-      enabled: true  # TLS 사용 여부
-      secretName: "astrago-tls-secret"  # TLS 인증서 시크릿명
+      enabled: true  # astrago-tls-secret을 수동으로 생성해야 함
+  
+  # === Truststore 설정 (Secret은 수동 생성) ===  
+  truststore:
+    enabled: true  # astrago-truststore-cert를 수동으로 생성해야 함
+  
   keycloak:
     externalKeycloakUrl:
     realm: astrago
@@ -67,62 +74,29 @@ astrago:
   mongodb:
     url: mongodb://astrago:xiirocks@astrago-mongodb:27017/astrago?authSource=admin
   core:
-    registry: "harbor.xiilab.com:32080"
-    repository: "astrago/core"
-    imageTag: "dev-3eff"
+    registry: "docker.io"
+    repository: "xiilab/astrago"
+    imageTag: "core-stag-7746"
   batch:
-    registry: "harbor.xiilab.com:32080"
-    repository: "astrago/batch"
-    imageTag: "dev-3eff"
+    registry: "docker.io"
+    repository: "xiilab/astrago"
+    imageTag: "batch-stag-7746"
   monitor:
-    registry: "harbor.xiilab.com:32080"
-    repository: "astrago/monitor"
-    imageTag: "dev-3eff"
+    registry: "docker.io"
+    repository: "xiilab/astrago"
+    imageTag: "monitor-stag-7746"
   frontend:
-    registry: "harbor.xiilab.com:32080"
-    repository: "astrago/frontend"
-    imageTag: dev-889b
-  experiment:
-    registry: "harbor.xiilab.com:32080"
-    repository: "astrago/experiment"
-    imageTag: "dev-3eff"
+    registry: "docker.io"
+    repository: "xiilab/astrago"
+    imageTag: "frontend-stag-9cd6"
   oneview:
     enabled: true
-# Loki Settings
-loki:
-  replicas: 1
-  resources:
-    limits:
-      cpu: "1000m"
-      memory: "2Gi"
-    requests:
-      cpu: "500m"
-      memory: "1Gi"
-  persistence:
-    enabled: true
-    size: "20Gi"
-    storageClass: "astrago-nfs-csi"
-  retention:
-    enabled: true
-    period: "168h" # 7 days for dev environment
-    compaction_interval: "10m"
-    delete_delay: "2h"
-    delete_worker_count: 150
-
-# Promtail Settings
-promtail:
-  resources:
-    limits:
-      cpu: "200m"
-      memory: "512Mi"
-    requests:
-      cpu: "100m"
-      memory: "256Mi"
 
 harbor:
   enabled: true
   servicePort: 30002
   adminPassword: Harbor12345
+
 offline:
   registry: # 192.168.56.11:35000
   httpServer: # http://192.168.56.11

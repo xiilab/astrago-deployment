@@ -295,3 +295,23 @@ ingress:
     - secretName: astrago-tls-secret
       hosts:
         - 10.61.3.33.nip.io
+
+# ASTRAGO 설정 (환경별로 values.yaml.gotmpl에서 오버라이드됨)
+astrago:
+  # TLS 인증서 설정
+  tls:
+    cert: ""  # 환경별로 설정
+    key: ""   # 환경별로 설정
+  
+  # Ingress 설정
+  ingress:
+    enabled: true
+    className: "nginx"
+    host: "localhost"  # 환경별로 설정
+    annotations: {}
+    tls:
+      enabled: false  # 환경별로 설정
+  
+  # Java Truststore 설정
+  truststore:
+    enabled: false  # 환경별로 설정

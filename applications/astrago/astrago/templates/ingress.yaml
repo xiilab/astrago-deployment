@@ -1,12 +1,12 @@
-{{- if .Values.ingress.enabled -}}
+{{- if .Values.astrago.ingress.enabled -}}
 {{- $fullName := include "common.fullname" . -}}
 {{- $svcPort := .Values.proxy.service.port | default 80 -}}
 {{- $annotations := dict -}}
-{{- if .Values.ingress.annotations }}
-  {{- $annotations = .Values.ingress.annotations }}
+{{- if .Values.astrago.ingress.annotations }}
+  {{- $annotations = .Values.astrago.ingress.annotations }}
 {{- end }}
-{{- if and .Values.ingress.className (not (hasKey $annotations "kubernetes.io/ingress.class")) }}
-  {{- $_ := set $annotations "kubernetes.io/ingress.class" .Values.ingress.className}}
+{{- if and .Values.astrago.ingress.className (not (hasKey $annotations "kubernetes.io/ingress.class")) }}
+  {{- $_ := set $annotations "kubernetes.io/ingress.class" .Values.astrago.ingress.className}}
 {{- end }}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: networking.k8s.io/v1
@@ -26,11 +26,18 @@ metadata:
     {{- toYaml $annotations | nindent 4 }}
   {{- end }}
 spec:
-  {{- if and .Values.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
-  ingressClassName: {{ .Values.ingress.className }}
+  {{- if and .Values.astrago.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.astrago.ingress.className }}
   {{- end }}
-  {{- if .Values.ingress.tls }}
+  {{- if or .Values.ingress.tls .Values.astrago.ingress.tls.enabled }}
   tls:
+    {{- if and .Values.astrago.ingress.tls.enabled .Values.astrago.tls.cert .Values.astrago.tls.key }}
+    {{/* TLS 인증서가 있고 Ingress TLS가 enabled인 경우 */}}
+    - secretName: astrago-tls-secret
+      hosts:
+        - {{ .Values.astrago.ingress.host | quote }}
+    {{- else if .Values.ingress.tls }}
+    {{/* 기존 방식 (하위 호환성) */}}
     {{- range .Values.ingress.tls }}
     - hosts:
         {{- range .hosts }}
@@ -38,27 +45,24 @@ spec:
         {{- end }}
       secretName: {{ .secretName }}
     {{- end }}
+    {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.ingress.hosts }}
-    - host: {{ .host | quote }}
+    - host: {{ .Values.astrago.ingress.host | quote }}
       http:
         paths:
-          {{- range .paths }}
-          - path: {{ .path }}
-            {{- if and .pathType (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
-            pathType: {{ .pathType }}
+          - path: /
+            {{- if semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion }}
+            pathType: Prefix
             {{- end }}
             backend:
-              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+              {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion }}
               service:
-                name: {{ .service | default "nginx-service" }}
+                name: nginx-service
                 port:
-                  number: {{ .port | default $svcPort }}
+                  number: {{ $svcPort }}
               {{- else }}
-              serviceName: {{ .service | default "nginx-service" }}
-              servicePort: {{ .port | default $svcPort }}
+              serviceName: nginx-service
+              servicePort: {{ $svcPort }}
               {{- end }}
-          {{- end }}
-    {{- end }}
 {{- end }}
