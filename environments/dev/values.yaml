@@ -53,6 +53,17 @@ astrago:
     host: "10.61.3.33.nip.io"
     annotations:
       nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      # 파일 업로드 용량 제한 (proxy-config.yaml의 client_max_body_size 0과 동일)
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+      # 프록시 버퍼 설정 (proxy-config.yaml 참조)
+      nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+      nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
+      # 타임아웃 설정 (proxy-config.yaml의 긴 타임아웃과 동일)
+      nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+      # 대용량 헤더 지원
+      nginx.ingress.kubernetes.io/large-client-header-buffers: "8 8k"
     tls:
       enabled: true  # astrago-tls-secret을 수동으로 생성해야 함
   
