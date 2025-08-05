@@ -46,34 +46,34 @@ astrago:
   servicePort: 30080
   userInitPassword: astrago
   
-  # === TLS 인증서 설정 ===
+  # === TLS SSL SET ===
   tls:
-    secretName: "astrago-tls-secret"  # 사용할 TLS Secret 이름
+    secretName: "astrago-tls-secret"  # USED TLS Secret NAME
   
-  # === Ingress 설정 (Secret은 수동 생성) ===
+  # === Ingress SETTING (Secret create) ===
   ingress:
     enabled: true
     className: "nginx"
     host: "10.61.3.33.nip.io"
     annotations:
       nginx.ingress.kubernetes.io/ssl-redirect: "true"
-      # 파일 업로드 용량 제한 (proxy-config.yaml의 client_max_body_size 0과 동일)
+      # limit size (proxy-config.yaml의 client_max_body_size 0)
       nginx.ingress.kubernetes.io/proxy-body-size: "0"
-      # 프록시 버퍼 설정 (proxy-config.yaml 참조)
+      # proxy buffer size (proxy-config.yaml)
       nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
       nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
-      # 타임아웃 설정 (proxy-config.yaml의 긴 타임아웃과 동일)
+      # Timeout set (proxy-config.yaml)
       nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
       nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
       nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-      # 대용량 헤더 지원
+      # large header size
       nginx.ingress.kubernetes.io/large-client-header-buffers: "8 8k"
     tls:
-      enabled: true  # astrago-tls-secret을 수동으로 생성해야 함
+      enabled: true  # astrago-tls-secret
   
-  # === Truststore 설정 (Secret은 수동 생성) ===  
+  # === Truststore set (Secret) ===  
   truststore:
-    enabled: true  # astrago-truststore-cert를 수동으로 생성해야 함
+    enabled: true  # astrago-truststore-cert
   
   keycloak:
     externalKeycloakUrl:
@@ -90,20 +90,20 @@ astrago:
     url: mongodb://astrago:xiirocks@astrago-mongodb:27017/astrago?authSource=admin
   core:
     registry: "docker.io"
-    repository: "xiilab/astrago"
-    imageTag: "core-stag-7746"
+    repository: "xiilab/astrago-posco"
+    imageTag: "core-stage-641f"
   batch:
     registry: "docker.io"
-    repository: "xiilab/astrago"
-    imageTag: "batch-stag-7746"
+    repository: "xiilab/astrago-posco"
+    imageTag: "batch-stage-641f"
   monitor:
     registry: "docker.io"
-    repository: "xiilab/astrago"
-    imageTag: "monitor-stag-7746"
+    repository: "xiilab/astrago-posco"
+    imageTag: "monitor-stage-641f"
   frontend:
     registry: "docker.io"
-    repository: "xiilab/astrago"
-    imageTag: "frontend-stag-9cd6"
+    repository: "xiilab/astrago-posco"
+    imageTag: "frontend-stage-f186"
   oneview:
     enabled: true
 
