@@ -1,5 +1,5 @@
 keycloak:
-  themeVersion: "dfd5"
+  themeVersion: "68de"
 # GPU Process Exporter - Exports GPU process metrics to Prometheus
 gpu-process-exporter:
   enabled: true
