@@ -1,0 +1,77 @@
+# 고객이 HTTPS 도메인 접근을 원할 때 추가할 설정
+# 파일 위치: environments/astrago/values.yaml (또는 고객 환경명)
+
+# 기본 설정 (기존과 동일)
+externalIP: 10.61.3.12
+nfs:
+  storageClassName: astrago-nfs-csi
+  server: 10.61.3.2
+  basePath: /kube_storage/customer-astrago
+
+# 🔥 인그레스 설정 (새로 추가) 🔥
+ingress:
+  enabled: true                              # 인그레스 활성화
+  hostname: "astrago.customer.com"           # 고객 도메인
+  className: "nginx"                         # 인그레스 컨트롤러 클래스
+  tls:
+    enabled: true                            # HTTPS 활성화
+    secretName: "astrago-customer-tls"       # TLS 시크릿 이름
+    certManager:
+      enabled: true                          # cert-manager 자동 인증서
+      issuer: "letsencrypt-prod"             # Let's Encrypt 발급자
+
+# AstraGo 설정 수정
+astrago:
+  proxyUrl: "https://astrago.customer.com"   # 🔥 HTTPS 도메인으로 변경 (포트 제거)
+  servicePort: 80                            # 인그레스 사용시 표준 포트
+  userInitPassword: astrago
+  keycloak:
+    externalKeycloakUrl:                     # 외부 Keycloak 사용시만 설정
+    realm: astrago
+    client: astrago-client
+    clientSecret: astragosecret
+    userInitPassword: astrago
+  mariadb:
+    rootPassword: root
+    username: astrago  
+    password: xiirocks
+    maxLifetime: "3595000"
+  mongodb:
+    url: mongodb://astrago:xiirocks@astrago-mongodb:27017/astrago?authSource=admin
+  core:
+    registry: "docker.io"
+    repository: "xiilab/astrago"
+    imageTag: "core-latest"
+  batch:
+    registry: "docker.io"
+    repository: "xiilab/astrago" 
+    imageTag: "batch-latest"
+  monitor:
+    registry: "docker.io"
+    repository: "xiilab/astrago"
+    imageTag: "monitor-latest"
+  frontend:
+    registry: "docker.io"
+    repository: "xiilab/astrago"
+    imageTag: "frontend-latest"
+  experiment:
+    registry: "docker.io"
+    repository: "xiilab/astrago"
+    imageTag: "experiment-latest"
+  oneview:
+    enabled: true
+
+# 기타 설정들 (기존과 동일)
+keycloak:
+  adminUser: admin
+  adminPassword: xiirocks
+  servicePort: 30001
+
+harbor:
+  enabled: true
+  servicePort: 30002
+  adminPassword: Harbor12345
+
+offline:
+  registry: # 오프라인 레지스트리 사용시 설정
+  httpServer: # 오프라인 HTTP 서버 사용시 설정
