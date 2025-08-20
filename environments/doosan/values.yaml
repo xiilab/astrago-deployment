@@ -1,0 +1,142 @@
+# 두산 전용 AstraGo 환경 설정
+# 기본 연결 정보 (고객 환경에 맞춰 수정 필요)
+externalIP: # 두산 클러스터 IP (예: 192.168.100.10)
+
+# 🔥 인그레스 설정 (HTTPS 도메인 접근용) 🔥
+ingress:
+  enabled: true                              # 인그레스 활성화
+  hostname: "astrago.doosan.com"             # 두산 도메인 (고객 요구사항에 맞춰 변경)
+  className: "nginx"                         # 인그레스 컨트롤러 클래스
+  path: "/"
+  pathType: "Prefix"
+  annotations: {}
+  tls:
+    enabled: true                            # HTTPS 활성화
+    secretName: "astrago-doosan-tls"         # 두산 전용 TLS 시크릿
+    certManager:
+      enabled: true                          # cert-manager 자동 인증서
+      issuer: "letsencrypt-prod"             # Let's Encrypt 발급자
+
+# Volume Settings (두산 환경에 맞춰 설정)
+nfs:
+  storageClassName: astrago-nfs-csi
+  server: # 두산 NFS 서버 IP (예: 192.168.100.100)
+  basePath: /kube_storage/doosan-astrago     # 두산 전용 경로
+
+# GPU Process Exporter Settings (필요시 활성화)
+gpu-process-exporter:
+  enabled: false                             # 두산 환경에서 GPU 사용시 true로 변경
+  collection:
+    schedule: "*/5 * * * *"                  # 5분마다 (운영환경 고려)
+    image:
+      repository: busybox
+      tag: "1.35"
+    resources:
+      limits:
+        cpu: 100m
+        memory: 64Mi
+      requests:
+        cpu: 50m
+        memory: 32Mi
+  prometheus:
+    serverService: prometheus-kube-prometheus-prometheus.prometheus.svc:9090
+  gpu:
+    count: 2                                 # 두산 환경 GPU 수에 맞춰 조정
+    devices: [0, 1]                          # GPU 디바이스 ID
+  nodeSelector:
+    nvidia.com/gpu.present: "true"
+  tolerations:
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
+
+# Keycloak Settings
+keycloak:
+  adminUser: admin
+  adminPassword: doosan123!                  # 두산 전용 비밀번호 (보안 강화)
+  servicePort: 30001
+
+# Astrago Settings (두산 특화)
+astrago:
+  proxyUrl: "https://astrago.doosan.com"     # 🔥 HTTPS 도메인 (포트 제거)
+  servicePort: 80                            # 인그레스 사용시 표준 포트
+  userInitPassword: doosan2024               # 두산 전용 초기 비밀번호
+  keycloak:
+    externalKeycloakUrl:                     # 외부 Keycloak 사용시만 설정
+    realm: astrago
+    client: astrago-client
+    clientSecret: doosanSecret2024           # 두산 전용 클라이언트 시크릿
+    userInitPassword: doosan2024
+  mariadb:
+    rootPassword: doosanRoot2024             # 두산 전용 DB 비밀번호
+    username: astrago
+    password: doosanDB2024                   # 두산 전용 DB 비밀번호
+    maxLifetime: "3595000"
+  mongodb:
+    url: mongodb://astrago:doosanMongo2024@astrago-mongodb:27017/astrago?authSource=admin
+  
+  # 두산 전용 이미지 태그 설정
+  core:
+    registry: "docker.io"                    # 또는 두산 전용 레지스트리
+    repository: "xiilab/astrago"
+    imageTag: "core-doosan-latest"           # 두산 전용 이미지 태그
+  batch:
+    registry: "docker.io"
+    repository: "xiilab/astrago"
+    imageTag: "batch-doosan-latest"          # 두산 전용 이미지 태그
+  monitor:
+    registry: "docker.io"
+    repository: "xiilab/astrago"
+    imageTag: "monitor-doosan-latest"        # 두산 전용 이미지 태그
+  frontend:
+    registry: "docker.io"
+    repository: "xiilab/astrago"
+    imageTag: "frontend-doosan-latest"       # 두산 전용 이미지 태그
+  experiment:
+    registry: "docker.io"
+    repository: "xiilab/astrago"
+    imageTag: "experiment-doosan-latest"     # 두산 전용 이미지 태그
+  oneview:
+    enabled: true
+
+# Loki Settings (로그 관리)
+loki:
+  replicas: 1
+  resources:
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+  persistence:
+    enabled: true
+    size: "50Gi"                             # 운영환경 고려하여 크게 설정
+    storageClass: "astrago-nfs-csi"
+  retention:
+    enabled: true
+    period: "720h"                           # 30일 보관 (운영환경)
+    compaction_interval: "10m"
+    delete_delay: "2h"
+    delete_worker_count: 150
+
+# Promtail Settings
+promtail:
+  resources:
+    limits:
+      cpu: "200m"
+      memory: "512Mi"
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+
+# Harbor 설정 (두산 전용 레지스트리)
+harbor:
+  enabled: true                              # 두산에서 프라이빗 레지스트리 사용시
+  servicePort: 30002
+  adminPassword: DoosanHarbor2024            # 두산 전용 Harbor 비밀번호
+
+# 오프라인 설정 (필요시)
+offline:
+  registry: # harbor.doosan.com:443          # 두산 프라이빗 레지스트리
+  httpServer: # http://mirror.doosan.com     # 두산 미러 서버

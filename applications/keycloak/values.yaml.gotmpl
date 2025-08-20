@@ -60,6 +60,15 @@ lifecycleHooks:
           done
           /opt/bitnami/keycloak/bin/kcadm.sh update realms/master -s sslRequired=NONE --server http://localhost:8080/auth/ --realm master --user admin --password "{{ .Values.keycloak.adminPassword }}" >> /opt/bitnami/keycloak/poststart.log 2>&1
 
+# Resource limits for testing Infrastructure Reviewer
+resources:
+  limits:
+    memory: 512Mi  # Intentionally low for testing - should trigger warning
+    cpu: 500m
+  requests:
+    memory: 256Mi
+    cpu: 250m
+
 postgresql:
   auth:
     postgresPassword: postgres
@@ -70,3 +79,10 @@ postgresql:
     persistence:
       enabled: true
       storageClass: "{{ .Values.nfs.storageClassName }}"
+    resources:
+      limits:
+        memory: 1Gi
+        cpu: 1000m
+      requests:
+        memory: 512Mi
+        cpu: 500m

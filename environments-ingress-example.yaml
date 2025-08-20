@@ -1,0 +1,23 @@
+# 환경별 인그레스 설정 예시
+# 파일 위치: environments/astrago/values.yaml
+
+# 도메인 접근을 위한 인그레스 설정
+ingress:
+  enabled: true                           # 인그레스 활성화
+  hostname: "astrago.company.com"         # 실제 도메인
+  className: "nginx"                      # 인그레스 컨트롤러 클래스
+  tls:
+    enabled: true                         # HTTPS 활성화
+    certManager:
+      enabled: true                       # cert-manager 자동 인증서
+      issuer: "letsencrypt-prod"          # Let's Encrypt 발급자
+
+# 기존 설정은 그대로 유지하되, proxyUrl만 수정
+astrago:
+  proxyUrl: "https://astrago.company.com"  # 도메인으로 변경 (포트 제거)
+  servicePort: 80                          # 인그레스 사용시 표준 포트
+
+# 기타 설정...
+nfs:
+  server: "10.61.3.2"
+  basePath: "/kube_storage/your-env-astrago"

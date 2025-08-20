@@ -1,0 +1,12 @@
+{
+	"mcpServers": {
+		"task-master-ai": {
+			"command": "npx",
+			"args": ["-y", "--package=task-master-ai", "task-master-ai"],
+			"env": {
+				"ANTHROPIC_API_KEY": "sk-ant-api03-여기에_실제_Anthropic_API_키를_입력하세요",
+				"PERPLEXITY_API_KEY": "pplx-여기에_실제_Perplexity_API_키를_입력하세요"
+			}
+		}
+	}
+}

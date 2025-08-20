@@ -1,0 +1,70 @@
+# Test ML Application for Infrastructure Reviewer Demo
+# This file is created to test GPU and resource analysis
+
+global:
+  imageRegistry: "{{ .Values.offline.registry | default "" }}"
+
+mlTraining:
+  enabled: true
+  image:
+    repository: pytorch/pytorch
+    tag: "2.0.0-cuda11.7-cudnn8-runtime"
+  
+  resources:
+    limits:
+      nvidia.com/gpu: 8  # Intentionally high for testing - should trigger warning
+      memory: 32Gi
+      cpu: 16
+    requests:
+      nvidia.com/gpu: 8
+      memory: 16Gi  
+      cpu: 8
+  
+  # Missing security context - should trigger security warning
+  containers:
+    - name: ml-trainer
+      image: pytorch/pytorch:2.0.0-cuda11.7-cudnn8-runtime
+      
+  persistence:
+    enabled: true
+    size: 500Gi  # Large storage - should trigger best practice comment
+    storageClass: "{{ .Values.nfs.storageClassName }}"
+
+  service:
+    type: NodePort
+    port: 8080
+    nodePort: 30090  # Different from standard AstraGo ports
+
+jupyter:
+  enabled: true
+  resources:
+    limits:
+      nvidia.com/gpu: 2  # Reasonable GPU allocation
+      memory: 8Gi
+      cpu: 4
+    requests:
+      nvidia.com/gpu: 1
+      memory: 4Gi
+      cpu: 2
+
+  # Good security practices
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000
+    capabilities:
+      drop: ["ALL"]
+
+# Database with potentially weak password
+database:
+  auth:
+    password: "simple123"  # Should trigger security warning
+    username: mluser
+  
+  resources:
+    limits:
+      memory: 2Gi
+      cpu: 1
+    requests:
+      memory: 1Gi 
+      cpu: 500m
