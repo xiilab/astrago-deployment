@@ -29,15 +29,15 @@ astrago:
   core:
     registry: "docker.io"
     repository: "xiilab/astrago"
-    imageTag: "core-v1.0.79"
+    imageTag: "core-v1.0.81"
   batch:
     registry: "docker.io"
     repository: "xiilab/astrago"
-    imageTag: "batch-v1.0.79"
+    imageTag: "batch-v1.0.81"
   monitor:
     registry: "docker.io"
     repository: "xiilab/astrago"
-    imageTag: "monitor-v1.0.79"
+    imageTag: "monitor-v1.0.81"
   frontend:
     registry: "docker.io"
     repository: "xiilab/astrago"
@@ -64,7 +64,6 @@ loki:
     compaction_interval: "10m"
     delete_delay: "2h"
     delete_worker_count: 150
-
 # Promtail Settings
 promtail:
   resources:
@@ -74,7 +73,6 @@ promtail:
     requests:
       cpu: "200m"
       memory: "512Mi"
-
 harbor:
   servicePort: 30002
   enabled: true
