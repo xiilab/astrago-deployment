@@ -20,6 +20,18 @@ sandboxWorkloads:
   enabled: false
   defaultWorkload: "container"
 
+hostPaths:
+  # rootFS represents the path to the root filesystem of the host.
+  # This is used by components that need to interact with the host filesystem
+  # and as such this must be a chroot-able filesystem.
+  # Examples include the MIG Manager and Toolkit Container which may need to
+  # stop, start, or restart systemd services
+  rootFS: "/"
+
+  # driverInstallDir represents the root at which driver files including libraries,
+  # config files, and executables can be found.
+  driverInstallDir: "/run/nvidia/driver"
+
 daemonsets:
   labels: {}
   annotations: {}
@@ -60,18 +72,17 @@ operator:
   imagePullPolicy: IfNotPresent
   imagePullSecrets: []
   priorityClassName: system-node-critical
-  defaultRuntime: docker
   runtimeClass: nvidia
   use_ocp_driver_toolkit: false
   # cleanup CRD on chart un-install
   cleanupCRD: false
   # upgrade CRD on chart upgrade, requires --disable-openapi-validation flag
   # to be passed during helm upgrade.
-  upgradeCRD: false
+  upgradeCRD: true
   initContainer:
     image: cuda
     repository: nvcr.io/nvidia
-    version: 12.4.1-base-ubi8
+    version: 12.8.1-base-ubi9
     imagePullPolicy: IfNotPresent
   tolerations:
   - key: "node-role.kubernetes.io/master"
@@ -125,13 +136,17 @@ driver:
     deployDefaultCR: true
     driverType: gpu
     nodeSelector: {}
-  useOpenKernelModules: false
+  kernelModuleType: "auto"
+
+  # NOTE: useOpenKernelModules has been deprecated and made no-op. Please use kernelModuleType instead.
+  # useOpenKernelModules: false
+
   # use pre-compiled packages for NVIDIA driver installation.
   # only supported for as a tech-preview feature on ubuntu22.04 kernels.
   usePrecompiled: false
   repository: nvcr.io/nvidia
   image: driver
-  version: "550.54.15"
+  version: "570.148.08"
   imagePullPolicy: IfNotPresent
   imagePullSecrets: []
   startupProbe:
@@ -181,7 +196,7 @@ driver:
     repository: nvcr.io/nvidia/cloud-native
     # When choosing a different version of k8s-driver-manager, DO NOT downgrade to a version lower than v0.6.4
     # to ensure k8s-driver-manager stays compatible with gpu-operator starting from v24.3.0
-    version: v0.6.8
+    version: v0.8.0
     imagePullPolicy: IfNotPresent
     env:
       - name: ENABLE_GPU_POD_EVICTION
@@ -219,7 +234,7 @@ toolkit:
   enabled: true
   repository: nvcr.io/nvidia/k8s
   image: container-toolkit
-  version: v1.15.0-ubuntu20.04
+  version: v1.17.8-ubuntu20.04
   imagePullPolicy: IfNotPresent
   imagePullSecrets: []
   env: []
@@ -230,7 +245,7 @@ devicePlugin:
   enabled: true
   repository: nvcr.io/nvidia
   image: k8s-device-plugin
-  version: v0.15.0-ubi8
+  version: v0.17.3
   imagePullPolicy: IfNotPresent
   imagePullSecrets: []
   args: []
@@ -271,7 +286,7 @@ devicePlugin:
   config:
     # Create a ConfigMap (default: false)
     create: false
-    # ConfigMap name (either exiting or to create a new one with create=true above)
+    # ConfigMap name (either existing or to create a new one with create=true above)
     name: ""
     # Default config name within the ConfigMap
     default: ""
@@ -288,9 +303,8 @@ dcgm:
   enabled: false
   repository: nvcr.io/nvidia/cloud-native
   image: dcgm
-  version: 3.3.5-1-ubuntu22.04
+  version: 4.2.3-1-ubuntu22.04
   imagePullPolicy: IfNotPresent
-  hostPort: 5555
   args: []
   env: []
   resources: {}
@@ -299,7 +313,7 @@ dcgmExporter:
   enabled: true
   repository: nvcr.io/nvidia/k8s
   image: dcgm-exporter
-  version: 3.3.5-3.4.1-ubuntu22.04
+  version: 4.2.3-4.1.3-ubuntu22.04
   imagePullPolicy: IfNotPresent
   env:
     - name: DCGM_EXPORTER_LISTEN
@@ -309,6 +323,8 @@ dcgmExporter:
     - name: DCGM_EXPORTER_COLLECTORS
       value: "/etc/dcgm-exporter/dcp-metrics-included.csv"
   resources: {}
+  service:
+    internalTrafficPolicy: Cluster
   serviceMonitor:
     enabled: false
     interval: 15s
@@ -321,12 +337,31 @@ dcgmExporter:
     #   target_label: instance
     #   replacement: $1
     #   action: replace
+  # DCGM Exporter configuration
+  # This block is used to configure DCGM Exporter to emit a customized list of metrics.
+  # Use "name" to either point to an existing ConfigMap or to create a new one with a
+  # list of configurations (i.e with create=true).
+  # When pointing to an existing ConfigMap, the ConfigMap must exist in the same namespace as the release.
+  # The metrics are expected to be listed under a key called `dcgm-metrics.csv`.
+  # Use "data" to build an integrated ConfigMap from a set of custom metrics as
+  # part of the chart. An example of some custom metrics are shown below. Note that
+  # the contents of "data" must be in CSV format and be valid DCGM Exporter metric configurations.
+  # config:
+    # name: custom-dcgm-exporter-metrics
+    # create: true
+    # data: |-
+      # Format
+      # If line starts with a '#' it is considered a comment
+      # DCGM FIELD, Prometheus metric type, help message
 
+      # Clocks
+      # DCGM_FI_DEV_SM_CLOCK,  gauge, SM clock frequency (in MHz).
+      # DCGM_FI_DEV_MEM_CLOCK, gauge, Memory clock frequency (in MHz).
 gfd:
   enabled: true
   repository: nvcr.io/nvidia
   image: k8s-device-plugin
-  version: v0.15.0-ubi8
+  version: v0.17.3
   imagePullPolicy: IfNotPresent
   imagePullSecrets: []
   env:
@@ -340,16 +375,52 @@ migManager:
   enabled: true
   repository: nvcr.io/nvidia/cloud-native
   image: k8s-mig-manager
-  version: v0.7.0-ubuntu20.04
+  version: v0.12.2-ubuntu20.04
   imagePullPolicy: IfNotPresent
   imagePullSecrets: []
   env:
     - name: WITH_REBOOT
       value: "false"
   resources: {}
+  # MIG configuration
+  # Use "name" to either point to an existing ConfigMap or to create a new one with a list of configurations(i.e with create=true).
+  # Use "data" to build an integrated ConfigMap from a set of configurations as
+  # part of this helm chart. An example of setting "data" might be:
+  # config:
+  #   name: custom-mig-parted-configs
+  #   create: true
+  #   data:
+  #     config.yaml: |-
+  #       version: v1
+  #       mig-configs:
+  #         all-disabled:
+  #           - devices: all
+  #             mig-enabled: false
+  #         custom-mig:
+  #           - devices: [0]
+  #             mig-enabled: false
+  #           - devices: [1]
+  #              mig-enabled: true
+  #              mig-devices:
+  #                "1g.10gb": 7
+  #           - devices: [2]
+  #             mig-enabled: true
+  #             mig-devices:
+  #               "2g.20gb": 2
+  #               "3g.40gb": 1
+  #           - devices: [3]
+  #             mig-enabled: true
+  #             mig-devices:
+  #               "3g.40gb": 1
+  #               "4g.40gb": 1
   config:
-    name: "default-mig-parted-config"
     default: "all-disabled"
+    # Create a ConfigMap (default: false)
+    create: false
+    # ConfigMap name (either existing or to create a new one with create=true above)
+    name: ""
+    # Data section for the ConfigMap to create (i.e only applies when create=true)
+    data: {}
   gpuClientsConfig:
     name: ""
 
@@ -367,7 +438,7 @@ gds:
   enabled: false
   repository: nvcr.io/nvidia/cloud-native
   image: nvidia-fs
-  version: "2.17.5"
+  version: "2.20.5"
   imagePullPolicy: IfNotPresent
   imagePullSecrets: []
   env: []
@@ -377,7 +448,7 @@ gdrcopy:
   enabled: false
   repository: nvcr.io/nvidia/cloud-native
   image: gdrdrv
-  version: "v2.4.1"
+  version: "v2.5"
   imagePullPolicy: IfNotPresent
   imagePullSecrets: []
   env: []
@@ -397,7 +468,7 @@ vgpuManager:
     repository: nvcr.io/nvidia/cloud-native
     # When choosing a different version of k8s-driver-manager, DO NOT downgrade to a version lower than v0.6.4
     # to ensure k8s-driver-manager stays compatible with gpu-operator starting from v24.3.0
-    version: v0.6.8
+    version: v0.8.0
     imagePullPolicy: IfNotPresent
     env:
       - name: ENABLE_GPU_POD_EVICTION
@@ -409,7 +480,7 @@ vgpuDeviceManager:
   enabled: true
   repository: nvcr.io/nvidia/cloud-native
   image: vgpu-device-manager
-  version: "v0.2.6"
+  version: v0.3.0
   imagePullPolicy: IfNotPresent
   imagePullSecrets: []
   env: []
@@ -421,7 +492,7 @@ vfioManager:
   enabled: true
   repository: nvcr.io/nvidia
   image: cuda
-  version: 12.4.1-base-ubi8
+  version: 12.8.1-base-ubi9
   imagePullPolicy: IfNotPresent
   imagePullSecrets: []
   env: []
@@ -431,7 +502,7 @@ vfioManager:
     repository: nvcr.io/nvidia/cloud-native
     # When choosing a different version of k8s-driver-manager, DO NOT downgrade to a version lower than v0.6.4
     # to ensure k8s-driver-manager stays compatible with gpu-operator starting from v24.3.0
-    version: v0.6.8
+    version: v0.8.0
     imagePullPolicy: IfNotPresent
     env:
       - name: ENABLE_GPU_POD_EVICTION
@@ -457,7 +528,7 @@ kataManager:
           pullSecret: ""
   repository: nvcr.io/nvidia/cloud-native
   image: k8s-kata-manager
-  version: v0.2.0
+  version: v0.2.3
   imagePullPolicy: IfNotPresent
   imagePullSecrets: []
   env: []
@@ -467,7 +538,7 @@ sandboxDevicePlugin:
   enabled: true
   repository: nvcr.io/nvidia
   image: kubevirt-gpu-device-plugin
-  version: v1.2.7
+  version: v1.3.1
   imagePullPolicy: IfNotPresent
   imagePullSecrets: []
   args: []
@@ -488,7 +559,7 @@ ccManager:
   resources: {}
 
 node-feature-discovery:
-  enableNodeFeatureApi: true
+  priorityClassName: system-node-critical
   gc:
     enable: true
     replicaCount: 1

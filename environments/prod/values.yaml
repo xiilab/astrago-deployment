@@ -28,20 +28,20 @@ astrago:
     maxLifetime: "1800000"
   core:
     registry: "docker.io"
-    repository: "xiilab/astrago"
-    imageTag: "core-v1.0.82"
+    repository: "xiilab/astrago-posco"
+    imageTag: "core-stage-c5ad"
   batch:
     registry: "docker.io"
-    repository: "xiilab/astrago"
-    imageTag: "batch-v1.0.82"
+    repository: "xiilab/astrago-posco"
+    imageTag: "batch-stage-c5ad"
   monitor:
     registry: "docker.io"
-    repository: "xiilab/astrago"
-    imageTag: "monitor-v1.0.82"
+    repository: "xiilab/astrago-posco"
+    imageTag: "monitor-stage-c5ad"
   frontend:
     registry: "docker.io"
-    repository: "xiilab/astrago"
-    imageTag: frontend-v1.0.51
+    repository: "xiilab/astrago-posco"
+    imageTag: frontend-stage-3770
   oneview:
     enabled: false
 # Loki Settings

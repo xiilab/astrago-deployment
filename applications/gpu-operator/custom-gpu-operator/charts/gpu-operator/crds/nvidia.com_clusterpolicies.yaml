@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.17.2
   name: clusterpolicies.nvidia.com
 spec:
   group: nvidia.com
@@ -248,8 +248,8 @@ spec:
                       type: object
                     type: array
                   hostPort:
-                    description: 'HostPort represents host port that needs to be bound
-                      for DCGM engine (Default: 5555)'
+                    description: 'Deprecated: HostPort represents host port that needs
+                      to be bound for DCGM engine (Default: 5555)'
                     format: int32
                     type: integer
                   image:
@@ -381,6 +381,19 @@ spec:
                           More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                         type: object
                     type: object
+                  service:
+                    description: 'Optional: Service configuration for NVIDIA DCGM
+                      Exporter'
+                    properties:
+                      internalTrafficPolicy:
+                        description: InternalTrafficPolicy describes how nodes distribute
+                          service traffic they receive on the ClusterIP.
+                        type: string
+                      type:
+                        description: Type represents the ServiceType which describes
+                          ingress methods for a service
+                        type: string
+                    type: object
                   serviceMonitor:
                     description: 'Optional: ServiceMonitor configuration for NVIDIA
                       DCGM Exporter'
@@ -413,7 +426,6 @@ spec:
                             RelabelConfig allows dynamic rewriting of the label set for targets, alerts,
                             scraped samples and remote write samples.
 
-
                             More info: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config
                           properties:
                             action:
@@ -421,10 +433,8 @@ spec:
                               description: |-
                                 Action to perform based on the regex matching.
 
-
                                 `Uppercase` and `Lowercase` actions require Prometheus >= v2.36.0.
                                 `DropEqual` and `KeepEqual` actions require Prometheus >= v2.41.0.
-
 
                                 Default: "Replace"
                               enum:
@@ -455,7 +465,6 @@ spec:
                               description: |-
                                 Modulus to take of the hash of the source label values.
 
-
                                 Only applicable when the action is `HashMod`.
                               format: int64
                               type: integer
@@ -467,7 +476,6 @@ spec:
                               description: |-
                                 Replacement value against which a Replace action is performed if the
                                 regular expression matches.
-
 
                                 Regex capture groups are available.
                               type: string
@@ -491,10 +499,8 @@ spec:
                               description: |-
                                 Label to which the resulting string is written in a replacement.
 
-
                                 It is mandatory for `Replace`, `HashMod`, `Lowercase`, `Uppercase`,
                                 `KeepEqual` and `DropEqual` actions.
-
 
                                 Regex capture groups are available.
                               type: string
@@ -657,6 +663,17 @@ spec:
                       name:
                         type: string
                     type: object
+                  kernelModuleType:
+                    default: auto
+                    description: |-
+                      KernelModuleType represents the type of driver kernel modules to be used when installing the GPU driver.
+                      Accepted values are auto, proprietary and open. NOTE: If auto is chosen, it means that the recommended kernel module
+                      type is chosen based on the GPU devices on the host and the driver branch used
+                    enum:
+                    - auto
+                    - open
+                    - proprietary
+                    type: string
                   licensingConfig:
                     description: 'Optional: Licensing configuration for NVIDIA vGPU
                       licensing'
@@ -985,8 +1002,9 @@ spec:
                       NVIDIA Driver is managed by the NVIDIADriver CRD type
                     type: boolean
                   useOpenKernelModules:
-                    description: UseOpenKernelModules indicates if the open GPU kernel
-                      modules should be used
+                    description: |-
+                      Deprecated: This field is no longer honored by the gpu-operator. Please use KernelModuleType instead.
+                      UseOpenKernelModules indicates if the open GPU kernel modules should be used
                     type: boolean
                   usePrecompiled:
                     description: UsePrecompiled indicates if deployment of NVIDIA
@@ -1173,6 +1191,24 @@ spec:
                     type: object
                   version:
                     description: GFD image tag
+                    type: string
+                type: object
+              hostPaths:
+                description: HostPaths defines various paths on the host needed by
+                  GPU Operator components
+                properties:
+                  driverInstallDir:
+                    description: |-
+                      DriverInstallDir represents the root at which driver files including libraries,
+                      config files, and executables can be found.
+                    type: string
+                  rootFS:
+                    description: |-
+                      RootFS represents the path to the root filesystem of the host.
+                      This is used by components that need to interact with the host filesystem
+                      and as such this must be a chroot-able filesystem.
+                      Examples include the MIG Manager and Toolkit Container which may need to
+                      stop, start, or restart systemd services.
                     type: string
                 type: object
               kataManager:
@@ -2298,16 +2334,8 @@ spec:
                 description: Conditions is a list of conditions representing the ClusterPolicy's
                   current state.
                 items:
-                  description: "Condition contains details for one aspect of the current
-                    state of this API Resource.\n---\nThis struct is intended for
-                    direct use as an array at the field path .status.conditions.  For
-                    example,\n\n\n\ttype FooStatus struct{\n\t    // Represents the
-                    observations of a foo's current state.\n\t    // Known .status.conditions.type
-                    are: \"Available\", \"Progressing\", and \"Degraded\"\n\t    //
-                    +patchMergeKey=type\n\t    // +patchStrategy=merge\n\t    // +listType=map\n\t
-                    \   // +listMapKey=type\n\t    Conditions []metav1.Condition `json:\"conditions,omitempty\"
-                    patchStrategy:\"merge\" patchMergeKey:\"type\" protobuf:\"bytes,1,rep,name=conditions\"`\n\n\n\t
-                    \   // other fields\n\t}"
+                  description: Condition contains details for one aspect of the current
+                    state of this API Resource.
                   properties:
                     lastTransitionTime:
                       description: |-
@@ -2348,12 +2376,7 @@ spec:
                       - Unknown
                       type: string
                     type:
-                      description: |-
-                        type of condition in CamelCase or in foo.example.com/CamelCase.
-                        ---
-                        Many .condition.type values are consistent across resources like Available, but because arbitrary conditions can be
-                        useful (see .node.status.conditions), the ability to deconflict is important.
-                        The regex it matches is (dns1123SubdomainFmt/)?(qualifiedNameFmt)
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase.
                       maxLength: 316
                       pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
                       type: string
