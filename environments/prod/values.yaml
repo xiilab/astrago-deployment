@@ -41,19 +41,19 @@ astrago:
   core:
     registry: "docker.io"
     repository: "xiilab/astrago-posco"
-    imageTag: "core-stage-c5ad"
+    imageTag: "core-stage-224a"
   batch:
     registry: "docker.io"
     repository: "xiilab/astrago-posco"
-    imageTag: "batch-stage-c5ad"
+    imageTag: "batch-stage-224a"
   monitor:
     registry: "docker.io"
     repository: "xiilab/astrago-posco"
-    imageTag: "monitor-stage-c5ad"
+    imageTag: "monitor-stage-224a"
   frontend:
     registry: "docker.io"
     repository: "xiilab/astrago-posco"
-    imageTag: frontend-stage-3770
+    imageTag: frontend-stage-2e50
   oneview:
     enabled: false
 # Loki Settings
