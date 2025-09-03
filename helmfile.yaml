@@ -65,3 +65,11 @@ helmfiles:
 - path: applications/harbor/helmfile.yaml
   values:
   - {{ toYaml .Values | nindent 4 }}
+
+- path: applications/redis/helmfile.yaml
+  values:
+  - {{ toYaml .Values | nindent 4 }}
+
+- path: applications/timescaledb/helmfile.yaml
+  values:
+  - {{ toYaml .Values | nindent 4 }}

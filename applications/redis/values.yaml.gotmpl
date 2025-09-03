@@ -1,0 +1,39 @@
+image:
+  registry: "docker.io"
+  repository: "redis"
+  tag: "7.2-alpine"
+  pullPolicy: IfNotPresent
+
+auth:
+  enabled: true
+  password: "{{ .Values.redis.password | default "redis123!" }}"
+
+persistence:
+  enabled: true
+  storageClass: "{{ .Values.nfs.storageClassName | default "astrago-nfs-csi" }}"
+  size: "{{ .Values.redis.persistence.size | default "10Gi" }}"
+
+resources:
+  limits:
+    cpu: "{{ .Values.redis.resources.limits.cpu | default "1000m" }}"
+    memory: "{{ .Values.redis.resources.limits.memory | default "1Gi" }}"
+  requests:
+    cpu: "{{ .Values.redis.resources.requests.cpu | default "100m" }}"
+    memory: "{{ .Values.redis.resources.requests.memory | default "128Mi" }}"
+
+service:
+  type: ClusterIP
+  port: 6379
+
+metrics:
+  enabled: "{{ .Values.redis.metrics.enabled | default false }}"
+  
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Redis 설정
+config:
+  maxmemory: "{{ .Values.redis.config.maxmemory | default "1gb" }}"
+  maxmemoryPolicy: "{{ .Values.redis.config.maxmemoryPolicy | default "allkeys-lru" }}"
+  save: "{{ .Values.redis.config.save | default "900 1 300 10 60 10000" }}" 

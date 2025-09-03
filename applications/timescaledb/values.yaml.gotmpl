@@ -1,0 +1,52 @@
+image:
+  registry: "docker.io"
+  repository: "timescale/timescaledb"
+  tag: "2.12.1-pg16"
+  pullPolicy: IfNotPresent
+
+auth:
+  enableSuperuser: true
+  superuserPassword: "{{ .Values.timescaledb.superuserPassword | default "timescale123!" }}"
+  database: "{{ .Values.timescaledb.database | default "timescaledb" }}"
+  username: "{{ .Values.timescaledb.username | default "timescale" }}"
+  password: "{{ .Values.timescaledb.password | default "timescale123!" }}"
+
+persistence:
+  enabled: true
+  storageClass: "{{ .Values.nfs.storageClassName | default "astrago-nfs-csi" }}"
+  size: "{{ .Values.timescaledb.persistence.size | default "50Gi" }}"
+
+resources:
+  limits:
+    cpu: "{{ .Values.timescaledb.resources.limits.cpu | default "2000m" }}"
+    memory: "{{ .Values.timescaledb.resources.limits.memory | default "4Gi" }}"
+  requests:
+    cpu: "{{ .Values.timescaledb.resources.requests.cpu | default "500m" }}"
+    memory: "{{ .Values.timescaledb.resources.requests.memory | default "1Gi" }}"
+
+service:
+  type: ClusterIP
+  port: 5432
+
+metrics:
+  enabled: "{{ .Values.timescaledb.metrics.enabled | default false }}"
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# PostgreSQL/TimescaleDB 설정
+config:
+  sharedBuffers: "{{ .Values.timescaledb.config.sharedBuffers | default "1GB" }}"
+  effectiveCacheSize: "{{ .Values.timescaledb.config.effectiveCacheSize | default "3GB" }}"
+  maintenanceWorkMem: "{{ .Values.timescaledb.config.maintenanceWorkMem | default "256MB" }}"
+  workMem: "{{ .Values.timescaledb.config.workMem | default "64MB" }}"
+  maxConnections: "{{ .Values.timescaledb.config.maxConnections | default "200" }}"
+  maxWalSize: "{{ .Values.timescaledb.config.maxWalSize | default "4GB" }}"
+  minWalSize: "{{ .Values.timescaledb.config.minWalSize | default "1GB" }}"
+  walBuffers: "{{ .Values.timescaledb.config.walBuffers | default "16MB" }}"
+
+# TimescaleDB 확장 설정
+timescale:
+  maxBackgroundWorkers: "{{ .Values.timescaledb.timescale.maxBackgroundWorkers | default "8" }}"
+  maxChunkTime: "{{ .Values.timescaledb.timescale.maxChunkTime | default "7d" }}" 
