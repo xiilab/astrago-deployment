@@ -57,6 +57,8 @@ get_chart_version() {
         "harbor/harbor") echo "1.14.2" ;;
         "nvidia/gpu-operator") echo "v24.9.0" ;;
         "bitnami/keycloak") echo "21.4.4" ;;
+        "cowboysysop/mpi-operator") echo "1.2.2" ;;
+        "csi-driver-nfs/csi-driver-nfs") echo "v4.9.0" ;;
         *) echo "" ;;
     esac
 }
@@ -67,6 +69,8 @@ CHART_LIST=(
     "harbor/harbor"
     "nvidia/gpu-operator"
     "bitnami/keycloak"
+    "cowboysysop/mpi-operator"
+    "csi-driver-nfs/csi-driver-nfs"
 )
 
 # Repository 추가
@@ -78,6 +82,8 @@ add_repositories() {
     helm repo add harbor https://helm.goharbor.io || true
     helm repo add nvidia https://helm.ngc.nvidia.com/nvidia || true
     helm repo add bitnami https://charts.bitnami.com/bitnami || true
+    helm repo add cowboysysop https://cowboysysop.github.io/charts/ || true
+    helm repo add csi-driver-nfs https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts || true
     
     log_info "리포지토리 업데이트 중..."
     helm repo update

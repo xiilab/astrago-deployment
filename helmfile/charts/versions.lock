@@ -1,9 +1,5 @@
 # Astrago Helm Charts Versions Lock File
 # Format: chart_name,version,checksum,download_date
-# Generated at 2025-09-03T06:40:40Z
+# Generated at 2025-09-03T06:56:35Z
 
-prometheus-community/kube-prometheus-stack,61.9.0,87039146bd817cc99d829d65c21b5627474c027463a383eb93021f7454111785,2025-09-03T06:40:42Z
-fluxcd-community/flux2,2.12.4,2a153ccc06528a7408a375bc99f389a29822e90d4912dca1c3795af394542ca7,2025-09-03T06:40:42Z
-harbor/harbor,1.14.2,b8fb2fd03abb44878b71854f3fbb4f81bf968712fa67441cf5124f60b8bf6222,2025-09-03T06:40:43Z
-nvidia/gpu-operator,v24.9.0,60ca13670f06a7324820d38d46ef2d27ec072265ad708525ad91791eb20d1681,2025-09-03T06:40:44Z
-bitnami/keycloak,21.4.4,704b5d3beb910fa566e1bcbb4ed811b0572cc3c861b7df63f541e5ac9927a967,2025-09-03T06:40:46Z
+cowboysysop/mpi-operator,1.2.2,fe88d94fb5d724e9a089ea84fea049a75e88d8d0b7c204e3fab7e25da2220e51,2025-09-03T06:56:37Z
