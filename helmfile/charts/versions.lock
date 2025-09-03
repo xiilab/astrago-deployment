@@ -1,5 +1,11 @@
 # Astrago Helm Charts Versions Lock File
 # Format: chart_name,version,checksum,download_date
-# Generated at 2025-09-03T06:56:35Z
+# Generated at 2025-09-03T07:49:44Z
 
-cowboysysop/mpi-operator,1.2.2,fe88d94fb5d724e9a089ea84fea049a75e88d8d0b7c204e3fab7e25da2220e51,2025-09-03T06:56:37Z
+csi-driver-nfs/csi-driver-nfs,v4.9.0,1470896f0c8fcfdc771d86ac3037ecd64aaa55c394b2ecdeb0be87bf946168c1,2025-09-03T07:49:44Z
+fluxcd-community/flux2,2.12.4,2a153ccc06528a7408a375bc99f389a29822e90d4912dca1c3795af394542ca7,2025-09-03T07:49:45Z
+nvidia/gpu-operator,v24.9.0,68aa4785a22dc268e4713306644d5e7d691cdeba3e4c3a82e7f7135148843085,2025-09-03T07:49:54Z
+harbor/harbor,1.14.2,b8fb2fd03abb44878b71854f3fbb4f81bf968712fa67441cf5124f60b8bf6222,2025-09-03T07:49:54Z
+bitnami/keycloak,21.4.4,0c4db081bfea3025fb6f2e2524884616f55dea824b37e4094cdcf134f1c45e74,2025-09-03T07:50:05Z
+prometheus-community/kube-prometheus-stack,61.9.0,9477999983c283c2d19c9fa204e1132fbbef51c2b6b51c47b3e43e0a268e331d,2025-09-03T07:50:20Z
+cowboysysop/mpi-operator,1.2.2,ad789c01699f7aada8808085a82d3ae0c0e7afc5365df850c8d72fe9865790ff,2025-09-03T07:50:29Z
