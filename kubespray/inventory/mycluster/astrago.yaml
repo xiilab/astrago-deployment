@@ -13,19 +13,19 @@ all:
       ip: 10.61.3.93
       access_ip: 10.61.3.93
   children:
-    kube_control_plane:
+    kube-master:
       hosts:
         master-1:
-    kube_node:
+    kube-node:
       hosts:
         worker-1:
         worker-2:
     etcd:
       hosts:
         master-1:
-    k8s_cluster:
+    k8s-cluster:
       children:
-        kube_control_plane:
-        kube_node:
-    calico_rr:
+        kube-master:
+        kube-node:
+    calico-rr:
       hosts: {}
