@@ -1,10 +1,18 @@
 # externalIP:
-externalIP:
+externalIP: 10.61.3.91
+
+gpu-operator:
+  driver:
+    version: "570.172.08"      # 설치된 NVIDIA GPU Driver Version
+  fabricManager:
+    version: "570.172.08"      # Fabric Manager Version == NVIDIA GPU Driver Version 
+    enabled: true              # Enable fabric manager
+
 # Volume Settings
 nfs:
   storageClassName: astrago-nfs-csi
-  server:
-  basePath:
+  server: 10.61.3.91
+  basePath: /nfs-data/astrago
 # Keycloak Settings
 keycloak:
   adminUser: admin
