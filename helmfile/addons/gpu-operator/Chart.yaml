@@ -1,0 +1,6 @@
+apiVersion: v2
+name: gpu-operator-addons
+description: Additional configurations for GPU Operator
+type: application
+version: 1.0.0
+appVersion: "1.0.0"

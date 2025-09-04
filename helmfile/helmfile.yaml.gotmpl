@@ -28,7 +28,7 @@ helmDefaults:
 ---
 
 releases:
-  # Tier 1: Infrastructure
+  # Tier 1: Infrastructure & Addons
   - name: nfs-provisioner
     namespace: nfs-provisioner
     chart: ./charts/external/csi-driver-nfs
@@ -41,12 +41,24 @@ releases:
     values:
     - ./values/csi-driver-nfs.yaml.gotmpl
     
+  # GPU Operator Addons (ConfigMaps)
+  - name: gpu-operator-addons
+    namespace: gpu-operator
+    chart: ./addons/gpu-operator
+    installed: true
+    wait: true
+    labels:
+      tier: infrastructure
+      app: gpu-operator-addons
+    
   - name: gpu-operator
     namespace: gpu-operator
     chart: ./charts/external/gpu-operator
     installed: true
     wait: true
     timeout: 600
+    needs:
+    - gpu-operator/gpu-operator-addons
     labels:
       tier: infrastructure
       app: gpu-operator
@@ -70,7 +82,7 @@ releases:
 
   - name: loki
     namespace: loki
-    chart: ../applications/loki-stack
+    chart: ./charts/internal/loki-stack
     installed: true
     wait: true
     labels:
@@ -82,7 +94,7 @@ releases:
 
   - name: gpu-process-exporter
     namespace: gpu-process-exporter
-    chart: ../applications/gpu-process-exporter
+    chart: ./charts/internal/gpu-process-exporter
     installed: true
     wait: true
     labels:
@@ -106,12 +118,24 @@ releases:
     - ./values/flux.yaml.gotmpl
 
 
+  # Keycloak Addons (Realm Config)
+  - name: keycloak-addons
+    namespace: keycloak
+    chart: ./addons/keycloak
+    installed: true
+    wait: true
+    labels:
+      tier: security
+      app: keycloak-addons
+
   - name: keycloak
     namespace: keycloak
     chart: ./charts/external/keycloak
     installed: true
     wait: true
     timeout: 600
+    needs:
+    - keycloak/keycloak-addons
     labels:
       tier: security
       app: keycloak
@@ -148,7 +172,7 @@ releases:
 
   - name: astrago
     namespace: astrago
-    chart: ../applications/astrago/astrago
+    chart: ./charts/internal/astrago
     installed: true
     wait: true
     timeout: 600

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: workload-log-pvc
+  namespace: {{ .Release.Namespace | quote }}
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  resources:
+    requests:
+      storage: {{ .Values.nfs.size | quote }}
+  accessModes:
+    {{- range .Values.nfs.accessModes }}
+    - {{ . | quote }}
+    {{- end }}
+  storageClassName: {{ .Values.nfs.storageClassName }}
