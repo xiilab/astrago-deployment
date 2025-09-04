@@ -1,7 +1,7 @@
 # externalIP:
 externalIP: 10.61.3.91
 
-gpu-operator:
+gpu_operator:
   driver:
     version: "570.172.08"      # 설치된 NVIDIA GPU Driver Version
   fabricManager:

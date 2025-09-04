@@ -46,7 +46,7 @@ gpu-operator:
     repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
     image: driver
     #version: "550.144.03"
-    version: {{ .Values.gpu-operator.driver.version | default "570.172.08" | quote }}
+    version: {{ .Values.gpu_operator.driver.version | default "570.172.08" | quote }}
     imagePullPolicy: IfNotPresent
     manager:
       image: k8s-driver-manager
@@ -57,7 +57,7 @@ gpu-operator:
     enabled: true
     repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
     image: fabric-manager
-    version: {{ .Values.gpu-operator.fabricManager.version | default "570.172.08" | quote }}
+    version: {{ .Values.gpu_operator.fabricManager.version | default "570.172.08" | quote }}
     imagePullPolicy: IfNotPresent
 
   toolkit:
