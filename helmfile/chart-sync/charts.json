@@ -1,0 +1,43 @@
+{
+  "repositories": {
+    "prometheus-community": "https://prometheus-community.github.io/helm-charts",
+    "fluxcd-community": "https://fluxcd-community.github.io/helm-charts",
+    "harbor": "https://helm.goharbor.io",
+    "nvidia": "https://helm.ngc.nvidia.com/nvidia",
+    "bitnami": "https://charts.bitnami.com/bitnami",
+    "cowboysysop": "https://cowboysysop.github.io/charts/",
+    "csi-driver-nfs": "https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts",
+    "grafana": "https://grafana.github.io/helm-charts",
+    "node-feature-discovery": "https://kubernetes-sigs.github.io/node-feature-discovery/charts"
+  },
+  "charts": {
+    "kube-prometheus-stack": {
+      "repository": "prometheus-community",
+      "version": "61.9.0"
+    },
+    "flux2": {
+      "repository": "fluxcd-community",
+      "version": "2.12.4"
+    },
+    "harbor": {
+      "repository": "harbor",
+      "version": "1.14.2"
+    },
+    "gpu-operator": {
+      "repository": "nvidia",
+      "version": "v24.9.0"
+    },
+    "keycloak": {
+      "repository": "bitnami",
+      "version": "17.3.5"
+    },
+    "mpi-operator": {
+      "repository": "cowboysysop",
+      "version": "1.2.2"
+    },
+    "csi-driver-nfs": {
+      "repository": "csi-driver-nfs",
+      "version": "v4.9.0"
+    }
+  }
+}
