@@ -34,14 +34,6 @@ helmfiles:
   values:
   - {{ toYaml .Values | nindent 4 }}
 
-    #- path: applications/gpu-process-exporter/helmfile.yaml
-    #values:
-    #- {{ toYaml .Values | nindent 4 }}
-
-    #- path: applications/loki-stack/helmfile.yaml
-    #values:
-    #- {{ toYaml .Values | nindent 4 }}
-
 - path: applications/prometheus/helmfile.yaml
   values:
   - {{ toYaml .Values | nindent 4 }}
