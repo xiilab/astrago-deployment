@@ -1,0 +1,56 @@
+# Loki Stack Configuration - Local Chart
+# Complete logging solution with Loki and Promtail using local templates
+
+# Loki Configuration
+loki:
+  image:
+    repository: {{ .Values.offline.registry | default "docker.io" }}/grafana/loki
+    tag: "2.9.2"
+    pullPolicy: IfNotPresent
+    
+  replicas: {{ .Values.loki.replicas | default 1 }}
+  
+  resources:
+    limits:
+      cpu: {{ .Values.loki.resources.limits.cpu | default "1000m" | quote }}
+      memory: {{ .Values.loki.resources.limits.memory | default "2Gi" | quote }}
+    requests:
+      cpu: {{ .Values.loki.resources.requests.cpu | default "500m" | quote }}
+      memory: {{ .Values.loki.resources.requests.memory | default "1Gi" | quote }}
+  
+  persistence:
+    enabled: {{ .Values.loki.persistence.enabled | default true }}
+    size: {{ .Values.loki.persistence.size | default "10Gi" | quote }}
+    storageClass: {{ .Values.loki.persistence.storageClass | default "astrago-nfs-csi" | quote }}
+  
+  # Retention Policy Configuration
+  config:
+    table_manager:
+      retention_deletes_enabled: {{ .Values.loki.retention.enabled | default true }}
+      retention_period: {{ .Values.loki.retention.period | default "30d" | quote }}
+    
+    compactor:
+      working_directory: /loki/compactor
+      shared_store: filesystem
+      compaction_interval: {{ .Values.loki.retention.compaction_interval | default "10m" | quote }}
+      retention_enabled: {{ .Values.loki.retention.enabled | default true }}
+      retention_delete_delay: {{ .Values.loki.retention.delete_delay | default "2h" | quote }}
+      retention_delete_worker_count: {{ .Values.loki.retention.delete_worker_count | default 150 }}
+      
+    limits_config:
+      retention_period: {{ .Values.loki.retention.period | default "720h" | quote }}  # 30 days default
+
+# Promtail Configuration
+promtail:
+  image:
+    repository: {{ .Values.offline.registry | default "docker.io" }}/grafana/promtail
+    tag: "2.9.2"
+    pullPolicy: IfNotPresent
+    
+  resources:
+    limits:
+      cpu: {{ .Values.promtail.resources.limits.cpu | default "200m" | quote }}
+      memory: {{ .Values.promtail.resources.limits.memory | default "512Mi" | quote }}
+    requests:
+      cpu: {{ .Values.promtail.resources.requests.cpu | default "100m" | quote }}
+      memory: {{ .Values.promtail.resources.requests.memory | default "256Mi" | quote }}

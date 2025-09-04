@@ -39,7 +39,7 @@ releases:
       tier: infrastructure
       app: nfs-provisioner
     values:
-    - ../applications/csi-driver-nfs/values.yaml.gotmpl
+    - ./values/csi-driver-nfs.yaml.gotmpl
     
   - name: gpu-operator
     namespace: gpu-operator
@@ -51,7 +51,7 @@ releases:
       tier: infrastructure
       app: gpu-operator
     values:
-    - ../applications/gpu-operator/values.yaml.gotmpl
+    - ./values/gpu-operator.yaml.gotmpl
 
 
   # Tier 2: Monitoring
@@ -65,7 +65,7 @@ releases:
       tier: monitoring
       app: prometheus
     values:
-    - ../applications/prometheus/values.yaml.gotmpl
+    - ./values/prometheus.yaml.gotmpl
 
 
   - name: loki
@@ -77,7 +77,7 @@ releases:
       tier: monitoring
       app: loki
     values:
-    - ../applications/loki-stack/values.yaml.gotmpl
+    - ./values/loki-stack.yaml.gotmpl
 
 
   - name: gpu-process-exporter
@@ -89,7 +89,7 @@ releases:
       tier: monitoring
       app: gpu-process-exporter
     values:
-    - ../applications/gpu-process-exporter/values.yaml.gotmpl
+    - ./values/gpu-process-exporter.yaml.gotmpl
 
 
   # Tier 3: Security
@@ -103,7 +103,7 @@ releases:
       tier: security
       app: flux
     values:
-    - ../applications/flux/values.yaml.gotmpl
+    - ./values/flux.yaml.gotmpl
 
 
   - name: keycloak
@@ -116,7 +116,7 @@ releases:
       tier: security
       app: keycloak
     values:
-    - ../applications/keycloak/values.yaml.gotmpl
+    - ./values/keycloak.yaml.gotmpl
 
 
   - name: harbor
@@ -129,7 +129,7 @@ releases:
       tier: security
       app: harbor
     values:
-    - ../applications/harbor/values.yaml.gotmpl
+    - ./values/harbor.yaml.gotmpl
 
 
   # Tier 4: Applications
@@ -143,7 +143,7 @@ releases:
       tier: applications
       app: mpi-operator
     values:
-    - ../applications/mpi-operator/values.yaml.gotmpl
+    - ./values/mpi-operator.yaml.gotmpl
 
 
   - name: astrago
@@ -156,4 +156,4 @@ releases:
       tier: applications
       app: astrago
     values:
-    - ../applications/astrago/values.yaml.gotmpl
+    - ./values/astrago.yaml.gotmpl

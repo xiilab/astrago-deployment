@@ -1,0 +1,117 @@
+global:
+  imageRegistry: "{{ .Values.offline.registry | default "" }}"
+
+alertmanager:
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      group_by: ['nodeName', 'ruleName']
+      group_wait: 30s
+      #group_interval: 5m
+      #repeat_interval: 12h
+      group_interval: 2m
+      repeat_interval: 1h
+      receiver: 'null'
+      routes:
+      - receiver: 'webhook'
+        matchers:
+          - app = "astrago"
+    receivers:
+    - name: 'null'
+    - name: 'webhook'
+      webhook_configs:
+      - url: 'http://astrago-backend-core.astrago.svc:8080/api/v1/core/alertManager/receive'
+    templates:
+    - '/etc/alertmanager/config/*.tmpl'  
+  service:
+    type: NodePort    
+      
+prometheus:
+  service:
+    type: NodePort
+
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+
+    additionalScrapeConfigs: 
+    - job_name: gpu-metrics
+      scrape_interval: 1s
+      metrics_path: /metrics
+      scheme: http
+      kubernetes_sd_configs:
+      - role: endpoints
+        namespaces:
+          names:
+          - gpu-operator
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_node_name]
+        action: replace
+        target_label: kubernetes_node      
+    retention: 1y
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: "{{ .Values.nfs.storageClassName }}"
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 50Gi
+
+grafana:          
+  service:
+    enabled: true
+    type: NodePort
+
+  # Grafana 데이터소스 자동 구성
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+      # Prometheus 데이터소스 (기본)
+      - name: Prometheus
+        type: prometheus
+        url: http://prometheus-kube-prometheus-prometheus.prometheus.svc.cluster.local:9090
+        access: proxy
+        isDefault: true
+        
+      # Loki 데이터소스 자동 추가
+      - name: Loki
+        type: loki
+        url: http://loki-stack.loki-stack.svc.cluster.local:3100
+        access: proxy
+        isDefault: false
+        jsonData:
+          maxLines: 1000
+          derivedFields:
+            # 로그에서 trace ID 추출 (선택사항)
+            - name: "TraceID"
+              matcherRegex: "trace_id=(\\w+)"
+              url: "$${__value.raw}"
+              
+  # Grafana 대시보드 자동 프로비저닝
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'loki-dashboards'
+        orgId: 1
+        folder: 'Loki'
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/loki
+          
+  # Loki 관련 대시보드 추가
+  dashboards:
+    loki:
+      loki-logs:
+        gnetId: 13639  # Loki Logs Dashboard
+        revision: 2
+        datasource: Loki
+      loki-operational:
+        gnetId: 14055  # Loki Operational Dashboard  
+        revision: 5
+        datasource: Prometheus
+

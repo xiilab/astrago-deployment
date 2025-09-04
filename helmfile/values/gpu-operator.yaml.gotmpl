@@ -1,0 +1,149 @@
+gpu-operator:
+  validator:
+    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
+    image: gpu-operator-validator
+    # version: ""
+  operator:
+    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
+    image: gpu-operator  
+    # version: ""    
+    initContainer:
+      image: cuda
+      repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
+      # version: 12.6.3-base-ubi9      
+
+  dcgmExporter:
+    enabled: true
+    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/k8s
+    image: dcgm-exporter
+    # version: 3.3.9-3.6.1-ubuntu22.04
+    imagePullPolicy: IfNotPresent
+    config:
+      name: metrics-config
+    env:
+      - name: DCGM_EXPORTER_LISTEN
+        value: ":9400"
+      - name: DCGM_EXPORTER_KUBERNETES
+        value: "true"
+      - name: DCGM_EXPORTER_COLLECTORS
+        value: "/etc/dcgm-exporter/dcgm-metrics.csv"
+    serviceMonitor:
+      enabled: true
+      interval: 15s
+      honorLabels: false
+      additionalLabels: {}
+      relabelings: []
+
+  dcgm:
+    enabled: true
+    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
+    image: dcgm
+    version: 3.3.9-1-ubuntu22.04
+    imagePullPolicy: IfNotPresent
+
+  driver:
+    enabled: true
+    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
+    image: driver
+    version: "550.144.03"
+    imagePullPolicy: IfNotPresent
+    manager:
+      image: k8s-driver-manager
+      repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
+      version: v0.7.0
+
+  toolkit:
+    enabled: true
+    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/k8s
+    image: container-toolkit
+    version: v1.17.4-ubuntu20.04
+    imagePullPolicy: IfNotPresent
+
+  devicePlugin:
+    enabled: true
+    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
+    image: k8s-device-plugin
+    version: v0.17.0
+    imagePullPolicy: IfNotPresent
+
+  gfd:
+    enabled: true
+    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
+    image: k8s-device-plugin
+    version: v0.17.0
+    imagePullPolicy: IfNotPresent
+
+  migManager:
+    enabled: true
+    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
+    image: k8s-mig-manager
+    version: v0.10.0-ubuntu20.04
+    imagePullPolicy: IfNotPresent
+
+  nodeStatusExporter:
+    enabled: false
+    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
+    image: gpu-operator-validator
+    # version: ""
+    imagePullPolicy: IfNotPresent
+
+  gds:
+    enabled: false
+    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
+    image: nvidia-fs
+    # version: "2.20.5"
+    imagePullPolicy: IfNotPresent
+
+  vgpuManager:
+    enabled: false
+    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
+    image: vgpu-manager
+    version: ""
+    imagePullPolicy: IfNotPresent
+
+  vgpuDeviceManager:
+    enabled: false  
+    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
+    image: vgpu-device-manager
+    # version: v0.2.8
+    imagePullPolicy: IfNotPresent
+
+  sandboxDevicePlugin:
+    enabled: false
+    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
+    image: kubevirt-gpu-device-plugin
+    # version: v1.2.10
+    imagePullPolicy: IfNotPresent
+
+  kataManager:
+    enabled: false
+    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
+    image: k8s-kata-manager
+    # version: v0.2.2
+    imagePullPolicy: IfNotPresent
+
+  ccManager:
+    enabled: false
+    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
+    image: k8s-cc-manager
+    # version: v0.1.1
+    imagePullPolicy: IfNotPresent
+
+node-feature-discovery:
+  master:
+    extraLabelNs:
+      - nvidia.com
+    serviceAccount:
+      name: node-feature-discovery
+
+# Global settings
+imagePullSecrets: []
+tolerations:
+  - key: "node-role.kubernetes.io/master"
+    operator: "Equal"
+    value: ""
+    effect: "NoSchedule"
+  - key: "node-role.kubernetes.io/control-plane"
+    operator: "Equal"
+    value: ""
+    effect: "NoSchedule"
