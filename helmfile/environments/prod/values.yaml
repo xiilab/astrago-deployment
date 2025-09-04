@@ -1,0 +1,82 @@
+# externalIP:
+externalIP:
+# Volume Settings
+nfs:
+  storageClassName: astrago-nfs-csi
+  server:
+  basePath:
+# Keycloak Settings
+keycloak:
+  adminUser: admin
+  adminPassword: xiirocks
+  servicePort: 30001
+# Astrago Settings
+astrago:
+  proxyUrl:
+  servicePort: 30080
+  userInitPassword: astrago
+  keycloak:
+    externalKeycloakUrl:
+    realm: astrago
+    client: astrago-client
+    clientSecret: astragosecret
+    userInitPassword: astrago
+  mariadb:
+    rootPassword: root
+    username: astrago
+    password: xiirocks
+    maxLifetime: "1800000"
+  core:
+    registry: "docker.io"
+    repository: "xiilab/astrago-posco"
+    imageTag: "core-stage-c5ad"
+  batch:
+    registry: "docker.io"
+    repository: "xiilab/astrago-posco"
+    imageTag: "batch-stage-c5ad"
+  monitor:
+    registry: "docker.io"
+    repository: "xiilab/astrago-posco"
+    imageTag: "monitor-stage-c5ad"
+  frontend:
+    registry: "docker.io"
+    repository: "xiilab/astrago-posco"
+    imageTag: frontend-stage-3770
+  oneview:
+    enabled: false
+# Loki Settings
+loki:
+  replicas: 1
+  resources:
+    limits:
+      cpu: "2000m"
+      memory: "4Gi"
+    requests:
+      cpu: "1000m"
+      memory: "2Gi"
+  persistence:
+    enabled: true
+    size: "100Gi"
+    storageClass: "astrago-nfs-csi"
+  retention:
+    enabled: true
+    period: "2160h" # 90 days for production environment
+    compaction_interval: "10m"
+    delete_delay: "2h"
+    delete_worker_count: 150
+# Promtail Settings
+promtail:
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+    requests:
+      cpu: "200m"
+      memory: "512Mi"
+harbor:
+  servicePort: 30002
+  enabled: true
+  adminPassword: Harbor12345
+offline:
+  registry: # 192.168.56.11:35000
+  httpServer: # http://192.168.56.11

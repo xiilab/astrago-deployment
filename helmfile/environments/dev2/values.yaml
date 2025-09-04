@@ -1,0 +1,85 @@
+# externalIP:
+externalIP: 10.61.3.12
+#externalIP: 59.10.103.94
+# Volume Settings
+nfs:
+  storageClassName: astrago-nfs-csi
+  server: 10.61.3.2
+  basePath: /kube_storage/develop-astrago
+# GPU Process Exporter Settings
+gpu-process-exporter:
+  enabled: true
+  collection:
+    schedule: "*/1 * * * *" # Every minute
+    image:
+      repository: busybox
+      tag: "1.35"
+    resources:
+      limits:
+        cpu: 100m
+        memory: 64Mi
+      requests:
+        cpu: 50m
+        memory: 32Mi
+  prometheus:
+    serverService: prometheus-kube-prometheus-prometheus.prometheus.svc:9090
+  gpu:
+    count: 4
+    devices: [0, 1, 2, 3]
+  nodeSelector:
+    nvidia.com/gpu.present: "true"
+  tolerations:
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
+# Keycloak Settings
+keycloak:
+  adminUser: admin
+  adminPassword: xiirocks
+  servicePort: 30001
+# Astrago Settings
+astrago:
+  proxyUrl:
+  #proxyUrl: http://59.10.103.94:30080
+  servicePort: 30080
+  userInitPassword: astrago
+  keycloak:
+    externalKeycloakUrl:
+    realm: astrago
+    client: astrago-client
+    clientSecret: astragosecret
+    userInitPassword: astrago
+  mariadb:
+    rootPassword: root
+    username: astrago
+    password: xiirocks
+    maxLifetime: "3595000"
+  mongodb:
+    url: mongodb://astrago:xiirocks@astrago-mongodb:27017/astrago?authSource=admin
+  core:
+    registry: "docker.io"
+    repository: "xiilab/astrago"
+    imageTag: "core-stag-7746"
+  batch:
+    registry: "docker.io"
+    repository: "xiilab/astrago"
+    imageTag: "batch-stag-7746"
+  monitor:
+    registry: "docker.io"
+    repository: "xiilab/astrago"
+    imageTag: "monitor-stag-7746"
+  frontend:
+    registry: "docker.io"
+    repository: "xiilab/astrago"
+    # registry: "10.61.3.161:30002"
+    # repository: "astrago/frontend"
+    imageTag: "frontend-stag-9cd6"
+  oneview:
+    enabled: true
+harbor:
+  enabled: true
+  servicePort: 30002
+  adminPassword: Harbor12345
+offline:
+  registry: # 192.168.56.11:35000
+  httpServer: # http://192.168.56.11
