@@ -82,30 +82,6 @@ releases:
     - ./values/prometheus.yaml.gotmpl
 
 
-  - name: loki
-    namespace: loki
-    chart: ./charts/internal/loki-stack
-    installed: true
-    wait: true
-    needs:
-    - nfs-provisioner/nfs-provisioner
-    labels:
-      tier: monitoring
-      app: loki
-    values:
-    - ./values/loki-stack.yaml.gotmpl
-
-
-  - name: gpu-process-exporter
-    namespace: gpu-process-exporter
-    chart: ./charts/internal/gpu-process-exporter
-    installed: true
-    wait: true
-    labels:
-      tier: monitoring
-      app: gpu-process-exporter
-    values:
-    - ./values/gpu-process-exporter.yaml.gotmpl
 
 
   # Tier 3: Security

@@ -56,22 +56,22 @@ astrago:
     url: mongodb://astrago:xiirocks@astrago-mongodb:27017/astrago?authSource=admin
   core:
     registry: "docker.io"
-    repository: "xiilab/astrago"
-    imageTag: "core-stag-7746"
+    repository: "xiilab/astrago-posco"
+    imageTag: "core-stag-224a"
   batch:
     registry: "docker.io"
-    repository: "xiilab/astrago"
-    imageTag: "batch-stag-7746"
+    repository: "xiilab/astrago-posco"
+    imageTag: "batch-stag-224a"
   monitor:
     registry: "docker.io"
-    repository: "xiilab/astrago"
-    imageTag: "monitor-stag-7746"
+    repository: "xiilab/astrago-posco"
+    imageTag: "monitor-stag-224a"
   frontend:
     registry: "docker.io"
-    repository: "xiilab/astrago"
+    repository: "xiilab/astrago-posco"
     # registry: "10.61.3.161:30002"
     # repository: "astrago/frontend"
-    imageTag: "frontend-stag-9cd6"
+    imageTag: "frontend-stag-2e50"
   oneview:
     enabled: true
 harbor:
