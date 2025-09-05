@@ -1,9 +1,0 @@
-dependencies:
-- name: postgresql
-  repository: file://charts/postgresql
-  version: 13.2.14
-- name: common
-  repository: file://charts/common
-  version: 2.13.3
-digest: sha256:c4d2e8383aabf672bd8d8a37154bcd5b9e612fdc2e54fcb609c009af540cd371
-generated: "2024-05-10T14:48:55.924762+09:00"

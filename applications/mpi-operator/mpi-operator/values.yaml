@@ -1,4 +1,0 @@
-image:
-  registry: "docker.io"
-  repository: mpioperator/mpi-operator
-  tag: 0.5.0

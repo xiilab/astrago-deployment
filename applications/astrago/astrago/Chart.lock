@@ -1,6 +1,0 @@
-dependencies:
-- name: mariadb
-  repository: file://./charts/mariadb
-  version: 12.2.9
-digest: sha256:5d89409a526d0b8949c3cde14f9198f6d91538946339c72cdceda79603047ab9
-generated: "2024-06-04T08:15:12.39576419Z"
