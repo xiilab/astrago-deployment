@@ -14,11 +14,32 @@ chartVersions:
 # GPU Process Exporter - Exports GPU process metrics to Prometheus
 gpu-process-exporter:
   enabled: true
+  collection:
+    schedule: "*/1 * * * *" # Every minute
+    image:
+      repository: busybox
+      tag: "1.35"
+    resources:
+      limits:
+        cpu: 100m
+        memory: 64Mi
+      requests:
+        cpu: 50m
+        memory: 32Mi
+  prometheus:
+    serverService: prometheus-kube-prometheus-prometheus.prometheus.svc:9090
+  gpu:
+    count: 4
+    devices: [0, 1, 2, 3]
+  nodeSelector:
+    nvidia.com/gpu.present: "true"
+  tolerations:
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
 
 # Loki Stack - Complete logging solution with Loki and Promtail
 loki:
-  enabled: true
-  retentionPeriod: "744h"  # 31 days
   replicas: 1
   resources:
     limits:
@@ -29,8 +50,23 @@ loki:
       memory: "1Gi"
   persistence:
     enabled: true
-    size: "10Gi"
+    size: "20Gi"
     storageClass: "astrago-nfs-csi"
+  retention:
+    enabled: true
+    period: "168h" # 7 days for dev environment
+    compaction_interval: "10m"
+    delete_delay: "2h"
+    delete_worker_count: 150
+  gpu:
+    count: 4
+    devices: [0, 1, 2, 3]
+  nodeSelector:
+    nvidia.com/gpu.present: "true"
+  tolerations:
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
 
 promtail:
   enabled: true

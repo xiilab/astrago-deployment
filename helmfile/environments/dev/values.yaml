@@ -98,6 +98,15 @@ loki:
     compaction_interval: "10m"
     delete_delay: "2h"
     delete_worker_count: 150
+  gpu:
+    count: 4
+    devices: [0, 1, 2, 3]
+  nodeSelector:
+    nvidia.com/gpu.present: "true"
+  tolerations:
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
 
 # Promtail Settings
 promtail:

@@ -73,6 +73,8 @@ releases:
     installed: true
     wait: true
     timeout: 600
+    needs:
+    - nfs-provisioner/nfs-provisioner
     labels:
       tier: monitoring
       app: prometheus
@@ -85,6 +87,8 @@ releases:
     chart: ./charts/internal/loki-stack
     installed: true
     wait: true
+    needs:
+    - nfs-provisioner/nfs-provisioner
     labels:
       tier: monitoring
       app: loki
@@ -135,6 +139,7 @@ releases:
     wait: true
     timeout: 600
     needs:
+    - nfs-provisioner/nfs-provisioner
     - keycloak/keycloak-addons
     labels:
       tier: security
@@ -149,6 +154,8 @@ releases:
     installed: true
     wait: true
     timeout: 600
+    needs:
+    - nfs-provisioner/nfs-provisioner
     labels:
       tier: security
       app: harbor
@@ -176,6 +183,8 @@ releases:
     installed: true
     wait: true
     timeout: 600
+    needs:
+    - nfs-provisioner/nfs-provisioner
     labels:
       tier: applications
       app: astrago
