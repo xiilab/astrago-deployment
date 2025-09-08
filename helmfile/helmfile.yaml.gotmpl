@@ -27,6 +27,10 @@ releases:
     installed: true
     wait: true
     timeout: 600
+    hooks:
+    - events: ["preuninstall"]
+      command: "sh"
+      args: ["-c", "echo 'Delaying NFS removal...' && sleep 15"]
     labels:
       tier: infrastructure
       app: nfs-provisioner

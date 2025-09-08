@@ -30,3 +30,11 @@
 
 environments/astrago
 .DS_Store
+
+# Binary files (downloaded separately)
+tools/linux/helm
+tools/linux/helmfile
+tools/linux/kubectl
+tools/linux/yq
+tools/binaries/
+*.tar.gz
