@@ -57,21 +57,21 @@ astrago:
   core:
     registry: "docker.io"
     repository: "xiilab/astrago-posco"
-    imageTag: "core-stag-224a"
+    imageTag: "core-stage-36379"
   batch:
     registry: "docker.io"
     repository: "xiilab/astrago-posco"
-    imageTag: "batch-stag-224a"
+    imageTag: "batch-stage-36379"
   monitor:
     registry: "docker.io"
     repository: "xiilab/astrago-posco"
-    imageTag: "monitor-stag-224a"
+    imageTag: "monitor-stage-36379"
   frontend:
     registry: "docker.io"
     repository: "xiilab/astrago-posco"
     # registry: "10.61.3.161:30002"
     # repository: "astrago/frontend"
-    imageTag: "frontend-stag-2e50"
+    imageTag: "frontend-stage-2e50"
   oneview:
     enabled: true
 harbor:
