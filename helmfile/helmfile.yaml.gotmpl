@@ -1,24 +1,16 @@
 environments:
-  prod:
+  # Default environment (uses base folder based on branch)
+  default:
     values:
     - ./environments/common/values.yaml
-    - ./environments/prod/values.yaml
-  dev:
-    values:
-    - ./environments/common/values.yaml
-    - ./environments/dev/values.yaml
-  dev2:
-    values:
-    - ./environments/common/values.yaml
-    - ./environments/dev2/values.yaml
-  stage:
-    values:
-    - ./environments/common/values.yaml
-    - ./environments/stage/values.yaml
+    - ./environments/base/values.yaml
+  
+  # Customer environments (release branch only)
   astrago:
     values:
     - ./environments/common/values.yaml
-    - ./environments/astrago/values.yaml
+    - ./environments/base/values.yaml
+    - ./environments/customers/astrago/values.yaml
 
 helmDefaults:
   wait: true

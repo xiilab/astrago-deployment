@@ -1,0 +1,28 @@
+# Customer-specific overrides for Astrago customer
+# These values override the base configuration
+
+# Customer-specific network settings
+externalIP: 10.61.3.123
+nfs:
+  server: 10.61.3.123
+  basePath: /astrago-volume
+
+# Customer-specific Astrago settings
+astrago:
+  mariadb:
+    maxLifetime: "3595000"  # Customer-specific DB timeout
+  mongodb:
+    url: mongodb://astrago:xiirocks@astrago-mongodb:27017/astrago?authSource=admin
+  core:
+    imageTag: "core-stage-36379"  # Customer-specific version
+  batch:
+    imageTag: "batch-stage-36379"  # Customer-specific version
+  monitor:
+    imageTag: "monitor-stage-36379"  # Customer-specific version
+  frontend:
+    imageTag: "frontend-stage-2e50"  # Customer-specific version
+    # Alternative registry example:
+    # registry: "10.61.3.161:30002"
+    # repository: "astrago/frontend"
+  oneview:
+    enabled: true  # Customer wants OneView enabled

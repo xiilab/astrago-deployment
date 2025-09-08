@@ -1,3 +1,7 @@
+# Base environment values
+# This file contains the base configuration for the current branch
+# Content will vary based on branch: main (dev), stabilize (stage), release (prod)
+
 # externalIP:
 externalIP:
 # Volume Settings
