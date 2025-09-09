@@ -33,8 +33,8 @@ esac
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/versions.conf"
 
-# Create directories
-BINARY_DIR="${SCRIPT_DIR}/linux"
+# Create directories based on OS
+BINARY_DIR="${SCRIPT_DIR}/${OS}"
 mkdir -p "${BINARY_DIR}"
 
 print_info "Downloading binaries for ${OS}/${ARCH}..."
@@ -93,4 +93,5 @@ for binary in helm helmfile kubectl yq; do
 done
 
 print_info "All binaries downloaded successfully to ${BINARY_DIR}"
+print_info "Platform: ${OS}/${ARCH}"
 print_info "You can now use deploy_astrago.sh script"

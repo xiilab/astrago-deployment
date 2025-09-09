@@ -33,6 +33,8 @@ environments/astrago
 
 # Binary files (downloaded separately)
 tools/linux/
+tools/darwin/
+tools/windows/
 tools/binaries/
 *.tar.gz
 

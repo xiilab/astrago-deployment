@@ -3,6 +3,7 @@ export LANG=en_US.UTF-8
 
 CURRENT_DIR=$(dirname "$(realpath "$0")")
 HELMFILE_DIR="$CURRENT_DIR/helmfile"
+TOOLS_DIR="$CURRENT_DIR/tools"
 
 # Colors for output
 RED='\033[0;31m'
@@ -15,20 +16,47 @@ print_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 print_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
-# Function to check and install binaries
-install_binary() {
-    local cmd=$1
+# Function to setup tools
+setup_tools() {
+    # Detect OS
     local OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-    if ! command -v $cmd &> /dev/null; then
-        print_info "Installing $cmd..."
-        if [[ -f "$CURRENT_DIR/tools/$OS/$cmd" ]]; then
-            sudo cp "$CURRENT_DIR/tools/$OS/$cmd" /usr/local/bin/
-            sudo chmod +x /usr/local/bin/$cmd
+    local BINARY_DIR="$TOOLS_DIR/$OS"
+    
+    # Check if binaries exist
+    local tools_missing=false
+    for cmd in helm helmfile kubectl yq; do
+        if [[ ! -f "$BINARY_DIR/$cmd" ]]; then
+            tools_missing=true
+            break
+        fi
+    done
+    
+    # Download binaries if missing
+    if [[ "$tools_missing" == "true" ]]; then
+        print_info "Required tools not found. Downloading..."
+        if [[ -f "$TOOLS_DIR/download-binaries.sh" ]]; then
+            bash "$TOOLS_DIR/download-binaries.sh" || {
+                print_error "Failed to download binaries"
+                exit 1
+            }
         else
-            print_error "$cmd binary not found in tools/$OS/ folder."
+            print_error "download-binaries.sh not found"
             exit 1
         fi
     fi
+    
+    # Add tools to PATH instead of installing to system
+    export PATH="$BINARY_DIR:$PATH"
+    
+    # Verify all tools are available
+    for cmd in helm helmfile kubectl yq; do
+        if ! command -v $cmd &> /dev/null; then
+            print_error "$cmd not available after setup"
+            exit 1
+        fi
+    done
+    
+    print_info "All tools are ready"
 }
 
 # Function to print usage
@@ -41,6 +69,7 @@ Commands:
   deploy [customer]   Deploy environment (default or customer)
   destroy [customer]  Destroy environment
   list                List all customer environments
+  update-tools        Update tools to latest versions
   
 Options:
   --ip <IP>          External IP address
@@ -53,8 +82,21 @@ Examples:
   $0 deploy samsung
   $0 deploy           # Deploy default environment (branch-based)
   $0 list
+  $0 update-tools    # Update binaries to latest versions
 EOF
     exit 0
+}
+
+# Function to update tools
+update_tools() {
+    print_info "Updating tools to latest versions..."
+    local OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+    rm -rf "$TOOLS_DIR/$OS"/*
+    bash "$TOOLS_DIR/download-binaries.sh" || {
+        print_error "Failed to update tools"
+        exit 1
+    }
+    print_info "Tools updated successfully"
 }
 
 # Function to initialize customer environment
@@ -205,10 +247,19 @@ list_customers() {
 
 # Main function
 main() {
-    # Install required binaries
-    for cmd in helm helmfile kubectl yq; do
-        install_binary $cmd
-    done
+    # Parse command first to check if it's help or update-tools
+    case "${1:-}" in
+        --help|help|-h)
+            print_usage
+            ;;
+        update-tools)
+            update_tools
+            exit 0
+            ;;
+    esac
+    
+    # Setup tools for other commands
+    setup_tools
     
     # Parse command
     case "${1:-}" in
@@ -227,7 +278,7 @@ main() {
         list|ls)
             list_customers
             ;;
-        --help|help|-h|"")
+        "")
             print_usage
             ;;
         *)
