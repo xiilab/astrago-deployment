@@ -174,6 +174,37 @@ HELM_DIFF_VERSION="3.12.5"  # 신규 추가
 - 환경변수 격리
 - 사용자 친화적 인터페이스
 
+#### 차트 구조 재편성
+**기존**: 분산된 applications 디렉토리
+```
+applications/
+├── gpu-operator/
+│   └── custom-gpu-operator/    # 커스텀 차트
+├── keycloak/
+├── astrago/
+└── ...
+```
+
+**개선**: helmfile 하위 통합 관리
+```
+helmfile/
+├── charts/                     # 차트 관리
+│   ├── astrago/               # 메인 애플리케이션 차트
+│   └── external/              # 오프라인용 외부 차트들
+│       ├── keycloak/
+│       ├── harbor/
+│       └── ...
+├── addons/                     # 애드온 설정
+│   ├── gpu-operator/          # GPU MIG 설정 
+│   └── keycloak/              # Realm 설정
+└── ...
+```
+
+**장점**:
+- **중앙화**: 모든 차트 관리를 helmfile 하위로 통합
+- **역할 분리**: charts(차트) vs addons(설정) vs values(템플릿)
+- **오프라인 지원**: external/ 폴더에 공식 차트들 사전 다운로드
+
 ### 환경 설정 개선
 
 #### Frontend 동적 설정 (예정)
