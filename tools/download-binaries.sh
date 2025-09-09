@@ -82,6 +82,40 @@ download_binary "kubectl" "${KUBECTL_URL}" ""
 YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_${OS}_${ARCH}"
 download_binary "yq" "${YQ_URL}" ""
 
+# Download Helm Diff Plugin
+print_info "Downloading Helm Diff Plugin..."
+HELM_PLUGINS_DIR="${BINARY_DIR}/.helm/plugins/helm-diff"
+mkdir -p "${HELM_PLUGINS_DIR}"
+
+# Convert OS name for helm-diff (darwin -> macos)
+HELM_DIFF_OS=${OS}
+if [ "${OS}" = "darwin" ]; then
+    HELM_DIFF_OS="macos"
+fi
+
+HELM_DIFF_URL="https://github.com/databus23/helm-diff/releases/download/v${HELM_DIFF_VERSION}/helm-diff-${HELM_DIFF_OS}-${ARCH}.tgz"
+print_info "Downloading from: ${HELM_DIFF_URL}"
+curl -L "${HELM_DIFF_URL}" -o "/tmp/helm-diff.tgz" || print_error "Failed to download helm-diff plugin"
+
+# Verify the downloaded file is a valid archive
+if ! tar -tzf "/tmp/helm-diff.tgz" &>/dev/null; then
+    print_error "Downloaded file is not a valid tar.gz archive"
+fi
+
+# Extract to temp directory first, then move files
+mkdir -p "/tmp/helm-diff-extract"
+tar xzf "/tmp/helm-diff.tgz" -C "/tmp/helm-diff-extract" || print_error "Failed to extract helm-diff plugin"
+
+# Move extracted files to plugin directory (diff/* -> helm-diff/*)
+if [ -d "/tmp/helm-diff-extract/diff" ]; then
+    cp -r "/tmp/helm-diff-extract/diff"/* "${HELM_PLUGINS_DIR}/"
+else
+    print_error "Extracted plugin structure is unexpected"
+fi
+
+# Clean up temp directory
+rm -rf "/tmp/helm-diff-extract"
+
 # Verify all binaries
 print_info "Verifying binaries..."
 for binary in helm helmfile kubectl yq; do
@@ -91,6 +125,13 @@ for binary in helm helmfile kubectl yq; do
         print_error "✗ ${binary} is missing"
     fi
 done
+
+# Verify helm diff plugin
+if [ -f "${HELM_PLUGINS_DIR}/bin/diff" ]; then
+    print_info "✓ helm-diff plugin is ready"
+else
+    print_error "✗ helm-diff plugin is missing"
+fi
 
 print_info "All binaries downloaded successfully to ${BINARY_DIR}"
 print_info "Platform: ${OS}/${ARCH}"

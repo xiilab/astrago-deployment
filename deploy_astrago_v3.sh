@@ -48,6 +48,9 @@ setup_tools() {
     # Add tools to PATH instead of installing to system
     export PATH="$BINARY_DIR:$PATH"
     
+    # Set HELM_PLUGINS environment for offline plugin support
+    export HELM_PLUGINS="$BINARY_DIR/.helm/plugins"
+    
     # Verify all tools are available
     for cmd in helm helmfile kubectl yq; do
         if ! command -v $cmd &> /dev/null; then
