@@ -200,6 +200,10 @@ data:
       # 파일 업로드 용량 제한을 100MB로 설정
       client_max_body_size 0;
 
+      map $http_x_forwarded_proto $best_proto { default $http_x_forwarded_proto; "" $scheme; }
+      map $http_x_forwarded_host  $best_host  { default $http_x_forwarded_host;  "" $host; }
+      map $http_x_forwarded_port  $best_port  { default $http_x_forwarded_port;  "" $server_port; }
+
       server {
         listen 80;
 
