@@ -37,22 +37,42 @@ data:
       # 파일 업로드 용량 제한을 100MB로 설정
       client_max_body_size 0;
 
+      # 기존 map들 유지
       map $http_x_forwarded_proto $best_proto { default $http_x_forwarded_proto; "" $scheme; }
       map $http_x_forwarded_host  $best_host  { default $http_x_forwarded_host;  "" $host; }
-
+    
+      # 1) 상위가 준 X-Forwarded-Port (있으면 사용)
       map $http_x_forwarded_port $xf_port { default $http_x_forwarded_port; "" ""; }
+    
+      # 2) 브라우저가 보낸 Host 헤더에서 포트 추출 (예: example.com:30080 → 30080)
+      map $http_host $host_port {
+        ~*^.+:(\d+)$  $1;   # 포트가 있으면 캡처
+        default       "";   # 없으면 빈 값
+      }
+    
+      # 3) 프로토콜 기본 포트
       map $best_proto $default_port { https 443; http 80; default $server_port; }
-      map "$xf_port:$default_port" $best_port {
-        ~^\d+:         $xf_port;       # 상위가 준 포트가 숫자면 그걸 사용
-        default        $default_port;  # 없으면 proto 기본값
+    
+      # 4) 최종 포트 결정: XFP > Host의 포트 > 프로토콜 기본
+      map "$xf_port:$host_port:$default_port" $best_port {
+        ~^\d+::        $xf_port;
+        ~^:\d+:        $host_port;
+        default        $default_port;
+      }
+    
+      # 5) Host 헤더에 붙일 포트 suffix (기본포트면 생략)
+      map "$best_proto:$best_port" $host_port_suffix {
+        "http:80"     "";
+        "https:443"   "";
+        default       ":$best_port";
       }
 
       server {
         listen 80;
 
         location / {
-          proxy_set_header Host              $best_host;
-          proxy_set_header X-Forwarded-Host  $best_host;
+          proxy_set_header Host              $best_host$host_port_suffix;
+          proxy_set_header X-Forwarded-Host  $best_host$host_port_suffix;
           proxy_set_header X-Forwarded-Proto $best_proto;
           proxy_set_header X-Forwarded-Port  $best_port;
           proxy_set_header X-Real-IP         $remote_addr;
