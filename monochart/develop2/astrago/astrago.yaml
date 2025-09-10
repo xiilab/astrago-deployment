@@ -202,7 +202,13 @@ data:
 
       map $http_x_forwarded_proto $best_proto { default $http_x_forwarded_proto; "" $scheme; }
       map $http_x_forwarded_host  $best_host  { default $http_x_forwarded_host;  "" $host; }
-      map $http_x_forwarded_port  $best_port  { default $http_x_forwarded_port;  "" $server_port; }
+
+      map $http_x_forwarded_port $xf_port { default $http_x_forwarded_port; "" ""; }
+      map $best_proto $default_port { https 443; http 80; default $server_port; }
+      map "$xf_port:$default_port" $best_port {
+        ~^\d+:         $xf_port;       # 상위가 준 포트가 숫자면 그걸 사용
+        default        $default_port;  # 없으면 proto 기본값
+      }
 
       server {
         listen 80;
