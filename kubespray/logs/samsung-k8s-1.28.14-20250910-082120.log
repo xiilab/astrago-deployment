@@ -1,0 +1,834 @@
+[WARNING]: Skipping callback plugin 'ara_default', unable to load
+
+PLAY [Check Ansible version] ***************************************************
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.009)       0:00:00.009 *** 
+
+TASK [Check 2.14.0 <= Ansible version < 2.15.0] ********************************
+ok: [localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.014)       0:00:00.024 *** 
+
+TASK [Check that python netaddr is installed] **********************************
+ok: [localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.152)       0:00:00.176 *** 
+[WARNING]: Could not match supplied host pattern, ignoring: kube-master
+[WARNING]: Could not match supplied host pattern, ignoring: kube-node
+[WARNING]: Could not match supplied host pattern, ignoring: k8s-cluster
+[WARNING]: Could not match supplied host pattern, ignoring: calico-rr
+[WARNING]: Could not match supplied host pattern, ignoring: no-floating
+[WARNING]: Could not match supplied host pattern, ignoring: bastion
+
+TASK [Check that jinja is not too old (install via pip)] ***********************
+ok: [localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+PLAY [Add kube-master nodes to kube_control_plane] *****************************
+skipping: no hosts matched
+
+PLAY [Add kube-node nodes to kube_node] ****************************************
+skipping: no hosts matched
+
+PLAY [Add k8s-cluster nodes to k8s_cluster] ************************************
+skipping: no hosts matched
+
+PLAY [Add calico-rr nodes to calico_rr] ****************************************
+skipping: no hosts matched
+
+PLAY [Add no-floating nodes to no_floating] ************************************
+skipping: no hosts matched
+
+PLAY [Install bastion ssh config] **********************************************
+skipping: no hosts matched
+
+PLAY [Bootstrap hosts for Ansible] *********************************************
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.039)       0:00:00.216 *** 
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.029)       0:00:00.246 *** 
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.017)       0:00:00.263 *** 
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.015)       0:00:00.278 *** 
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.026)       0:00:00.304 *** 
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.026)       0:00:00.330 *** 
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.027)       0:00:00.358 *** 
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.027)       0:00:00.386 *** 
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.014)       0:00:00.401 *** 
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.025)       0:00:00.427 *** 
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.038)       0:00:00.465 *** 
+
+TASK [kubespray-defaults : Configure defaults] *********************************
+ok: [node1] => {
+    "msg": "Check roles/kubespray-defaults/defaults/main.yml"
+}
+ok: [node2] => {
+    "msg": "Check roles/kubespray-defaults/defaults/main.yml"
+}
+ok: [node3] => {
+    "msg": "Check roles/kubespray-defaults/defaults/main.yml"
+}
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.043)       0:00:00.509 *** 
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.013)       0:00:00.523 *** 
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.009)       0:00:00.532 *** 
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.023)       0:00:00.556 *** 
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.009)       0:00:00.565 *** 
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.021)       0:00:00.586 *** 
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.032)       0:00:00.619 *** 
+[WARNING]: raw module does not support the environment keyword
+[WARNING]: raw module does not support the environment keyword
+[WARNING]: raw module does not support the environment keyword
+
+TASK [bootstrap-os : Fetch /etc/os-release] ************************************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.058)       0:00:00.678 *** 
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.023)       0:00:00.702 *** 
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.021)       0:00:00.724 *** 
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.021)       0:00:00.746 *** 
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.021)       0:00:00.767 *** 
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.022)       0:00:00.789 *** 
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.021)       0:00:00.811 *** 
+
+TASK [bootstrap-os : Bootstrap Debian] *****************************************
+included: /Users/xiilab/Develop/astrago/astrago-deployment/kubespray/versions/v2.23.3/kubespray/roles/bootstrap-os/tasks/bootstrap-debian.yml for node1, node2, node3
+Wednesday 10 September 2025  08:21:22 +0900 (0:00:00.034)       0:00:00.845 *** 
+[WARNING]: raw module does not support the environment keyword
+[WARNING]: raw module does not support the environment keyword
+[WARNING]: raw module does not support the environment keyword
+
+TASK [bootstrap-os : Check if bootstrap is needed] *****************************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:23 +0900 (0:00:00.057)       0:00:00.903 *** 
+[WARNING]: raw module does not support the environment keyword
+[WARNING]: raw module does not support the environment keyword
+[WARNING]: raw module does not support the environment keyword
+
+TASK [bootstrap-os : Check http::proxy in apt configuration files] *************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:23 +0900 (0:00:00.085)       0:00:00.989 *** 
+Wednesday 10 September 2025  08:21:23 +0900 (0:00:00.024)       0:00:01.014 *** 
+[WARNING]: raw module does not support the environment keyword
+[WARNING]: raw module does not support the environment keyword
+[WARNING]: raw module does not support the environment keyword
+
+TASK [bootstrap-os : Check https::proxy in apt configuration files] ************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:23 +0900 (0:00:00.080)       0:00:01.094 *** 
+Wednesday 10 September 2025  08:21:23 +0900 (0:00:00.024)       0:00:01.118 *** 
+Wednesday 10 September 2025  08:21:23 +0900 (0:00:00.020)       0:00:01.138 *** 
+Wednesday 10 September 2025  08:21:23 +0900 (0:00:00.021)       0:00:01.159 *** 
+
+TASK [bootstrap-os : Set the ansible_python_interpreter fact] ******************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:23 +0900 (0:00:00.027)       0:00:01.187 *** 
+
+TASK [bootstrap-os : Install dbus for the hostname module] *********************
+ok: [node2]
+ok: [node1]
+ok: [node3]
+Wednesday 10 September 2025  08:21:25 +0900 (0:00:02.199)       0:00:03.387 *** 
+Wednesday 10 September 2025  08:21:25 +0900 (0:00:00.024)       0:00:03.412 *** 
+Wednesday 10 September 2025  08:21:25 +0900 (0:00:00.021)       0:00:03.433 *** 
+
+TASK [bootstrap-os : Create remote_tmp for it is used by another module] *******
+ok: [node2]
+ok: [node3]
+ok: [node1]
+Wednesday 10 September 2025  08:21:26 +0900 (0:00:00.673)       0:00:04.106 *** 
+
+TASK [bootstrap-os : Gather host facts to get ansible_os_family] ***************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:28 +0900 (0:00:02.589)       0:00:06.696 *** 
+
+TASK [bootstrap-os : Assign inventory name to unconfigured hostnames (non-CoreOS, non-Flatcar, Suse and ClearLinux, non-Fedora)] ***
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:32 +0900 (0:00:04.134)       0:00:10.830 *** 
+Wednesday 10 September 2025  08:21:33 +0900 (0:00:00.032)       0:00:10.863 *** 
+Wednesday 10 September 2025  08:21:33 +0900 (0:00:00.024)       0:00:10.887 *** 
+Wednesday 10 September 2025  08:21:33 +0900 (0:00:00.023)       0:00:10.911 *** 
+
+TASK [bootstrap-os : Ensure bash_completion.d folder exists] *******************
+ok: [node1]
+ok: [node3]
+ok: [node2]
+
+PLAY [Gather facts] ************************************************************
+Wednesday 10 September 2025  08:21:33 +0900 (0:00:00.626)       0:00:11.538 *** 
+
+TASK [Gather minimal facts] ****************************************************
+ok: [node2]
+ok: [node3]
+ok: [node1]
+Wednesday 10 September 2025  08:21:40 +0900 (0:00:06.366)       0:00:17.905 *** 
+
+TASK [Gather necessary facts (network)] ****************************************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:43 +0900 (0:00:03.591)       0:00:21.496 *** 
+
+TASK [Gather necessary facts (hardware)] ***************************************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+
+PLAY [Prepare for etcd install] ************************************************
+Wednesday 10 September 2025  08:21:46 +0900 (0:00:02.649)       0:00:24.146 *** 
+Wednesday 10 September 2025  08:21:46 +0900 (0:00:00.027)       0:00:24.174 *** 
+Wednesday 10 September 2025  08:21:46 +0900 (0:00:00.013)       0:00:24.188 *** 
+Wednesday 10 September 2025  08:21:46 +0900 (0:00:00.010)       0:00:24.198 *** 
+Wednesday 10 September 2025  08:21:46 +0900 (0:00:00.024)       0:00:24.222 *** 
+Wednesday 10 September 2025  08:21:46 +0900 (0:00:00.024)       0:00:24.247 *** 
+Wednesday 10 September 2025  08:21:46 +0900 (0:00:00.025)       0:00:24.272 *** 
+Wednesday 10 September 2025  08:21:46 +0900 (0:00:00.026)       0:00:24.299 *** 
+Wednesday 10 September 2025  08:21:46 +0900 (0:00:00.010)       0:00:24.310 *** 
+Wednesday 10 September 2025  08:21:46 +0900 (0:00:00.024)       0:00:24.335 *** 
+Wednesday 10 September 2025  08:21:46 +0900 (0:00:00.037)       0:00:24.372 *** 
+
+TASK [kubespray-defaults : Configure defaults] *********************************
+ok: [node1] => {
+    "msg": "Check roles/kubespray-defaults/defaults/main.yml"
+}
+ok: [node2] => {
+    "msg": "Check roles/kubespray-defaults/defaults/main.yml"
+}
+ok: [node3] => {
+    "msg": "Check roles/kubespray-defaults/defaults/main.yml"
+}
+Wednesday 10 September 2025  08:21:46 +0900 (0:00:00.037)       0:00:24.409 *** 
+Wednesday 10 September 2025  08:21:46 +0900 (0:00:00.028)       0:00:24.437 *** 
+
+TASK [kubespray-defaults : Create fallback_ips_base] ***************************
+ok: [node1 -> localhost]
+Wednesday 10 September 2025  08:21:46 +0900 (0:00:00.023)       0:00:24.461 *** 
+
+TASK [kubespray-defaults : Set fallback_ips] ***********************************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:46 +0900 (0:00:00.035)       0:00:24.496 *** 
+Wednesday 10 September 2025  08:21:46 +0900 (0:00:00.013)       0:00:24.509 *** 
+Wednesday 10 September 2025  08:21:46 +0900 (0:00:00.026)       0:00:24.536 *** 
+Wednesday 10 September 2025  08:21:46 +0900 (0:00:00.034)       0:00:24.570 *** 
+
+TASK [adduser : User | Create User Group] **************************************
+ok: [node3]
+ok: [node1]
+ok: [node2]
+Wednesday 10 September 2025  08:21:47 +0900 (0:00:00.455)       0:00:25.026 *** 
+
+TASK [adduser : User | Create User] ********************************************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:47 +0900 (0:00:00.549)       0:00:25.575 *** 
+
+TASK [kubernetes/preinstall : Remove swapfile from /etc/fstab] *****************
+ok: [node1] => (item=swap)
+ok: [node3] => (item=swap)
+ok: [node2] => (item=swap)
+ok: [node1] => (item=none)
+ok: [node3] => (item=none)
+ok: [node2] => (item=none)
+Wednesday 10 September 2025  08:21:48 +0900 (0:00:00.723)       0:00:26.299 *** 
+
+TASK [kubernetes/preinstall : Check swap] **************************************
+ok: [node2]
+ok: [node1]
+ok: [node3]
+Wednesday 10 September 2025  08:21:48 +0900 (0:00:00.420)       0:00:26.720 *** 
+Wednesday 10 September 2025  08:21:48 +0900 (0:00:00.034)       0:00:26.754 *** 
+Wednesday 10 September 2025  08:21:48 +0900 (0:00:00.027)       0:00:26.781 *** 
+Wednesday 10 September 2025  08:21:48 +0900 (0:00:00.024)       0:00:26.806 *** 
+Wednesday 10 September 2025  08:21:48 +0900 (0:00:00.024)       0:00:26.831 *** 
+Wednesday 10 September 2025  08:21:49 +0900 (0:00:00.023)       0:00:26.855 *** 
+
+TASK [kubernetes/preinstall : Check if booted with ostree] *********************
+ok: [node2]
+ok: [node1]
+ok: [node3]
+Wednesday 10 September 2025  08:21:49 +0900 (0:00:00.399)       0:00:27.255 *** 
+
+TASK [kubernetes/preinstall : Set is_fedora_coreos] ****************************
+ok: [node2]
+ok: [node3]
+ok: [node1]
+Wednesday 10 September 2025  08:21:49 +0900 (0:00:00.421)       0:00:27.676 *** 
+
+TASK [kubernetes/preinstall : Set is_fedora_coreos] ****************************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:49 +0900 (0:00:00.040)       0:00:27.717 *** 
+
+TASK [kubernetes/preinstall : Check resolvconf] ********************************
+ok: [node2]
+ok: [node1]
+ok: [node3]
+Wednesday 10 September 2025  08:21:50 +0900 (0:00:00.334)       0:00:28.051 *** 
+
+TASK [kubernetes/preinstall : Check existence of /etc/resolvconf/resolv.conf.d] ***
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:50 +0900 (0:00:00.314)       0:00:28.365 *** 
+
+TASK [kubernetes/preinstall : Check status of /etc/resolv.conf] ****************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:50 +0900 (0:00:00.322)       0:00:28.688 *** 
+
+TASK [kubernetes/preinstall : Get content of /etc/resolv.conf] *****************
+ok: [node2]
+ok: [node1]
+ok: [node3]
+Wednesday 10 September 2025  08:21:51 +0900 (0:00:00.419)       0:00:29.107 *** 
+
+TASK [kubernetes/preinstall : Get currently configured nameservers] ************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:51 +0900 (0:00:00.058)       0:00:29.165 *** 
+
+TASK [kubernetes/preinstall : Stop if /etc/resolv.conf not configured nameservers] ***
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:51 +0900 (0:00:00.031)       0:00:29.197 *** 
+
+TASK [kubernetes/preinstall : NetworkManager | Check if host has NetworkManager] ***
+ok: [node2]
+ok: [node1]
+ok: [node3]
+Wednesday 10 September 2025  08:21:51 +0900 (0:00:00.365)       0:00:29.563 *** 
+
+TASK [kubernetes/preinstall : Check systemd-resolved] **************************
+ok: [node1]
+ok: [node3]
+ok: [node2]
+Wednesday 10 September 2025  08:21:52 +0900 (0:00:00.336)       0:00:29.899 *** 
+
+TASK [kubernetes/preinstall : Set default dns if remove_default_searchdomains is false] ***
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:52 +0900 (0:00:00.040)       0:00:29.939 *** 
+
+TASK [kubernetes/preinstall : Set dns facts] ***********************************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:52 +0900 (0:00:00.032)       0:00:29.972 *** 
+
+TASK [kubernetes/preinstall : Check if kubelet is configured] ******************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:52 +0900 (0:00:00.298)       0:00:30.270 *** 
+
+TASK [kubernetes/preinstall : Check if early DNS configuration stage] **********
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:52 +0900 (0:00:00.034)       0:00:30.305 *** 
+
+TASK [kubernetes/preinstall : Target resolv.conf files] ************************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:52 +0900 (0:00:00.031)       0:00:30.336 *** 
+Wednesday 10 September 2025  08:21:52 +0900 (0:00:00.024)       0:00:30.361 *** 
+
+TASK [kubernetes/preinstall : Check if /etc/dhclient.conf exists] **************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:52 +0900 (0:00:00.326)       0:00:30.687 *** 
+Wednesday 10 September 2025  08:21:52 +0900 (0:00:00.034)       0:00:30.721 *** 
+
+TASK [kubernetes/preinstall : Check if /etc/dhcp/dhclient.conf exists] *********
+ok: [node2]
+ok: [node1]
+ok: [node3]
+Wednesday 10 September 2025  08:21:53 +0900 (0:00:00.337)       0:00:31.059 *** 
+
+TASK [kubernetes/preinstall : Target dhclient conf file for /etc/dhcp/dhclient.conf] ***
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:53 +0900 (0:00:00.039)       0:00:31.098 *** 
+Wednesday 10 September 2025  08:21:53 +0900 (0:00:00.025)       0:00:31.124 *** 
+
+TASK [kubernetes/preinstall : Target dhclient hook file for Debian family] *****
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:53 +0900 (0:00:00.030)       0:00:31.154 *** 
+
+TASK [kubernetes/preinstall : Generate search domains to resolvconf] ***********
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:53 +0900 (0:00:00.033)       0:00:31.187 *** 
+
+TASK [kubernetes/preinstall : Pick coredns cluster IP or default resolver] *****
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:53 +0900 (0:00:00.052)       0:00:31.240 *** 
+
+TASK [kubernetes/preinstall : Generate nameservers for resolvconf, including cluster DNS] ***
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:53 +0900 (0:00:00.034)       0:00:31.275 *** 
+Wednesday 10 September 2025  08:21:53 +0900 (0:00:00.025)       0:00:31.300 *** 
+
+TASK [kubernetes/preinstall : Gather os specific variables] ********************
+ok: [node1] => (item=/Users/xiilab/Develop/astrago/astrago-deployment/kubespray/versions/v2.23.3/kubespray/roles/kubernetes/preinstall/vars/../vars/ubuntu.yml)
+ok: [node2] => (item=/Users/xiilab/Develop/astrago/astrago-deployment/kubespray/versions/v2.23.3/kubespray/roles/kubernetes/preinstall/vars/../vars/ubuntu.yml)
+ok: [node3] => (item=/Users/xiilab/Develop/astrago/astrago-deployment/kubespray/versions/v2.23.3/kubespray/roles/kubernetes/preinstall/vars/../vars/ubuntu.yml)
+Wednesday 10 September 2025  08:21:53 +0900 (0:00:00.036)       0:00:31.337 *** 
+Wednesday 10 September 2025  08:21:53 +0900 (0:00:00.024)       0:00:31.361 *** 
+
+TASK [kubernetes/preinstall : Check /usr readonly] *****************************
+ok: [node1]
+ok: [node3]
+ok: [node2]
+Wednesday 10 September 2025  08:21:53 +0900 (0:00:00.301)       0:00:31.663 *** 
+Wednesday 10 September 2025  08:21:53 +0900 (0:00:00.035)       0:00:31.698 *** 
+
+TASK [kubernetes/preinstall : Stop if either kube_control_plane or kube_node group is empty] ***
+ok: [node1] => (item=kube_control_plane) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": "kube_control_plane",
+    "msg": "All assertions passed"
+}
+ok: [node1] => (item=kube_node) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": "kube_node",
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:53 +0900 (0:00:00.026)       0:00:31.724 *** 
+
+TASK [kubernetes/preinstall : Stop if etcd group is empty in external etcd mode] ***
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:53 +0900 (0:00:00.018)       0:00:31.743 *** 
+
+TASK [kubernetes/preinstall : Stop if non systemd OS type] *********************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:53 +0900 (0:00:00.032)       0:00:31.776 *** 
+
+TASK [kubernetes/preinstall : Stop if the os does not support] *****************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:53 +0900 (0:00:00.030)       0:00:31.806 *** 
+
+TASK [kubernetes/preinstall : Stop if unknown network plugin] ******************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:53 +0900 (0:00:00.030)       0:00:31.837 *** 
+
+TASK [kubernetes/preinstall : Stop if unsupported version of Kubernetes] *******
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:54 +0900 (0:00:00.031)       0:00:31.868 *** 
+
+TASK [kubernetes/preinstall : Stop if known booleans are set as strings (Use JSON format on CLI: -e "{'key': true }")] ***
+ok: [node1] => (item={'name': 'download_run_once', 'value': False}) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "name": "download_run_once",
+        "value": false
+    },
+    "msg": "All assertions passed"
+}
+ok: [node1] => (item={'name': 'deploy_netchecker', 'value': False}) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "name": "deploy_netchecker",
+        "value": false
+    },
+    "msg": "All assertions passed"
+}
+ok: [node1] => (item={'name': 'download_always_pull', 'value': False}) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "name": "download_always_pull",
+        "value": false
+    },
+    "msg": "All assertions passed"
+}
+ok: [node1] => (item={'name': 'helm_enabled', 'value': False}) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "name": "helm_enabled",
+        "value": false
+    },
+    "msg": "All assertions passed"
+}
+ok: [node1] => (item={'name': 'openstack_lbaas_enabled', 'value': False}) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "name": "openstack_lbaas_enabled",
+        "value": false
+    },
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:54 +0900 (0:00:00.033)       0:00:31.901 *** 
+
+TASK [kubernetes/preinstall : Stop if even number of etcd hosts] ***************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:54 +0900 (0:00:00.032)       0:00:31.934 *** 
+
+TASK [kubernetes/preinstall : Stop if memory is too small for masters] *********
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:54 +0900 (0:00:00.030)       0:00:31.964 *** 
+
+TASK [kubernetes/preinstall : Stop if memory is too small for nodes] ***********
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:54 +0900 (0:00:00.030)       0:00:31.995 *** 
+Wednesday 10 September 2025  08:21:54 +0900 (0:00:00.030)       0:00:32.025 *** 
+
+TASK [kubernetes/preinstall : Stop if ip var does not match local ips] *********
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:54 +0900 (0:00:00.031)       0:00:32.056 *** 
+
+TASK [kubernetes/preinstall : Ensure ping package] *****************************
+ok: [node2]
+ok: [node1]
+ok: [node3]
+Wednesday 10 September 2025  08:21:55 +0900 (0:00:01.705)       0:00:33.762 *** 
+
+TASK [kubernetes/preinstall : Stop if access_ip is not pingable] ***************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.344)       0:00:34.107 *** 
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.034)       0:00:34.141 *** 
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.029)       0:00:34.171 *** 
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.026)       0:00:34.198 *** 
+
+TASK [kubernetes/preinstall : Stop if bad hostname] ****************************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.033)       0:00:34.232 *** 
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.029)       0:00:34.261 *** 
+
+TASK [kubernetes/preinstall : Check that kube_service_addresses is a network range] ***
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.035)       0:00:34.296 *** 
+
+TASK [kubernetes/preinstall : Check that kube_pods_subnet is a network range] ***
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.035)       0:00:34.332 *** 
+
+TASK [kubernetes/preinstall : Check that kube_pods_subnet does not collide with kube_service_addresses] ***
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.037)       0:00:34.369 *** 
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.010)       0:00:34.380 *** 
+
+TASK [kubernetes/preinstall : Stop if unknown dns mode] ************************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.017)       0:00:34.398 *** 
+
+TASK [kubernetes/preinstall : Stop if unknown kube proxy mode] *****************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.017)       0:00:34.415 *** 
+
+TASK [kubernetes/preinstall : Stop if unknown cert_management] *****************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.017)       0:00:34.432 *** 
+
+TASK [kubernetes/preinstall : Stop if unknown resolvconf_mode] *****************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.017)       0:00:34.449 *** 
+
+TASK [kubernetes/preinstall : Stop if etcd deployment type is not host, docker or kubeadm] ***
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.031)       0:00:34.481 *** 
+
+TASK [kubernetes/preinstall : Stop if container manager is not docker, crio or containerd] ***
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.017)       0:00:34.498 *** 
+
+TASK [kubernetes/preinstall : Stop if etcd deployment type is not host or kubeadm when container_manager != docker] ***
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.031)       0:00:34.529 *** 
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.013)       0:00:34.543 *** 
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.012)       0:00:34.556 *** 
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.024)       0:00:34.581 *** 
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.024)       0:00:34.605 *** 
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.024)       0:00:34.630 *** 
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.024)       0:00:34.654 *** 
+
+TASK [kubernetes/preinstall : Ensure minimum containerd version] ***************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.018)       0:00:34.673 *** 
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.028)       0:00:34.701 *** 
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.025)       0:00:34.726 *** 
+Wednesday 10 September 2025  08:21:56 +0900 (0:00:00.028)       0:00:34.755 *** 
+
+TASK [kubernetes/preinstall : Create kubernetes directories] *******************
+ok: [node1] => (item=/etc/kubernetes)
+ok: [node3] => (item=/etc/kubernetes)
+ok: [node2] => (item=/etc/kubernetes)
+ok: [node3] => (item=/etc/kubernetes/manifests)
+ok: [node1] => (item=/etc/kubernetes/manifests)
+ok: [node2] => (item=/etc/kubernetes/manifests)
+ok: [node3] => (item=/usr/local/bin/kubernetes-scripts)
+ok: [node1] => (item=/usr/local/bin/kubernetes-scripts)
+ok: [node2] => (item=/usr/local/bin/kubernetes-scripts)
+ok: [node1] => (item=/usr/libexec/kubernetes/kubelet-plugins/volume/exec)
+ok: [node3] => (item=/usr/libexec/kubernetes/kubelet-plugins/volume/exec)
+ok: [node2] => (item=/usr/libexec/kubernetes/kubelet-plugins/volume/exec)
+Wednesday 10 September 2025  08:21:58 +0900 (0:00:01.194)       0:00:35.949 *** 
+
+TASK [kubernetes/preinstall : Create other directories of root owner] **********
+ok: [node1] => (item=/etc/kubernetes/ssl)
+ok: [node2] => (item=/etc/kubernetes/ssl)
+ok: [node3] => (item=/etc/kubernetes/ssl)
+ok: [node1] => (item=/usr/local/bin)
+ok: [node2] => (item=/usr/local/bin)
+ok: [node3] => (item=/usr/local/bin)
+Wednesday 10 September 2025  08:21:58 +0900 (0:00:00.651)       0:00:36.601 *** 
+
+TASK [kubernetes/preinstall : Check if kubernetes kubeadm compat cert dir exists] ***
+ok: [node2]
+ok: [node1]
+ok: [node3]
+Wednesday 10 September 2025  08:21:59 +0900 (0:00:00.316)       0:00:36.917 *** 
+Wednesday 10 September 2025  08:21:59 +0900 (0:00:00.032)       0:00:36.950 *** 
+
+TASK [kubernetes/preinstall : Create cni directories] **************************
+ok: [node1] => (item=/etc/cni/net.d)
+ok: [node2] => (item=/etc/cni/net.d)
+ok: [node3] => (item=/etc/cni/net.d)
+ok: [node2] => (item=/opt/cni/bin)
+ok: [node1] => (item=/opt/cni/bin)
+ok: [node3] => (item=/opt/cni/bin)
+Wednesday 10 September 2025  08:21:59 +0900 (0:00:00.635)       0:00:37.585 *** 
+
+TASK [kubernetes/preinstall : Create calico cni directories] *******************
+ok: [node1] => (item=/var/lib/calico)
+ok: [node2] => (item=/var/lib/calico)
+ok: [node3] => (item=/var/lib/calico)
+Wednesday 10 September 2025  08:22:00 +0900 (0:00:00.336)       0:00:37.922 *** 
+Wednesday 10 September 2025  08:22:00 +0900 (0:00:00.040)       0:00:37.963 *** 
+Wednesday 10 September 2025  08:22:00 +0900 (0:00:00.027)       0:00:37.990 *** 
+Wednesday 10 September 2025  08:22:00 +0900 (0:00:00.025)       0:00:38.016 *** 
+Wednesday 10 September 2025  08:22:00 +0900 (0:00:00.032)       0:00:38.048 *** 
+Wednesday 10 September 2025  08:22:00 +0900 (0:00:00.032)       0:00:38.080 *** 
+Wednesday 10 September 2025  08:22:00 +0900 (0:00:00.027)       0:00:38.108 *** 
+Wednesday 10 September 2025  08:22:00 +0900 (0:00:00.026)       0:00:38.135 *** 
+
+TASK [kubernetes/preinstall : Write resolved.conf] *****************************
+changed: [node1]
+changed: [node2]
+changed: [node3]
+Wednesday 10 September 2025  08:22:01 +0900 (0:00:01.000)       0:00:39.135 *** 
+Wednesday 10 September 2025  08:22:01 +0900 (0:00:00.034)       0:00:39.170 *** 
+Wednesday 10 September 2025  08:22:01 +0900 (0:00:00.029)       0:00:39.199 *** 
+Wednesday 10 September 2025  08:22:01 +0900 (0:00:00.027)       0:00:39.226 *** 
+Wednesday 10 September 2025  08:22:01 +0900 (0:00:00.026)       0:00:39.253 *** 
+Wednesday 10 September 2025  08:22:01 +0900 (0:00:00.027)       0:00:39.280 *** 
+Wednesday 10 September 2025  08:22:01 +0900 (0:00:00.027)       0:00:39.307 *** 
+Wednesday 10 September 2025  08:22:01 +0900 (0:00:00.025)       0:00:39.333 *** 
+Wednesday 10 September 2025  08:22:01 +0900 (0:00:00.024)       0:00:39.357 *** 
+Wednesday 10 September 2025  08:22:01 +0900 (0:00:00.024)       0:00:39.382 *** 
+Wednesday 10 September 2025  08:22:01 +0900 (0:00:00.025)       0:00:39.408 *** 
+
+TASK [kubernetes/preinstall : Update package management cache (APT)] ***********
+changed: [node3]
+changed: [node2]
+changed: [node1]
+Wednesday 10 September 2025  08:22:41 +0900 (0:00:40.424)       0:01:19.833 *** 
+Wednesday 10 September 2025  08:22:42 +0900 (0:00:00.042)       0:01:19.875 *** 
+Wednesday 10 September 2025  08:22:42 +0900 (0:00:00.029)       0:01:19.904 *** 
+Wednesday 10 September 2025  08:22:42 +0900 (0:00:00.026)       0:01:19.931 *** 
+
+TASK [kubernetes/preinstall : Update common_required_pkgs with ipvsadm when kube_proxy_mode is ipvs] ***
+ok: [node1]
+ok: [node2]
+ok: [node3]
+Wednesday 10 September 2025  08:22:42 +0900 (0:00:00.033)       0:01:19.965 *** 

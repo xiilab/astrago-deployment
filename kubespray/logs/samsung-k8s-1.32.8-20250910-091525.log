@@ -1,0 +1,84 @@
+[WARNING]: While constructing a mapping from
+/Users/xiilab/Develop/astrago/astrago-deployment/kubespray/versions/v2.28.1/kub
+espray/roles/bootstrap_os/tasks/main.yml, line 29, column 7, found a duplicate
+dict key (paths). Using last defined value only.
+[WARNING]: Skipping callback plugin 'ara_default', unable to load
+
+PLAY [Check Ansible version] ***************************************************
+수요일 10 9월 2025  09:15:27 +0900 (0:00:00.007)       0:00:00.007 **************** 
+
+TASK [Check 2.16.4 <= Ansible version < 2.17.0] ********************************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:15:27 +0900 (0:00:00.015)       0:00:00.022 **************** 
+
+TASK [Check that python netaddr is installed] **********************************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:15:27 +0900 (0:00:00.036)       0:00:00.058 **************** 
+
+TASK [Check that jinja is not too old (install via pip)] ***********************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+PLAY [Define groups for legacy less structured inventories] ********************
+수요일 10 9월 2025  09:15:27 +0900 (0:00:00.012)       0:00:00.070 **************** 
+
+TASK [Match needed groups by their old names or definition] ********************
+changed: [node1] => (item={'key': 'kube_control_plane', 'value': ['kube-master']})
+ok: [node1] => (item={'key': 'kube_node', 'value': ['kube-node']})
+ok: [node1] => (item={'key': 'calico_rr', 'value': ['calico-rr']})
+ok: [node1] => (item={'key': 'no_floating', 'value': ['no-floating']})
+ok: [node1] => (item={'key': 'k8s_cluster', 'value': ['kube_node', 'kube_control_plane', 'calico_rr']})
+changed: [node2] => (item={'key': 'kube_control_plane', 'value': ['kube-master']})
+ok: [node2] => (item={'key': 'kube_node', 'value': ['kube-node']})
+ok: [node2] => (item={'key': 'calico_rr', 'value': ['calico-rr']})
+ok: [node2] => (item={'key': 'no_floating', 'value': ['no-floating']})
+ok: [node2] => (item={'key': 'k8s_cluster', 'value': ['kube_node', 'kube_control_plane', 'calico_rr']})
+changed: [node3] => (item={'key': 'kube_control_plane', 'value': ['kube-master']})
+ok: [node3] => (item={'key': 'kube_node', 'value': ['kube-node']})
+ok: [node3] => (item={'key': 'calico_rr', 'value': ['calico-rr']})
+ok: [node3] => (item={'key': 'no_floating', 'value': ['no-floating']})
+ok: [node3] => (item={'key': 'k8s_cluster', 'value': ['kube_node', 'kube_control_plane', 'calico_rr']})
+
+PLAY [Check inventory settings] ************************************************
+수요일 10 9월 2025  09:15:27 +0900 (0:00:00.049)       0:00:00.120 **************** 
+
+TASK [validate_inventory : Stop if some versions have a 'v' left at the start] ***
+fatal: [node1]: FAILED! => {
+    "assertion": "not kube_version.startswith('v')",
+    "changed": false,
+    "evaluated_to": false,
+    "msg": "All version string used in kubespray have been normalized to not use a leading 'v'.\nThis check will be dropped in the next minor release.\n"
+}
+fatal: [node2]: FAILED! => {
+    "assertion": "not kube_version.startswith('v')",
+    "changed": false,
+    "evaluated_to": false,
+    "msg": "All version string used in kubespray have been normalized to not use a leading 'v'.\nThis check will be dropped in the next minor release.\n"
+}
+fatal: [node3]: FAILED! => {
+    "assertion": "not kube_version.startswith('v')",
+    "changed": false,
+    "evaluated_to": false,
+    "msg": "All version string used in kubespray have been normalized to not use a leading 'v'.\nThis check will be dropped in the next minor release.\n"
+}
+
+PLAY RECAP *********************************************************************
+node1                      : ok=4    changed=1    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+node2                      : ok=1    changed=1    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+node3                      : ok=1    changed=1    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+
+수요일 10 9월 2025  09:15:27 +0900 (0:00:00.037)       0:00:00.158 **************** 
+=============================================================================== 
+Match needed groups by their old names or definition -------------------- 0.05s
+validate_inventory : Stop if some versions have a 'v' left at the start --- 0.04s
+Check that python netaddr is installed ---------------------------------- 0.04s
+Check 2.16.4 <= Ansible version < 2.17.0 -------------------------------- 0.02s
+Check that jinja is not too old (install via pip) ----------------------- 0.01s

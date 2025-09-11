@@ -1,0 +1,13 @@
+# 컨테이너 런타임 설정
+container_manager: crio
+
+# CRI-O 이미지 저장 위치
+crio_root: /data/crio/containers
+
+# CRI-O 레지스트리 설정 (Kubespray 표준 방식)
+crio_registries:
+  - prefix: docker.io
+    location: docker.io
+    unqualified: true
+    insecure: false
+    blocked: false

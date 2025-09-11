@@ -1,0 +1,1480 @@
+[WARNING]: While constructing a mapping from
+/Users/xiilab/Develop/astrago/astrago-deployment/kubespray/versions/v2.28.1/kub
+espray/roles/bootstrap_os/tasks/main.yml, line 29, column 7, found a duplicate
+dict key (paths). Using last defined value only.
+[WARNING]: Skipping callback plugin 'ara_default', unable to load
+
+PLAY [Check Ansible version] ***************************************************
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.006)       0:00:00.006 **************** 
+
+TASK [Check 2.16.4 <= Ansible version < 2.17.0] ********************************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.014)       0:00:00.020 **************** 
+
+TASK [Check that python netaddr is installed] **********************************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.032)       0:00:00.053 **************** 
+
+TASK [Check that jinja is not too old (install via pip)] ***********************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+PLAY [Define groups for legacy less structured inventories] ********************
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.012)       0:00:00.065 **************** 
+
+TASK [Match needed groups by their old names or definition] ********************
+changed: [node1] => (item={'key': 'kube_control_plane', 'value': ['kube-master']})
+ok: [node1] => (item={'key': 'kube_node', 'value': ['kube-node']})
+ok: [node1] => (item={'key': 'calico_rr', 'value': ['calico-rr']})
+ok: [node1] => (item={'key': 'no_floating', 'value': ['no-floating']})
+ok: [node1] => (item={'key': 'k8s_cluster', 'value': ['kube_node', 'kube_control_plane', 'calico_rr']})
+changed: [node2] => (item={'key': 'kube_control_plane', 'value': ['kube-master']})
+ok: [node2] => (item={'key': 'kube_node', 'value': ['kube-node']})
+ok: [node2] => (item={'key': 'calico_rr', 'value': ['calico-rr']})
+ok: [node2] => (item={'key': 'no_floating', 'value': ['no-floating']})
+ok: [node2] => (item={'key': 'k8s_cluster', 'value': ['kube_node', 'kube_control_plane', 'calico_rr']})
+changed: [node3] => (item={'key': 'kube_control_plane', 'value': ['kube-master']})
+ok: [node3] => (item={'key': 'kube_node', 'value': ['kube-node']})
+ok: [node3] => (item={'key': 'calico_rr', 'value': ['calico-rr']})
+ok: [node3] => (item={'key': 'no_floating', 'value': ['no-floating']})
+ok: [node3] => (item={'key': 'k8s_cluster', 'value': ['kube_node', 'kube_control_plane', 'calico_rr']})
+
+PLAY [Check inventory settings] ************************************************
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.046)       0:00:00.112 **************** 
+
+TASK [validate_inventory : Stop if some versions have a 'v' left at the start] ***
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.041)       0:00:00.153 **************** 
+
+TASK [validate_inventory : Stop if some derived versions have a 'v' left at the start] ***
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.096)       0:00:00.250 **************** 
+
+TASK [validate_inventory : Stop if kube_control_plane group is empty] **********
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.019)       0:00:00.269 **************** 
+
+TASK [validate_inventory : Stop if etcd group is empty in external etcd mode] ***
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.018)       0:00:00.288 **************** 
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.021)       0:00:00.310 **************** 
+
+TASK [validate_inventory : Stop if unsupported version of Kubernetes] **********
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.034)       0:00:00.344 **************** 
+
+TASK [validate_inventory : Stop if known booleans are set as strings (Use JSON format on CLI: -e "{'key': true }")] ***
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.019)       0:00:00.364 **************** 
+
+TASK [validate_inventory : Stop if even number of etcd hosts] ******************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.019)       0:00:00.384 **************** 
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.022)       0:00:00.406 **************** 
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.021)       0:00:00.428 **************** 
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.021)       0:00:00.449 **************** 
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.022)       0:00:00.472 **************** 
+
+TASK [validate_inventory : Check that kube_service_addresses is a network range] ***
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.036)       0:00:00.508 **************** 
+
+TASK [validate_inventory : Check that kube_pods_subnet is a network range] *****
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.078)       0:00:00.587 **************** 
+
+TASK [validate_inventory : Check that kube_pods_subnet does not collide with kube_service_addresses] ***
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.118)       0:00:00.705 **************** 
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.014)       0:00:00.719 **************** 
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.015)       0:00:00.735 **************** 
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.014)       0:00:00.750 **************** 
+수요일 10 9월 2025  09:29:09 +0900 (0:00:00.014)       0:00:00.764 **************** 
+수요일 10 9월 2025  09:29:10 +0900 (0:00:00.015)       0:00:00.780 **************** 
+
+TASK [validate_inventory : Stop if unsupported options selected] ***************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:10 +0900 (0:00:00.020)       0:00:00.800 **************** 
+수요일 10 9월 2025  09:29:10 +0900 (0:00:00.026)       0:00:00.827 **************** 
+
+TASK [validate_inventory : Stop if etcd_kubeadm_enabled is defined] ************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:10 +0900 (0:00:00.017)       0:00:00.845 **************** 
+수요일 10 9월 2025  09:29:10 +0900 (0:00:00.022)       0:00:00.867 **************** 
+수요일 10 9월 2025  09:29:10 +0900 (0:00:00.021)       0:00:00.888 **************** 
+수요일 10 9월 2025  09:29:10 +0900 (0:00:00.022)       0:00:00.911 **************** 
+
+TASK [validate_inventory : Ensure minimum containerd version] ******************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:10 +0900 (0:00:00.020)       0:00:00.931 **************** 
+[WARNING]: Could not match supplied host pattern, ignoring: bastion
+
+PLAY [Install bastion ssh config] **********************************************
+skipping: no hosts matched
+
+PLAY [Bootstrap hosts for Ansible] *********************************************
+수요일 10 9월 2025  09:29:10 +0900 (0:00:00.080)       0:00:01.011 **************** 
+[WARNING]: raw module does not support the environment keyword
+
+TASK [bootstrap_os : Fetch /etc/os-release] ************************************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:10 +0900 (0:00:00.067)       0:00:01.079 **************** 
+수요일 10 9월 2025  09:29:10 +0900 (0:00:00.042)       0:00:01.122 **************** 
+
+TASK [bootstrap_os : Include tasks] ********************************************
+included: /Users/xiilab/Develop/astrago/astrago-deployment/kubespray/versions/v2.28.1/kubespray/roles/bootstrap_os/tasks/ubuntu.yml for node1, node2, node3 => (item=/Users/xiilab/Develop/astrago/astrago-deployment/kubespray/versions/v2.28.1/kubespray/roles/bootstrap_os/tasks/ubuntu.yml)
+수요일 10 9월 2025  09:29:10 +0900 (0:00:00.055)       0:00:01.177 **************** 
+
+TASK [bootstrap_os : Check if bootstrap is needed] *****************************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:10 +0900 (0:00:00.063)       0:00:01.240 **************** 
+
+TASK [bootstrap_os : Check http::proxy in apt configuration files] *************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:10 +0900 (0:00:00.087)       0:00:01.328 **************** 
+수요일 10 9월 2025  09:29:10 +0900 (0:00:00.026)       0:00:01.354 **************** 
+
+TASK [bootstrap_os : Check https::proxy in apt configuration files] ************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:10 +0900 (0:00:00.128)       0:00:01.483 **************** 
+수요일 10 9월 2025  09:29:10 +0900 (0:00:00.027)       0:00:01.511 **************** 
+수요일 10 9월 2025  09:29:10 +0900 (0:00:00.023)       0:00:01.534 **************** 
+수요일 10 9월 2025  09:29:10 +0900 (0:00:00.039)       0:00:01.574 **************** 
+수요일 10 9월 2025  09:29:10 +0900 (0:00:00.022)       0:00:01.596 **************** 
+수요일 10 9월 2025  09:29:10 +0900 (0:00:00.024)       0:00:01.621 **************** 
+수요일 10 9월 2025  09:29:10 +0900 (0:00:00.022)       0:00:01.644 **************** 
+
+TASK [system_packages : Gather OS information] *********************************
+ok: [node3]
+ok: [node1]
+ok: [node2]
+수요일 10 9월 2025  09:29:11 +0900 (0:00:00.883)       0:00:02.528 **************** 
+수요일 10 9월 2025  09:29:11 +0900 (0:00:00.030)       0:00:02.558 **************** 
+수요일 10 9월 2025  09:29:11 +0900 (0:00:00.071)       0:00:02.629 **************** 
+수요일 10 9월 2025  09:29:11 +0900 (0:00:00.023)       0:00:02.652 **************** 
+
+TASK [system_packages : Update package management cache (APT)] *****************
+ok: [node3]
+ok: [node1]
+ok: [node2]
+수요일 10 9월 2025  09:29:13 +0900 (0:00:01.179)       0:00:03.832 **************** 
+수요일 10 9월 2025  09:29:13 +0900 (0:00:00.035)       0:00:03.868 **************** 
+수요일 10 9월 2025  09:29:13 +0900 (0:00:00.026)       0:00:03.895 **************** 
+
+TASK [system_packages : Manage packages] ***************************************
+ok: [node3] => (item=remove)
+ok: [node1] => (item=remove)
+ok: [node2] => (item=remove)
+ok: [node3] => (item=install)
+ok: [node1] => (item=install)
+ok: [node2] => (item=install)
+수요일 10 9월 2025  09:29:15 +0900 (0:00:02.643)       0:00:06.538 **************** 
+
+TASK [bootstrap_os : Create remote_tmp for it is used by another module] *******
+ok: [node3]
+ok: [node2]
+ok: [node1]
+수요일 10 9월 2025  09:29:16 +0900 (0:00:00.410)       0:00:06.948 **************** 
+
+TASK [bootstrap_os : Gather facts] *********************************************
+ok: [node2]
+ok: [node1]
+ok: [node3]
+수요일 10 9월 2025  09:29:17 +0900 (0:00:00.865)       0:00:07.814 **************** 
+
+TASK [bootstrap_os : Assign inventory name to unconfigured hostnames (non-CoreOS, non-Flatcar, Suse and ClearLinux, non-Fedora)] ***
+ok: [node3]
+ok: [node1]
+ok: [node2]
+수요일 10 9월 2025  09:29:18 +0900 (0:00:01.009)       0:00:08.823 **************** 
+
+TASK [bootstrap_os : Ensure bash_completion.d folder exists] *******************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+
+PLAY [Gather facts] ************************************************************
+수요일 10 9월 2025  09:29:18 +0900 (0:00:00.345)       0:00:09.169 **************** 
+수요일 10 9월 2025  09:29:18 +0900 (0:00:00.029)       0:00:09.199 **************** 
+
+TASK [network_facts : Set fallback_ip] *****************************************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:18 +0900 (0:00:00.034)       0:00:09.233 **************** 
+수요일 10 9월 2025  09:29:18 +0900 (0:00:00.027)       0:00:09.261 **************** 
+
+TASK [network_facts : Set fallback_ip6] ****************************************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:18 +0900 (0:00:00.034)       0:00:09.295 **************** 
+
+TASK [network_facts : Set main access ip(access_ip based on ipv4_stack/ipv6_stack options).] ***
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:18 +0900 (0:00:00.079)       0:00:09.374 **************** 
+
+TASK [network_facts : Set main ip(ip based on ipv4_stack/ipv6_stack options).] ***
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:18 +0900 (0:00:00.033)       0:00:09.408 **************** 
+
+TASK [network_facts : Set main access ips(mixed ips for dualstack).] ***********
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:18 +0900 (0:00:00.035)       0:00:09.443 **************** 
+
+TASK [network_facts : Set main ips(mixed ips for dualstack).] ******************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:18 +0900 (0:00:00.033)       0:00:09.477 **************** 
+수요일 10 9월 2025  09:29:18 +0900 (0:00:00.013)       0:00:09.490 **************** 
+수요일 10 9월 2025  09:29:18 +0900 (0:00:00.034)       0:00:09.525 **************** 
+
+TASK [Gather minimal facts] ****************************************************
+ok: [node2]
+ok: [node1]
+ok: [node3]
+수요일 10 9월 2025  09:29:19 +0900 (0:00:00.738)       0:00:10.264 **************** 
+
+TASK [Gather necessary facts (network)] ****************************************
+ok: [node3]
+ok: [node2]
+ok: [node1]
+수요일 10 9월 2025  09:29:20 +0900 (0:00:00.830)       0:00:11.094 **************** 
+
+TASK [Gather necessary facts (hardware)] ***************************************
+ok: [node3]
+ok: [node1]
+ok: [node2]
+
+PLAY [Prepare for etcd install] ************************************************
+수요일 10 9월 2025  09:29:21 +0900 (0:00:01.247)       0:00:12.341 **************** 
+
+TASK [adduser : User | Create User Group] **************************************
+ok: [node2]
+ok: [node3]
+ok: [node1]
+수요일 10 9월 2025  09:29:21 +0900 (0:00:00.370)       0:00:12.711 **************** 
+
+TASK [adduser : User | Create User] ********************************************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:22 +0900 (0:00:00.518)       0:00:13.230 **************** 
+
+TASK [kubernetes/preinstall : Check if /etc/fstab exists] **********************
+ok: [node3]
+ok: [node1]
+ok: [node2]
+수요일 10 9월 2025  09:29:22 +0900 (0:00:00.481)       0:00:13.711 **************** 
+
+TASK [kubernetes/preinstall : Remove swapfile from /etc/fstab] *****************
+ok: [node2] => (item=swap)
+ok: [node3] => (item=swap)
+ok: [node1] => (item=swap)
+ok: [node3] => (item=none)
+ok: [node2] => (item=none)
+ok: [node1] => (item=none)
+수요일 10 9월 2025  09:29:23 +0900 (0:00:00.760)       0:00:14.472 **************** 
+
+TASK [kubernetes/preinstall : Mask swap.target (persist swapoff)] **************
+ok: [node2]
+ok: [node1]
+ok: [node3]
+수요일 10 9월 2025  09:29:24 +0900 (0:00:00.720)       0:00:15.193 **************** 
+
+TASK [kubernetes/preinstall : Disable swap] ************************************
+changed: [node3]
+changed: [node2]
+changed: [node1]
+수요일 10 9월 2025  09:29:24 +0900 (0:00:00.459)       0:00:15.652 **************** 
+수요일 10 9월 2025  09:29:24 +0900 (0:00:00.037)       0:00:15.690 **************** 
+
+TASK [kubernetes/preinstall : Check resolvconf] ********************************
+ok: [node3]
+ok: [node2]
+ok: [node1]
+수요일 10 9월 2025  09:29:25 +0900 (0:00:00.326)       0:00:16.016 **************** 
+
+TASK [kubernetes/preinstall : Check existence of /etc/resolvconf/resolv.conf.d] ***
+ok: [node2]
+ok: [node1]
+ok: [node3]
+수요일 10 9월 2025  09:29:25 +0900 (0:00:00.326)       0:00:16.342 **************** 
+
+TASK [kubernetes/preinstall : Check status of /etc/resolv.conf] ****************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:25 +0900 (0:00:00.315)       0:00:16.657 **************** 
+
+TASK [kubernetes/preinstall : Fetch resolv.conf] *******************************
+ok: [node3]
+ok: [node2]
+ok: [node1]
+수요일 10 9월 2025  09:29:26 +0900 (0:00:00.423)       0:00:17.080 **************** 
+
+TASK [kubernetes/preinstall : NetworkManager | Check if host has NetworkManager] ***
+ok: [node2]
+ok: [node1]
+ok: [node3]
+수요일 10 9월 2025  09:29:26 +0900 (0:00:00.333)       0:00:17.414 **************** 
+
+TASK [kubernetes/preinstall : Check systemd-resolved] **************************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:26 +0900 (0:00:00.334)       0:00:17.749 **************** 
+
+TASK [kubernetes/preinstall : Set default dns if remove_default_searchdomains is false] ***
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:27 +0900 (0:00:00.048)       0:00:17.797 **************** 
+
+TASK [kubernetes/preinstall : Set dns facts] ***********************************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:27 +0900 (0:00:00.104)       0:00:17.902 **************** 
+
+TASK [kubernetes/preinstall : Check if kubelet is configured] ******************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:27 +0900 (0:00:00.302)       0:00:18.205 **************** 
+
+TASK [kubernetes/preinstall : Check if early DNS configuration stage] **********
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:27 +0900 (0:00:00.047)       0:00:18.252 **************** 
+
+TASK [kubernetes/preinstall : Target resolv.conf files] ************************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:27 +0900 (0:00:00.038)       0:00:18.290 **************** 
+수요일 10 9월 2025  09:29:27 +0900 (0:00:00.025)       0:00:18.316 **************** 
+
+TASK [kubernetes/preinstall : Check if /etc/dhclient.conf exists] **************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:27 +0900 (0:00:00.305)       0:00:18.621 **************** 
+수요일 10 9월 2025  09:29:27 +0900 (0:00:00.035)       0:00:18.656 **************** 
+
+TASK [kubernetes/preinstall : Check if /etc/dhcp/dhclient.conf exists] *********
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:28 +0900 (0:00:00.307)       0:00:18.964 **************** 
+
+TASK [kubernetes/preinstall : Target dhclient conf file for /etc/dhcp/dhclient.conf] ***
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:28 +0900 (0:00:00.045)       0:00:19.010 **************** 
+수요일 10 9월 2025  09:29:28 +0900 (0:00:00.067)       0:00:19.077 **************** 
+
+TASK [kubernetes/preinstall : Target dhclient hook file for Debian family] *****
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:28 +0900 (0:00:00.036)       0:00:19.114 **************** 
+수요일 10 9월 2025  09:29:28 +0900 (0:00:00.024)       0:00:19.138 **************** 
+
+TASK [kubernetes/preinstall : Check /usr readonly] *****************************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:28 +0900 (0:00:00.311)       0:00:19.450 **************** 
+수요일 10 9월 2025  09:29:28 +0900 (0:00:00.034)       0:00:19.485 **************** 
+수요일 10 9월 2025  09:29:28 +0900 (0:00:00.015)       0:00:19.501 **************** 
+
+TASK [kubernetes/preinstall : Stop if non systemd OS type] *********************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:28 +0900 (0:00:00.038)       0:00:19.539 **************** 
+
+TASK [kubernetes/preinstall : Stop if the os does not support] *****************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:28 +0900 (0:00:00.036)       0:00:19.575 **************** 
+
+TASK [kubernetes/preinstall : Stop if memory is too small for control plane nodes] ***
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:28 +0900 (0:00:00.037)       0:00:19.612 **************** 
+
+TASK [kubernetes/preinstall : Stop if memory is too small for nodes] ***********
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:28 +0900 (0:00:00.119)       0:00:19.731 **************** 
+
+TASK [kubernetes/preinstall : Stop if cgroups are not enabled on nodes] ********
+ok: [node2]
+ok: [node1]
+ok: [node3]
+수요일 10 9월 2025  09:29:29 +0900 (0:00:00.540)       0:00:20.272 **************** 
+
+TASK [kubernetes/preinstall : Stop if ip var does not match local ips] *********
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:29 +0900 (0:00:00.053)       0:00:20.325 **************** 
+
+TASK [kubernetes/preinstall : Stop if access_ip is not pingable] ***************
+ok: [node2]
+ok: [node1]
+ok: [node3]
+수요일 10 9월 2025  09:29:29 +0900 (0:00:00.340)       0:00:20.666 **************** 
+수요일 10 9월 2025  09:29:29 +0900 (0:00:00.037)       0:00:20.703 **************** 
+수요일 10 9월 2025  09:29:29 +0900 (0:00:00.028)       0:00:20.731 **************** 
+
+TASK [kubernetes/preinstall : Stop if bad hostname] ****************************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:30 +0900 (0:00:00.037)       0:00:20.768 **************** 
+
+TASK [kubernetes/preinstall : Stop if /etc/resolv.conf has no configured nameservers] ***
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [node3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:30 +0900 (0:00:00.059)       0:00:20.828 **************** 
+수요일 10 9월 2025  09:29:30 +0900 (0:00:00.024)       0:00:20.852 **************** 
+
+TASK [kubernetes/preinstall : Create kubernetes directories] *******************
+ok: [node1] => (item=/etc/kubernetes)
+ok: [node2] => (item=/etc/kubernetes)
+ok: [node3] => (item=/etc/kubernetes)
+ok: [node2] => (item=/etc/kubernetes/manifests)
+ok: [node1] => (item=/etc/kubernetes/manifests)
+ok: [node3] => (item=/etc/kubernetes/manifests)
+ok: [node2] => (item=/usr/local/bin/kubernetes-scripts)
+ok: [node1] => (item=/usr/local/bin/kubernetes-scripts)
+ok: [node3] => (item=/usr/local/bin/kubernetes-scripts)
+ok: [node2] => (item=/usr/libexec/kubernetes/kubelet-plugins/volume/exec)
+ok: [node1] => (item=/usr/libexec/kubernetes/kubelet-plugins/volume/exec)
+ok: [node3] => (item=/usr/libexec/kubernetes/kubelet-plugins/volume/exec)
+수요일 10 9월 2025  09:29:31 +0900 (0:00:01.240)       0:00:22.093 **************** 
+
+TASK [kubernetes/preinstall : Create other directories of root owner] **********
+ok: [node2] => (item=/etc/kubernetes/ssl)
+ok: [node1] => (item=/etc/kubernetes/ssl)
+ok: [node3] => (item=/etc/kubernetes/ssl)
+ok: [node2] => (item=/usr/local/bin)
+ok: [node1] => (item=/usr/local/bin)
+ok: [node3] => (item=/usr/local/bin)
+수요일 10 9월 2025  09:29:31 +0900 (0:00:00.608)       0:00:22.702 **************** 
+
+TASK [kubernetes/preinstall : Check if kubernetes kubeadm compat cert dir exists] ***
+ok: [node2]
+ok: [node1]
+ok: [node3]
+수요일 10 9월 2025  09:29:32 +0900 (0:00:00.315)       0:00:23.017 **************** 
+수요일 10 9월 2025  09:29:32 +0900 (0:00:00.037)       0:00:23.054 **************** 
+
+TASK [kubernetes/preinstall : Create cni directories] **************************
+ok: [node1] => (item=/etc/cni/net.d)
+ok: [node2] => (item=/etc/cni/net.d)
+ok: [node3] => (item=/etc/cni/net.d)
+ok: [node3] => (item=/opt/cni/bin)
+ok: [node2] => (item=/opt/cni/bin)
+ok: [node1] => (item=/opt/cni/bin)
+수요일 10 9월 2025  09:29:32 +0900 (0:00:00.600)       0:00:23.654 **************** 
+
+TASK [kubernetes/preinstall : Create calico cni directories] *******************
+ok: [node1] => (item=/var/lib/calico)
+ok: [node2] => (item=/var/lib/calico)
+ok: [node3] => (item=/var/lib/calico)
+수요일 10 9월 2025  09:29:33 +0900 (0:00:00.333)       0:00:23.988 **************** 
+수요일 10 9월 2025  09:29:33 +0900 (0:00:00.043)       0:00:24.031 **************** 
+수요일 10 9월 2025  09:29:33 +0900 (0:00:00.026)       0:00:24.057 **************** 
+수요일 10 9월 2025  09:29:33 +0900 (0:00:00.026)       0:00:24.084 **************** 
+수요일 10 9월 2025  09:29:33 +0900 (0:00:00.102)       0:00:24.187 **************** 
+수요일 10 9월 2025  09:29:33 +0900 (0:00:00.036)       0:00:24.224 **************** 
+수요일 10 9월 2025  09:29:33 +0900 (0:00:00.025)       0:00:24.250 **************** 
+수요일 10 9월 2025  09:29:33 +0900 (0:00:00.025)       0:00:24.275 **************** 
+
+TASK [kubernetes/preinstall : Create systemd-resolved drop-in directory] *******
+ok: [node2]
+ok: [node1]
+ok: [node3]
+수요일 10 9월 2025  09:29:33 +0900 (0:00:00.321)       0:00:24.597 **************** 
+
+TASK [kubernetes/preinstall : Write Kubespray DNS settings to systemd-resolved] ***
+ok: [node2]
+ok: [node1]
+ok: [node3]
+수요일 10 9월 2025  09:29:34 +0900 (0:00:00.811)       0:00:25.408 **************** 
+수요일 10 9월 2025  09:29:34 +0900 (0:00:00.031)       0:00:25.439 **************** 
+수요일 10 9월 2025  09:29:34 +0900 (0:00:00.026)       0:00:25.466 **************** 
+수요일 10 9월 2025  09:29:34 +0900 (0:00:00.026)       0:00:25.492 **************** 
+수요일 10 9월 2025  09:29:34 +0900 (0:00:00.067)       0:00:25.559 **************** 
+수요일 10 9월 2025  09:29:34 +0900 (0:00:00.025)       0:00:25.585 **************** 
+수요일 10 9월 2025  09:29:34 +0900 (0:00:00.025)       0:00:25.611 **************** 
+수요일 10 9월 2025  09:29:34 +0900 (0:00:00.025)       0:00:25.636 **************** 
+수요일 10 9월 2025  09:29:34 +0900 (0:00:00.024)       0:00:25.661 **************** 
+수요일 10 9월 2025  09:29:34 +0900 (0:00:00.026)       0:00:25.687 **************** 
+수요일 10 9월 2025  09:29:34 +0900 (0:00:00.024)       0:00:25.711 **************** 
+
+TASK [kubernetes/preinstall : Clean previously used sysctl file locations] *****
+ok: [node2] => (item=ipv4-ip_forward.conf)
+ok: [node1] => (item=ipv4-ip_forward.conf)
+ok: [node3] => (item=ipv4-ip_forward.conf)
+ok: [node2] => (item=bridge-nf-call.conf)
+ok: [node1] => (item=bridge-nf-call.conf)
+ok: [node3] => (item=bridge-nf-call.conf)
+수요일 10 9월 2025  09:29:35 +0900 (0:00:00.594)       0:00:26.306 **************** 
+
+TASK [kubernetes/preinstall : Stat sysctl file configuration] ******************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:35 +0900 (0:00:00.373)       0:00:26.679 **************** 
+
+TASK [kubernetes/preinstall : Change sysctl file path to link source if linked] ***
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:36 +0900 (0:00:00.100)       0:00:26.780 **************** 
+
+TASK [kubernetes/preinstall : Make sure sysctl file path folder exists] ********
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:36 +0900 (0:00:00.338)       0:00:27.119 **************** 
+
+TASK [kubernetes/preinstall : Enable ip forwarding] ****************************
+ok: [node3]
+ok: [node2]
+ok: [node1]
+수요일 10 9월 2025  09:29:36 +0900 (0:00:00.374)       0:00:27.494 **************** 
+수요일 10 9월 2025  09:29:36 +0900 (0:00:00.042)       0:00:27.536 **************** 
+
+TASK [kubernetes/preinstall : Check if we need to set fs.may_detach_mounts] ****
+ok: [node2]
+ok: [node1]
+ok: [node3]
+수요일 10 9월 2025  09:29:37 +0900 (0:00:00.306)       0:00:27.843 **************** 
+수요일 10 9월 2025  09:29:37 +0900 (0:00:00.042)       0:00:27.886 **************** 
+
+TASK [kubernetes/preinstall : Ensure kubelet expected parameters are set] ******
+ok: [node1] => (item={'name': 'kernel.keys.root_maxbytes', 'value': 25000000})
+ok: [node2] => (item={'name': 'kernel.keys.root_maxbytes', 'value': 25000000})
+ok: [node3] => (item={'name': 'kernel.keys.root_maxbytes', 'value': 25000000})
+ok: [node3] => (item={'name': 'kernel.keys.root_maxkeys', 'value': 1000000})
+ok: [node2] => (item={'name': 'kernel.keys.root_maxkeys', 'value': 1000000})
+ok: [node1] => (item={'name': 'kernel.keys.root_maxkeys', 'value': 1000000})
+ok: [node3] => (item={'name': 'kernel.panic', 'value': 10})
+ok: [node2] => (item={'name': 'kernel.panic', 'value': 10})
+ok: [node1] => (item={'name': 'kernel.panic', 'value': 10})
+ok: [node3] => (item={'name': 'kernel.panic_on_oops', 'value': 1})
+ok: [node2] => (item={'name': 'kernel.panic_on_oops', 'value': 1})
+ok: [node1] => (item={'name': 'kernel.panic_on_oops', 'value': 1})
+ok: [node3] => (item={'name': 'vm.overcommit_memory', 'value': 1})
+ok: [node2] => (item={'name': 'vm.overcommit_memory', 'value': 1})
+ok: [node1] => (item={'name': 'vm.overcommit_memory', 'value': 1})
+ok: [node3] => (item={'name': 'vm.panic_on_oom', 'value': 0})
+ok: [node2] => (item={'name': 'vm.panic_on_oom', 'value': 0})
+ok: [node1] => (item={'name': 'vm.panic_on_oom', 'value': 0})
+수요일 10 9월 2025  09:29:38 +0900 (0:00:01.809)       0:00:29.696 **************** 
+
+TASK [kubernetes/preinstall : Check dummy module] ******************************
+ok: [node2]
+ok: [node3]
+ok: [node1]
+수요일 10 9월 2025  09:29:39 +0900 (0:00:00.418)       0:00:30.114 **************** 
+수요일 10 9월 2025  09:29:39 +0900 (0:00:00.082)       0:00:30.197 **************** 
+
+TASK [kubernetes/preinstall : Disable fapolicyd service] ***********************
+ok: [node2]
+ok: [node3]
+ok: [node1]
+수요일 10 9월 2025  09:29:39 +0900 (0:00:00.525)       0:00:30.723 **************** 
+수요일 10 9월 2025  09:29:39 +0900 (0:00:00.035)       0:00:30.759 **************** 
+수요일 10 9월 2025  09:29:40 +0900 (0:00:00.027)       0:00:30.786 **************** 
+수요일 10 9월 2025  09:29:40 +0900 (0:00:00.025)       0:00:30.812 **************** 
+수요일 10 9월 2025  09:29:40 +0900 (0:00:00.024)       0:00:30.837 **************** 
+수요일 10 9월 2025  09:29:40 +0900 (0:00:00.025)       0:00:30.862 **************** 
+수요일 10 9월 2025  09:29:40 +0900 (0:00:00.025)       0:00:30.888 **************** 
+수요일 10 9월 2025  09:29:40 +0900 (0:00:00.025)       0:00:30.913 **************** 
+수요일 10 9월 2025  09:29:40 +0900 (0:00:00.065)       0:00:30.979 **************** 
+
+TASK [kubernetes/preinstall : Hosts | create hosts list from inventory] ********
+ok: [node1 -> localhost]
+수요일 10 9월 2025  09:29:40 +0900 (0:00:00.042)       0:00:31.021 **************** 
+
+TASK [kubernetes/preinstall : Hosts | populate inventory into hosts file] ******
+ok: [node2]
+ok: [node1]
+ok: [node3]
+수요일 10 9월 2025  09:29:40 +0900 (0:00:00.349)       0:00:31.371 **************** 
+수요일 10 9월 2025  09:29:40 +0900 (0:00:00.041)       0:00:31.413 **************** 
+
+TASK [kubernetes/preinstall : Hosts | Retrieve hosts file content] *************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:40 +0900 (0:00:00.305)       0:00:31.719 **************** 
+
+TASK [kubernetes/preinstall : Hosts | Extract existing entries for localhost from hosts file] ***
+ok: [node1] => (item=127.0.0.1 localhost)
+ok: [node2] => (item=127.0.0.1 localhost)
+ok: [node1] => (item=::1 ip6-loopback ip6-localhost localhost6 localhost6.localdomain)
+ok: [node3] => (item=127.0.0.1 localhost)
+ok: [node2] => (item=::1 ip6-loopback ip6-localhost localhost6 localhost6.localdomain)
+ok: [node1] => (item=127.0.0.1 ubuntu2204.localdomain localhost localhost.localdomain)
+ok: [node3] => (item=::1 ip6-loopback ip6-localhost localhost6 localhost6.localdomain)
+ok: [node2] => (item=127.0.0.1 ubuntu2204.localdomain localhost localhost.localdomain)
+ok: [node3] => (item=127.0.0.1 ubuntu2204.localdomain localhost localhost.localdomain)
+수요일 10 9월 2025  09:29:41 +0900 (0:00:00.086)       0:00:31.805 **************** 
+
+TASK [kubernetes/preinstall : Hosts | Update target hosts file entries dict with required entries] ***
+ok: [node1] => (item={'key': '127.0.0.1', 'value': {'expected': ['localhost', 'localhost.localdomain']}})
+ok: [node1] => (item={'key': '::1', 'value': {'expected': ['localhost6', 'localhost6.localdomain'], 'unexpected': ['localhost', 'localhost.localdomain']}})
+ok: [node2] => (item={'key': '127.0.0.1', 'value': {'expected': ['localhost', 'localhost.localdomain']}})
+ok: [node2] => (item={'key': '::1', 'value': {'expected': ['localhost6', 'localhost6.localdomain'], 'unexpected': ['localhost', 'localhost.localdomain']}})
+ok: [node3] => (item={'key': '127.0.0.1', 'value': {'expected': ['localhost', 'localhost.localdomain']}})
+ok: [node3] => (item={'key': '::1', 'value': {'expected': ['localhost6', 'localhost6.localdomain'], 'unexpected': ['localhost', 'localhost.localdomain']}})
+수요일 10 9월 2025  09:29:41 +0900 (0:00:00.041)       0:00:31.847 **************** 
+
+TASK [kubernetes/preinstall : Hosts | Update (if necessary) hosts file] ********
+ok: [node2] => (item={'key': '127.0.0.1', 'value': ['ubuntu2204.localdomain', 'localhost', 'localhost.localdomain']})
+ok: [node1] => (item={'key': '127.0.0.1', 'value': ['ubuntu2204.localdomain', 'localhost', 'localhost.localdomain']})
+ok: [node3] => (item={'key': '127.0.0.1', 'value': ['ubuntu2204.localdomain', 'localhost', 'localhost.localdomain']})
+changed: [node2] => (item={'key': '::1', 'value': ['ip6-loopback', 'localhost6', 'ip6-localhost', 'localhost6.localdomain']})
+changed: [node3] => (item={'key': '::1', 'value': ['ip6-loopback', 'localhost6', 'ip6-localhost', 'localhost6.localdomain']})
+changed: [node1] => (item={'key': '::1', 'value': ['ip6-loopback', 'localhost6', 'ip6-localhost', 'localhost6.localdomain']})
+수요일 10 9월 2025  09:29:41 +0900 (0:00:00.715)       0:00:32.562 **************** 
+
+TASK [kubernetes/preinstall : Update facts] ************************************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:42 +0900 (0:00:00.732)       0:00:33.295 **************** 
+
+TASK [kubernetes/preinstall : Configure dhclient to supersede search/domain/nameservers] ***
+ok: [node2]
+ok: [node1]
+ok: [node3]
+수요일 10 9월 2025  09:29:42 +0900 (0:00:00.400)       0:00:33.695 **************** 
+
+TASK [kubernetes/preinstall : Configure dhclient hooks for resolv.conf (non-RH)] ***
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:43 +0900 (0:00:00.766)       0:00:34.462 **************** 
+수요일 10 9월 2025  09:29:43 +0900 (0:00:00.036)       0:00:34.498 **************** 
+수요일 10 9월 2025  09:29:43 +0900 (0:00:00.026)       0:00:34.524 **************** 
+수요일 10 9월 2025  09:29:43 +0900 (0:00:00.025)       0:00:34.549 **************** 
+수요일 10 9월 2025  09:29:43 +0900 (0:00:00.002)       0:00:34.552 **************** 
+수요일 10 9월 2025  09:29:43 +0900 (0:00:00.002)       0:00:34.555 **************** 
+수요일 10 9월 2025  09:29:43 +0900 (0:00:00.003)       0:00:34.558 **************** 
+
+TASK [kubernetes/preinstall : Check if we are running inside a Azure VM] *******
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:44 +0900 (0:00:00.301)       0:00:34.860 **************** 
+
+TASK [Run calico checks] *******************************************************
+수요일 10 9월 2025  09:29:44 +0900 (0:00:00.155)       0:00:35.015 **************** 
+
+TASK [network_plugin/calico : Stop if legacy encapsulation variables are detected (ipip)] ***
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:44 +0900 (0:00:00.025)       0:00:35.041 **************** 
+
+TASK [network_plugin/calico : Stop if legacy encapsulation variables are detected (ipip_mode)] ***
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:44 +0900 (0:00:00.023)       0:00:35.064 **************** 
+
+TASK [network_plugin/calico : Stop if legacy encapsulation variables are detected (calcio_ipam_autoallocateblocks)] ***
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:44 +0900 (0:00:00.024)       0:00:35.089 **************** 
+
+TASK [network_plugin/calico : Stop if supported Calico versions] ***************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:44 +0900 (0:00:00.025)       0:00:35.114 **************** 
+
+TASK [network_plugin/calico : Check if calicoctl.sh exists] ********************
+ok: [node1]
+수요일 10 9월 2025  09:29:44 +0900 (0:00:00.292)       0:00:35.407 **************** 
+수요일 10 9월 2025  09:29:44 +0900 (0:00:00.026)       0:00:35.434 **************** 
+수요일 10 9월 2025  09:29:44 +0900 (0:00:00.017)       0:00:35.451 **************** 
+수요일 10 9월 2025  09:29:44 +0900 (0:00:00.015)       0:00:35.466 **************** 
+수요일 10 9월 2025  09:29:44 +0900 (0:00:00.021)       0:00:35.488 **************** 
+수요일 10 9월 2025  09:29:44 +0900 (0:00:00.014)       0:00:35.502 **************** 
+
+TASK [network_plugin/calico : Check vars defined correctly] ********************
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:44 +0900 (0:00:00.024)       0:00:35.527 **************** 
+
+TASK [network_plugin/calico : Check calico network backend defined correctly] ***
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:44 +0900 (0:00:00.023)       0:00:35.551 **************** 
+
+TASK [network_plugin/calico : Check ipip and vxlan mode defined correctly] *****
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:44 +0900 (0:00:00.024)       0:00:35.575 **************** 
+수요일 10 9월 2025  09:29:44 +0900 (0:00:00.013)       0:00:35.589 **************** 
+
+TASK [network_plugin/calico : Check ipip and vxlan mode if simultaneously enabled] ***
+ok: [node1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+수요일 10 9월 2025  09:29:44 +0900 (0:00:00.024)       0:00:35.613 **************** 
+
+TASK [network_plugin/calico : Get Calico default-pool configuration] ***********
+ok: [node1]
+수요일 10 9월 2025  09:29:45 +0900 (0:00:00.303)       0:00:35.917 **************** 
+수요일 10 9월 2025  09:29:45 +0900 (0:00:00.033)       0:00:35.951 **************** 
+수요일 10 9월 2025  09:29:45 +0900 (0:00:00.025)       0:00:35.976 **************** 
+수요일 10 9월 2025  09:29:45 +0900 (0:00:00.020)       0:00:35.996 **************** 
+수요일 10 9월 2025  09:29:45 +0900 (0:00:00.019)       0:00:36.015 **************** 
+수요일 10 9월 2025  09:29:45 +0900 (0:00:00.019)       0:00:36.035 **************** 
+수요일 10 9월 2025  09:29:45 +0900 (0:00:00.013)       0:00:36.049 **************** 
+수요일 10 9월 2025  09:29:45 +0900 (0:00:00.102)       0:00:36.152 **************** 
+수요일 10 9월 2025  09:29:45 +0900 (0:00:00.036)       0:00:36.188 **************** 
+
+TASK [container-engine/validate-container-engine : Validate-container-engine | check if fedora coreos] ***
+ok: [node2]
+ok: [node1]
+ok: [node3]
+수요일 10 9월 2025  09:29:45 +0900 (0:00:00.312)       0:00:36.500 **************** 
+
+TASK [container-engine/validate-container-engine : Validate-container-engine | set is_ostree] ***
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:45 +0900 (0:00:00.046)       0:00:36.547 **************** 
+
+TASK [container-engine/validate-container-engine : Ensure kubelet systemd unit exists] ***
+ok: [node2]
+ok: [node1]
+ok: [node3]
+수요일 10 9월 2025  09:29:46 +0900 (0:00:00.306)       0:00:36.854 **************** 
+
+TASK [container-engine/validate-container-engine : Populate service facts] *****
+ok: [node3]
+ok: [node2]
+ok: [node1]
+수요일 10 9월 2025  09:29:54 +0900 (0:00:08.412)       0:00:45.266 **************** 
+
+TASK [container-engine/validate-container-engine : Check if containerd is installed] ***
+ok: [node3]
+ok: [node2]
+ok: [node1]
+수요일 10 9월 2025  09:29:54 +0900 (0:00:00.434)       0:00:45.701 **************** 
+
+TASK [container-engine/validate-container-engine : Check if docker is installed] ***
+ok: [node2]
+ok: [node1]
+ok: [node3]
+수요일 10 9월 2025  09:29:55 +0900 (0:00:00.339)       0:00:46.041 **************** 
+
+TASK [container-engine/validate-container-engine : Check if crio is installed] ***
+ok: [node2]
+ok: [node1]
+ok: [node3]
+수요일 10 9월 2025  09:29:55 +0900 (0:00:00.349)       0:00:46.390 **************** 
+수요일 10 9월 2025  09:29:55 +0900 (0:00:00.033)       0:00:46.423 **************** 
+수요일 10 9월 2025  09:29:55 +0900 (0:00:00.025)       0:00:46.449 **************** 
+수요일 10 9월 2025  09:29:55 +0900 (0:00:00.071)       0:00:46.521 **************** 
+수요일 10 9월 2025  09:29:55 +0900 (0:00:00.023)       0:00:46.545 **************** 
+수요일 10 9월 2025  09:29:55 +0900 (0:00:00.041)       0:00:46.586 **************** 
+수요일 10 9월 2025  09:29:55 +0900 (0:00:00.023)       0:00:46.610 **************** 
+수요일 10 9월 2025  09:29:55 +0900 (0:00:00.023)       0:00:46.634 **************** 
+수요일 10 9월 2025  09:29:55 +0900 (0:00:00.025)       0:00:46.660 **************** 
+수요일 10 9월 2025  09:29:55 +0900 (0:00:00.023)       0:00:46.683 **************** 
+수요일 10 9월 2025  09:29:55 +0900 (0:00:00.024)       0:00:46.708 **************** 
+수요일 10 9월 2025  09:29:55 +0900 (0:00:00.030)       0:00:46.738 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.031)       0:00:46.770 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.023)       0:00:46.794 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.025)       0:00:46.820 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.023)       0:00:46.843 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.030)       0:00:46.874 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.023)       0:00:46.897 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.039)       0:00:46.937 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.025)       0:00:46.962 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.024)       0:00:46.986 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.023)       0:00:47.010 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.026)       0:00:47.036 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.044)       0:00:47.080 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.026)       0:00:47.107 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.023)       0:00:47.131 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.025)       0:00:47.156 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.024)       0:00:47.180 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.028)       0:00:47.209 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.026)       0:00:47.236 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.025)       0:00:47.261 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.026)       0:00:47.288 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.026)       0:00:47.314 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.024)       0:00:47.338 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.037)       0:00:47.376 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.069)       0:00:47.446 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.024)       0:00:47.471 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.023)       0:00:47.494 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.024)       0:00:47.518 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.031)       0:00:47.550 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.030)       0:00:47.580 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.024)       0:00:47.605 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.024)       0:00:47.629 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.025)       0:00:47.655 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.024)       0:00:47.679 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.030)       0:00:47.710 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.024)       0:00:47.735 **************** 
+수요일 10 9월 2025  09:29:56 +0900 (0:00:00.025)       0:00:47.760 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.024)       0:00:47.784 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.024)       0:00:47.808 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.026)       0:00:47.835 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.023)       0:00:47.859 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.023)       0:00:47.882 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.025)       0:00:47.908 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.027)       0:00:47.935 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.026)       0:00:47.962 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.030)       0:00:47.992 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.024)       0:00:48.016 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.038)       0:00:48.054 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.025)       0:00:48.079 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.022)       0:00:48.102 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.023)       0:00:48.126 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.026)       0:00:48.152 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.024)       0:00:48.177 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.026)       0:00:48.203 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.029)       0:00:48.233 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.024)       0:00:48.257 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.023)       0:00:48.281 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.379)       0:00:48.661 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.023)       0:00:48.684 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.030)       0:00:48.714 **************** 
+수요일 10 9월 2025  09:29:57 +0900 (0:00:00.024)       0:00:48.738 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.029)       0:00:48.768 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.023)       0:00:48.792 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.030)       0:00:48.823 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.030)       0:00:48.853 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.025)       0:00:48.878 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.023)       0:00:48.902 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.023)       0:00:48.926 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.027)       0:00:48.954 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.032)       0:00:48.986 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.024)       0:00:49.010 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.023)       0:00:49.034 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.024)       0:00:49.059 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.024)       0:00:49.083 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.023)       0:00:49.106 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.025)       0:00:49.132 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.024)       0:00:49.156 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.025)       0:00:49.181 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.024)       0:00:49.205 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.023)       0:00:49.229 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.025)       0:00:49.254 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.023)       0:00:49.277 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.027)       0:00:49.305 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.025)       0:00:49.331 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.024)       0:00:49.355 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.025)       0:00:49.380 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.023)       0:00:49.404 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.023)       0:00:49.427 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.025)       0:00:49.453 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.024)       0:00:49.477 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.023)       0:00:49.501 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.067)       0:00:49.568 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.023)       0:00:49.591 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.023)       0:00:49.615 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.031)       0:00:49.646 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.024)       0:00:49.670 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.025)       0:00:49.696 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.021)       0:00:49.718 **************** 
+수요일 10 9월 2025  09:29:58 +0900 (0:00:00.023)       0:00:49.741 **************** 
+수요일 10 9월 2025  09:29:59 +0900 (0:00:00.025)       0:00:49.766 **************** 
+수요일 10 9월 2025  09:29:59 +0900 (0:00:00.026)       0:00:49.793 **************** 
+수요일 10 9월 2025  09:29:59 +0900 (0:00:00.098)       0:00:49.891 **************** 
+수요일 10 9월 2025  09:29:59 +0900 (0:00:00.048)       0:00:49.940 **************** 
+수요일 10 9월 2025  09:29:59 +0900 (0:00:00.043)       0:00:49.983 **************** 
+
+TASK [container-engine/containerd-common : Containerd-common | check if fedora coreos] ***
+ok: [node2]
+ok: [node3]
+ok: [node1]
+수요일 10 9월 2025  09:29:59 +0900 (0:00:00.401)       0:00:50.384 **************** 
+
+TASK [container-engine/containerd-common : Containerd-common | set is_ostree] ***
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:29:59 +0900 (0:00:00.063)       0:00:50.448 **************** 
+수요일 10 9월 2025  09:29:59 +0900 (0:00:00.054)       0:00:50.502 **************** 
+
+TASK [container-engine/runc : Runc | check if fedora coreos] *******************
+ok: [node2]
+ok: [node3]
+ok: [node1]
+수요일 10 9월 2025  09:30:00 +0900 (0:00:00.346)       0:00:50.849 **************** 
+
+TASK [container-engine/runc : Runc | set is_ostree] ****************************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:30:00 +0900 (0:00:00.046)       0:00:50.895 **************** 
+
+TASK [container-engine/runc : Runc | Uninstall runc package managed by package manager] ***
+ok: [node3]
+ok: [node2]
+ok: [node1]
+수요일 10 9월 2025  09:30:01 +0900 (0:00:01.090)       0:00:51.986 **************** 
+
+TASK [container-engine/runc : Runc | Download runc binary] *********************
+included: /Users/xiilab/Develop/astrago/astrago-deployment/kubespray/versions/v2.28.1/kubespray/roles/container-engine/runc/tasks/../../../download/tasks/download_file.yml for node1, node2, node3
+수요일 10 9월 2025  09:30:01 +0900 (0:00:00.057)       0:00:52.044 **************** 
+
+TASK [container-engine/runc : Prep_download | Set a few facts] *****************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:30:01 +0900 (0:00:00.156)       0:00:52.200 **************** 
+수요일 10 9월 2025  09:30:01 +0900 (0:00:00.031)       0:00:52.232 **************** 
+
+TASK [container-engine/runc : Download_file | Set pathname of cached file] *****
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:30:01 +0900 (0:00:00.263)       0:00:52.496 **************** 
+
+TASK [container-engine/runc : Download_file | Create dest directory on node] ***
+ok: [node2]
+ok: [node1]
+ok: [node3]
+수요일 10 9월 2025  09:30:02 +0900 (0:00:00.687)       0:00:53.184 **************** 
+수요일 10 9월 2025  09:30:02 +0900 (0:00:00.025)       0:00:53.210 **************** 
+수요일 10 9월 2025  09:30:02 +0900 (0:00:00.026)       0:00:53.236 **************** 
+
+TASK [container-engine/runc : Download_file | Download item] *******************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:30:04 +0900 (0:00:01.798)       0:00:55.035 **************** 
+수요일 10 9월 2025  09:30:04 +0900 (0:00:00.036)       0:00:55.072 **************** 
+수요일 10 9월 2025  09:30:04 +0900 (0:00:00.030)       0:00:55.102 **************** 
+수요일 10 9월 2025  09:30:04 +0900 (0:00:00.025)       0:00:55.127 **************** 
+
+TASK [container-engine/runc : Download_file | Extract file archives] ***********
+included: /Users/xiilab/Develop/astrago/astrago-deployment/kubespray/versions/v2.28.1/kubespray/roles/download/tasks/extract_file.yml for node1, node2, node3
+수요일 10 9월 2025  09:30:04 +0900 (0:00:00.039)       0:00:55.167 **************** 
+수요일 10 9월 2025  09:30:04 +0900 (0:00:00.151)       0:00:55.318 **************** 
+
+TASK [container-engine/runc : Copy runc binary from download dir] **************
+ok: [node3]
+ok: [node2]
+ok: [node1]
+수요일 10 9월 2025  09:30:05 +0900 (0:00:00.999)       0:00:56.318 **************** 
+
+TASK [container-engine/runc : Runc | Remove orphaned binary] *******************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:30:05 +0900 (0:00:00.345)       0:00:56.663 **************** 
+
+TASK [container-engine/crictl : Install crictl] ********************************
+included: /Users/xiilab/Develop/astrago/astrago-deployment/kubespray/versions/v2.28.1/kubespray/roles/container-engine/crictl/tasks/crictl.yml for node1, node2, node3
+수요일 10 9월 2025  09:30:05 +0900 (0:00:00.091)       0:00:56.755 **************** 
+
+TASK [container-engine/crictl : Crictl | Download crictl] **********************
+included: /Users/xiilab/Develop/astrago/astrago-deployment/kubespray/versions/v2.28.1/kubespray/roles/container-engine/crictl/tasks/../../../download/tasks/download_file.yml for node1, node2, node3
+수요일 10 9월 2025  09:30:06 +0900 (0:00:00.040)       0:00:56.795 **************** 
+
+TASK [container-engine/crictl : Prep_download | Set a few facts] ***************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:30:06 +0900 (0:00:00.154)       0:00:56.950 **************** 
+수요일 10 9월 2025  09:30:06 +0900 (0:00:00.029)       0:00:56.979 **************** 
+
+TASK [container-engine/crictl : Download_file | Set pathname of cached file] ***
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:30:06 +0900 (0:00:00.266)       0:00:57.245 **************** 
+
+TASK [container-engine/crictl : Download_file | Create dest directory on node] ***
+ok: [node2]
+ok: [node1]
+ok: [node3]
+수요일 10 9월 2025  09:30:07 +0900 (0:00:00.664)       0:00:57.910 **************** 
+수요일 10 9월 2025  09:30:07 +0900 (0:00:00.027)       0:00:57.938 **************** 
+수요일 10 9월 2025  09:30:07 +0900 (0:00:00.020)       0:00:57.958 **************** 
+
+TASK [container-engine/crictl : Download_file | Download item] *****************
+ok: [node2]
+ok: [node3]
+ok: [node1]
+수요일 10 9월 2025  09:30:08 +0900 (0:00:01.626)       0:00:59.584 **************** 
+수요일 10 9월 2025  09:30:08 +0900 (0:00:00.043)       0:00:59.628 **************** 
+수요일 10 9월 2025  09:30:08 +0900 (0:00:00.030)       0:00:59.658 **************** 
+수요일 10 9월 2025  09:30:08 +0900 (0:00:00.028)       0:00:59.686 **************** 
+
+TASK [container-engine/crictl : Download_file | Extract file archives] *********
+included: /Users/xiilab/Develop/astrago/astrago-deployment/kubespray/versions/v2.28.1/kubespray/roles/download/tasks/extract_file.yml for node1, node2, node3
+수요일 10 9월 2025  09:30:08 +0900 (0:00:00.040)       0:00:59.727 **************** 
+
+TASK [container-engine/crictl : Extract_file | Unpacking archive] **************
+ok: [node3]
+ok: [node1]
+ok: [node2]
+수요일 10 9월 2025  09:30:11 +0900 (0:00:02.586)       0:01:02.313 **************** 
+
+TASK [container-engine/crictl : Install crictl config] *************************
+ok: [node2]
+ok: [node1]
+ok: [node3]
+수요일 10 9월 2025  09:30:12 +0900 (0:00:00.785)       0:01:03.099 **************** 
+
+TASK [container-engine/crictl : Copy crictl binary from download dir] **********
+ok: [node2]
+ok: [node3]
+ok: [node1]
+수요일 10 9월 2025  09:30:12 +0900 (0:00:00.648)       0:01:03.747 **************** 
+
+TASK [container-engine/nerdctl : Nerdctl | Download nerdctl] *******************
+included: /Users/xiilab/Develop/astrago/astrago-deployment/kubespray/versions/v2.28.1/kubespray/roles/container-engine/nerdctl/tasks/../../../download/tasks/download_file.yml for node1, node2, node3
+수요일 10 9월 2025  09:30:13 +0900 (0:00:00.046)       0:01:03.794 **************** 
+
+TASK [container-engine/nerdctl : Prep_download | Set a few facts] **************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:30:13 +0900 (0:00:00.156)       0:01:03.950 **************** 
+수요일 10 9월 2025  09:30:13 +0900 (0:00:00.031)       0:01:03.982 **************** 
+
+TASK [container-engine/nerdctl : Download_file | Set pathname of cached file] ***
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:30:13 +0900 (0:00:00.264)       0:01:04.246 **************** 
+
+TASK [container-engine/nerdctl : Download_file | Create dest directory on node] ***
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:30:14 +0900 (0:00:00.660)       0:01:04.907 **************** 
+수요일 10 9월 2025  09:30:14 +0900 (0:00:00.028)       0:01:04.936 **************** 
+수요일 10 9월 2025  09:30:14 +0900 (0:00:00.020)       0:01:04.956 **************** 
+
+TASK [container-engine/nerdctl : Download_file | Download item] ****************
+ok: [node2]
+ok: [node1]
+ok: [node3]
+수요일 10 9월 2025  09:30:15 +0900 (0:00:01.638)       0:01:06.595 **************** 
+수요일 10 9월 2025  09:30:15 +0900 (0:00:00.039)       0:01:06.634 **************** 
+수요일 10 9월 2025  09:30:15 +0900 (0:00:00.032)       0:01:06.666 **************** 
+수요일 10 9월 2025  09:30:15 +0900 (0:00:00.027)       0:01:06.693 **************** 
+
+TASK [container-engine/nerdctl : Download_file | Extract file archives] ********
+included: /Users/xiilab/Develop/astrago/astrago-deployment/kubespray/versions/v2.28.1/kubespray/roles/download/tasks/extract_file.yml for node1, node2, node3
+수요일 10 9월 2025  09:30:15 +0900 (0:00:00.040)       0:01:06.734 **************** 
+
+TASK [container-engine/nerdctl : Extract_file | Unpacking archive] *************
+ok: [node3]
+ok: [node2]
+ok: [node1]
+수요일 10 9월 2025  09:30:18 +0900 (0:00:02.222)       0:01:08.956 **************** 
+
+TASK [container-engine/nerdctl : Nerdctl | Copy nerdctl binary from download dir] ***
+ok: [node2]
+ok: [node1]
+ok: [node3]
+수요일 10 9월 2025  09:30:18 +0900 (0:00:00.601)       0:01:09.557 **************** 
+
+TASK [container-engine/nerdctl : Nerdctl | Create configuration dir] ***********
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:30:19 +0900 (0:00:00.332)       0:01:09.890 **************** 
+
+TASK [container-engine/nerdctl : Nerdctl | Install nerdctl configuration] ******
+ok: [node2]
+ok: [node3]
+ok: [node1]
+수요일 10 9월 2025  09:30:19 +0900 (0:00:00.780)       0:01:10.670 **************** 
+
+TASK [container-engine/containerd : Containerd | Download containerd] **********
+included: /Users/xiilab/Develop/astrago/astrago-deployment/kubespray/versions/v2.28.1/kubespray/roles/container-engine/containerd/tasks/../../../download/tasks/download_file.yml for node1, node2, node3
+수요일 10 9월 2025  09:30:19 +0900 (0:00:00.092)       0:01:10.762 **************** 
+
+TASK [container-engine/containerd : Prep_download | Set a few facts] ***********
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:30:20 +0900 (0:00:00.153)       0:01:10.916 **************** 
+수요일 10 9월 2025  09:30:20 +0900 (0:00:00.028)       0:01:10.945 **************** 
+
+TASK [container-engine/containerd : Download_file | Set pathname of cached file] ***
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:30:20 +0900 (0:00:00.265)       0:01:11.210 **************** 
+
+TASK [container-engine/containerd : Download_file | Create dest directory on node] ***
+ok: [node1]
+ok: [node3]
+ok: [node2]
+수요일 10 9월 2025  09:30:21 +0900 (0:00:00.659)       0:01:11.870 **************** 
+수요일 10 9월 2025  09:30:21 +0900 (0:00:00.026)       0:01:11.896 **************** 
+수요일 10 9월 2025  09:30:21 +0900 (0:00:00.020)       0:01:11.916 **************** 
+
+TASK [container-engine/containerd : Download_file | Download item] *************
+ok: [node2]
+ok: [node3]
+ok: [node1]
+수요일 10 9월 2025  09:30:22 +0900 (0:00:01.697)       0:01:13.614 **************** 
+수요일 10 9월 2025  09:30:22 +0900 (0:00:00.031)       0:01:13.645 **************** 
+수요일 10 9월 2025  09:30:22 +0900 (0:00:00.028)       0:01:13.673 **************** 
+수요일 10 9월 2025  09:30:22 +0900 (0:00:00.026)       0:01:13.699 **************** 
+
+TASK [container-engine/containerd : Download_file | Extract file archives] *****
+included: /Users/xiilab/Develop/astrago/astrago-deployment/kubespray/versions/v2.28.1/kubespray/roles/download/tasks/extract_file.yml for node1, node2, node3
+수요일 10 9월 2025  09:30:22 +0900 (0:00:00.039)       0:01:13.738 **************** 
+수요일 10 9월 2025  09:30:23 +0900 (0:00:00.151)       0:01:13.889 **************** 
+
+TASK [container-engine/containerd : Containerd | Unpack containerd archive] ****
+ok: [node2]
+ok: [node3]
+ok: [node1]
+수요일 10 9월 2025  09:30:26 +0900 (0:00:03.198)       0:01:17.088 **************** 
+
+TASK [container-engine/containerd : Containerd | Generate systemd service for containerd] ***
+ok: [node2]
+ok: [node3]
+ok: [node1]
+수요일 10 9월 2025  09:30:27 +0900 (0:00:00.780)       0:01:17.868 **************** 
+
+TASK [container-engine/containerd : Containerd | Ensure containerd directories exist] ***
+ok: [node2] => (item=/etc/systemd/system/containerd.service.d)
+ok: [node1] => (item=/etc/systemd/system/containerd.service.d)
+ok: [node3] => (item=/etc/systemd/system/containerd.service.d)
+ok: [node2] => (item=/etc/containerd)
+ok: [node3] => (item=/etc/containerd)
+ok: [node1] => (item=/etc/containerd)
+ok: [node2] => (item=/var/lib/containerd)
+ok: [node3] => (item=/var/lib/containerd)
+ok: [node1] => (item=/var/lib/containerd)
+ok: [node2] => (item=/run/containerd)
+ok: [node3] => (item=/run/containerd)
+ok: [node1] => (item=/run/containerd)
+수요일 10 9월 2025  09:30:28 +0900 (0:00:01.207)       0:01:19.076 **************** 
+수요일 10 9월 2025  09:30:28 +0900 (0:00:00.035)       0:01:19.111 **************** 
+
+TASK [container-engine/containerd : Containerd | Generate default base_runtime_spec] ***
+ok: [node2]
+ok: [node3]
+ok: [node1]
+수요일 10 9월 2025  09:30:28 +0900 (0:00:00.353)       0:01:19.465 **************** 
+
+TASK [container-engine/containerd : Containerd | Store generated default base_runtime_spec] ***
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:30:28 +0900 (0:00:00.053)       0:01:19.519 **************** 
+
+TASK [container-engine/containerd : Containerd | Write base_runtime_specs] *****
+ok: [node2] => (item={'key': 'cri-base.json', 'value': {'ociVersion': '1.2.0', 'process': {'user': {'uid': 0, 'gid': 0}, 'cwd': '/', 'capabilities': {'bounding': ['CAP_CHOWN', 'CAP_DAC_OVERRIDE', 'CAP_FSETID', 'CAP_FOWNER', 'CAP_MKNOD', 'CAP_NET_RAW', 'CAP_SETGID', 'CAP_SETUID', 'CAP_SETFCAP', 'CAP_SETPCAP', 'CAP_NET_BIND_SERVICE', 'CAP_SYS_CHROOT', 'CAP_KILL', 'CAP_AUDIT_WRITE'], 'effective': ['CAP_CHOWN', 'CAP_DAC_OVERRIDE', 'CAP_FSETID', 'CAP_FOWNER', 'CAP_MKNOD', 'CAP_NET_RAW', 'CAP_SETGID', 'CAP_SETUID', 'CAP_SETFCAP', 'CAP_SETPCAP', 'CAP_NET_BIND_SERVICE', 'CAP_SYS_CHROOT', 'CAP_KILL', 'CAP_AUDIT_WRITE'], 'permitted': ['CAP_CHOWN', 'CAP_DAC_OVERRIDE', 'CAP_FSETID', 'CAP_FOWNER', 'CAP_MKNOD', 'CAP_NET_RAW', 'CAP_SETGID', 'CAP_SETUID', 'CAP_SETFCAP', 'CAP_SETPCAP', 'CAP_NET_BIND_SERVICE', 'CAP_SYS_CHROOT', 'CAP_KILL', 'CAP_AUDIT_WRITE']}, 'rlimits': [{'type': 'RLIMIT_NOFILE', 'hard': 65535, 'soft': 65535}], 'noNewPrivileges': True}, 'root': {'path': 'rootfs'}, 'mounts': [{'destination': '/proc', 'type': 'proc', 'source': 'proc', 'options': ['nosuid', 'noexec', 'nodev']}, {'destination': '/dev', 'type': 'tmpfs', 'source': 'tmpfs', 'options': ['nosuid', 'strictatime', 'mode=755', 'size=65536k']}, {'destination': '/dev/pts', 'type': 'devpts', 'source': 'devpts', 'options': ['nosuid', 'noexec', 'newinstance', 'ptmxmode=0666', 'mode=0620', 'gid=5']}, {'destination': '/dev/shm', 'type': 'tmpfs', 'source': 'shm', 'options': ['nosuid', 'noexec', 'nodev', 'mode=1777', 'size=65536k']}, {'destination': '/dev/mqueue', 'type': 'mqueue', 'source': 'mqueue', 'options': ['nosuid', 'noexec', 'nodev']}, {'destination': '/sys', 'type': 'sysfs', 'source': 'sysfs', 'options': ['nosuid', 'noexec', 'nodev', 'ro']}, {'destination': '/run', 'type': 'tmpfs', 'source': 'tmpfs', 'options': ['nosuid', 'strictatime', 'mode=755', 'size=65536k']}], 'linux': {'resources': {'devices': [{'allow': False, 'access': 'rwm'}]}, 'cgroupsPath': '/default', 'namespaces': [{'type': 'pid'}, {'type': 'ipc'}, {'type': 'uts'}, {'type': 'mount'}, {'type': 'network'}], 'maskedPaths': ['/proc/acpi', '/proc/asound', '/proc/kcore', '/proc/keys', '/proc/latency_stats', '/proc/timer_list', '/proc/timer_stats', '/proc/sched_debug', '/sys/firmware', '/sys/devices/virtual/powercap', '/proc/scsi'], 'readonlyPaths': ['/proc/bus', '/proc/fs', '/proc/irq', '/proc/sys', '/proc/sysrq-trigger']}}})
+ok: [node1] => (item={'key': 'cri-base.json', 'value': {'ociVersion': '1.2.0', 'process': {'user': {'uid': 0, 'gid': 0}, 'cwd': '/', 'capabilities': {'bounding': ['CAP_CHOWN', 'CAP_DAC_OVERRIDE', 'CAP_FSETID', 'CAP_FOWNER', 'CAP_MKNOD', 'CAP_NET_RAW', 'CAP_SETGID', 'CAP_SETUID', 'CAP_SETFCAP', 'CAP_SETPCAP', 'CAP_NET_BIND_SERVICE', 'CAP_SYS_CHROOT', 'CAP_KILL', 'CAP_AUDIT_WRITE'], 'effective': ['CAP_CHOWN', 'CAP_DAC_OVERRIDE', 'CAP_FSETID', 'CAP_FOWNER', 'CAP_MKNOD', 'CAP_NET_RAW', 'CAP_SETGID', 'CAP_SETUID', 'CAP_SETFCAP', 'CAP_SETPCAP', 'CAP_NET_BIND_SERVICE', 'CAP_SYS_CHROOT', 'CAP_KILL', 'CAP_AUDIT_WRITE'], 'permitted': ['CAP_CHOWN', 'CAP_DAC_OVERRIDE', 'CAP_FSETID', 'CAP_FOWNER', 'CAP_MKNOD', 'CAP_NET_RAW', 'CAP_SETGID', 'CAP_SETUID', 'CAP_SETFCAP', 'CAP_SETPCAP', 'CAP_NET_BIND_SERVICE', 'CAP_SYS_CHROOT', 'CAP_KILL', 'CAP_AUDIT_WRITE']}, 'rlimits': [{'type': 'RLIMIT_NOFILE', 'hard': 65535, 'soft': 65535}], 'noNewPrivileges': True}, 'root': {'path': 'rootfs'}, 'mounts': [{'destination': '/proc', 'type': 'proc', 'source': 'proc', 'options': ['nosuid', 'noexec', 'nodev']}, {'destination': '/dev', 'type': 'tmpfs', 'source': 'tmpfs', 'options': ['nosuid', 'strictatime', 'mode=755', 'size=65536k']}, {'destination': '/dev/pts', 'type': 'devpts', 'source': 'devpts', 'options': ['nosuid', 'noexec', 'newinstance', 'ptmxmode=0666', 'mode=0620', 'gid=5']}, {'destination': '/dev/shm', 'type': 'tmpfs', 'source': 'shm', 'options': ['nosuid', 'noexec', 'nodev', 'mode=1777', 'size=65536k']}, {'destination': '/dev/mqueue', 'type': 'mqueue', 'source': 'mqueue', 'options': ['nosuid', 'noexec', 'nodev']}, {'destination': '/sys', 'type': 'sysfs', 'source': 'sysfs', 'options': ['nosuid', 'noexec', 'nodev', 'ro']}, {'destination': '/run', 'type': 'tmpfs', 'source': 'tmpfs', 'options': ['nosuid', 'strictatime', 'mode=755', 'size=65536k']}], 'linux': {'resources': {'devices': [{'allow': False, 'access': 'rwm'}]}, 'cgroupsPath': '/default', 'namespaces': [{'type': 'pid'}, {'type': 'ipc'}, {'type': 'uts'}, {'type': 'mount'}, {'type': 'network'}], 'maskedPaths': ['/proc/acpi', '/proc/asound', '/proc/kcore', '/proc/keys', '/proc/latency_stats', '/proc/timer_list', '/proc/timer_stats', '/proc/sched_debug', '/sys/firmware', '/sys/devices/virtual/powercap', '/proc/scsi'], 'readonlyPaths': ['/proc/bus', '/proc/fs', '/proc/irq', '/proc/sys', '/proc/sysrq-trigger']}}})
+ok: [node3] => (item={'key': 'cri-base.json', 'value': {'ociVersion': '1.2.0', 'process': {'user': {'uid': 0, 'gid': 0}, 'cwd': '/', 'capabilities': {'bounding': ['CAP_CHOWN', 'CAP_DAC_OVERRIDE', 'CAP_FSETID', 'CAP_FOWNER', 'CAP_MKNOD', 'CAP_NET_RAW', 'CAP_SETGID', 'CAP_SETUID', 'CAP_SETFCAP', 'CAP_SETPCAP', 'CAP_NET_BIND_SERVICE', 'CAP_SYS_CHROOT', 'CAP_KILL', 'CAP_AUDIT_WRITE'], 'effective': ['CAP_CHOWN', 'CAP_DAC_OVERRIDE', 'CAP_FSETID', 'CAP_FOWNER', 'CAP_MKNOD', 'CAP_NET_RAW', 'CAP_SETGID', 'CAP_SETUID', 'CAP_SETFCAP', 'CAP_SETPCAP', 'CAP_NET_BIND_SERVICE', 'CAP_SYS_CHROOT', 'CAP_KILL', 'CAP_AUDIT_WRITE'], 'permitted': ['CAP_CHOWN', 'CAP_DAC_OVERRIDE', 'CAP_FSETID', 'CAP_FOWNER', 'CAP_MKNOD', 'CAP_NET_RAW', 'CAP_SETGID', 'CAP_SETUID', 'CAP_SETFCAP', 'CAP_SETPCAP', 'CAP_NET_BIND_SERVICE', 'CAP_SYS_CHROOT', 'CAP_KILL', 'CAP_AUDIT_WRITE']}, 'rlimits': [{'type': 'RLIMIT_NOFILE', 'hard': 65535, 'soft': 65535}], 'noNewPrivileges': True}, 'root': {'path': 'rootfs'}, 'mounts': [{'destination': '/proc', 'type': 'proc', 'source': 'proc', 'options': ['nosuid', 'noexec', 'nodev']}, {'destination': '/dev', 'type': 'tmpfs', 'source': 'tmpfs', 'options': ['nosuid', 'strictatime', 'mode=755', 'size=65536k']}, {'destination': '/dev/pts', 'type': 'devpts', 'source': 'devpts', 'options': ['nosuid', 'noexec', 'newinstance', 'ptmxmode=0666', 'mode=0620', 'gid=5']}, {'destination': '/dev/shm', 'type': 'tmpfs', 'source': 'shm', 'options': ['nosuid', 'noexec', 'nodev', 'mode=1777', 'size=65536k']}, {'destination': '/dev/mqueue', 'type': 'mqueue', 'source': 'mqueue', 'options': ['nosuid', 'noexec', 'nodev']}, {'destination': '/sys', 'type': 'sysfs', 'source': 'sysfs', 'options': ['nosuid', 'noexec', 'nodev', 'ro']}, {'destination': '/run', 'type': 'tmpfs', 'source': 'tmpfs', 'options': ['nosuid', 'strictatime', 'mode=755', 'size=65536k']}], 'linux': {'resources': {'devices': [{'allow': False, 'access': 'rwm'}]}, 'cgroupsPath': '/default', 'namespaces': [{'type': 'pid'}, {'type': 'ipc'}, {'type': 'uts'}, {'type': 'mount'}, {'type': 'network'}], 'maskedPaths': ['/proc/acpi', '/proc/asound', '/proc/kcore', '/proc/keys', '/proc/latency_stats', '/proc/timer_list', '/proc/timer_stats', '/proc/sched_debug', '/sys/firmware', '/sys/devices/virtual/powercap', '/proc/scsi'], 'readonlyPaths': ['/proc/bus', '/proc/fs', '/proc/irq', '/proc/sys', '/proc/sysrq-trigger']}}})
+수요일 10 9월 2025  09:30:29 +0900 (0:00:00.739)       0:01:20.258 **************** 
+
+TASK [container-engine/containerd : Containerd | Copy containerd config file] ***
+ok: [node3]
+ok: [node2]
+ok: [node1]
+수요일 10 9월 2025  09:30:30 +0900 (0:00:00.765)       0:01:21.024 **************** 
+
+TASK [container-engine/containerd : Containerd | Create registry directories] ***
+ok: [node2] => (item={'prefix': 'docker.io', 'mirrors': [{'host': 'https://registry-1.docker.io', 'capabilities': ['pull', 'resolve'], 'skip_verify': False}]})
+ok: [node1] => (item={'prefix': 'docker.io', 'mirrors': [{'host': 'https://registry-1.docker.io', 'capabilities': ['pull', 'resolve'], 'skip_verify': False}]})
+ok: [node3] => (item={'prefix': 'docker.io', 'mirrors': [{'host': 'https://registry-1.docker.io', 'capabilities': ['pull', 'resolve'], 'skip_verify': False}]})
+수요일 10 9월 2025  09:30:30 +0900 (0:00:00.338)       0:01:21.362 **************** 
+
+TASK [container-engine/containerd : Containerd | Write hosts.toml file] ********
+ok: [node3] => (item={'prefix': 'docker.io', 'mirrors': [{'host': 'https://registry-1.docker.io', 'capabilities': ['pull', 'resolve'], 'skip_verify': False}]})
+ok: [node2] => (item={'prefix': 'docker.io', 'mirrors': [{'host': 'https://registry-1.docker.io', 'capabilities': ['pull', 'resolve'], 'skip_verify': False}]})
+ok: [node1] => (item={'prefix': 'docker.io', 'mirrors': [{'host': 'https://registry-1.docker.io', 'capabilities': ['pull', 'resolve'], 'skip_verify': False}]})
+수요일 10 9월 2025  09:30:31 +0900 (0:00:00.768)       0:01:22.131 **************** 
+수요일 10 9월 2025  09:30:31 +0900 (0:00:00.010)       0:01:22.142 **************** 
+수요일 10 9월 2025  09:30:31 +0900 (0:00:00.009)       0:01:22.152 **************** 
+수요일 10 9월 2025  09:30:31 +0900 (0:00:00.007)       0:01:22.159 **************** 
+
+TASK [container-engine/containerd : Containerd | Ensure containerd is started and enabled] ***
+ok: [node3]
+ok: [node1]
+ok: [node2]
+수요일 10 9월 2025  09:30:32 +0900 (0:00:01.052)       0:01:23.211 **************** 
+수요일 10 9월 2025  09:30:32 +0900 (0:00:00.033)       0:01:23.244 **************** 
+수요일 10 9월 2025  09:30:32 +0900 (0:00:00.025)       0:01:23.269 **************** 
+수요일 10 9월 2025  09:30:32 +0900 (0:00:00.046)       0:01:23.316 **************** 
+수요일 10 9월 2025  09:30:32 +0900 (0:00:00.024)       0:01:23.340 **************** 
+수요일 10 9월 2025  09:30:32 +0900 (0:00:00.025)       0:01:23.366 **************** 
+수요일 10 9월 2025  09:30:32 +0900 (0:00:00.038)       0:01:23.404 **************** 
+수요일 10 9월 2025  09:30:32 +0900 (0:00:00.023)       0:01:23.428 **************** 
+수요일 10 9월 2025  09:30:32 +0900 (0:00:00.066)       0:01:23.495 **************** 
+수요일 10 9월 2025  09:30:32 +0900 (0:00:00.024)       0:01:23.519 **************** 
+수요일 10 9월 2025  09:30:32 +0900 (0:00:00.023)       0:01:23.543 **************** 
+수요일 10 9월 2025  09:30:32 +0900 (0:00:00.026)       0:01:23.569 **************** 
+수요일 10 9월 2025  09:30:32 +0900 (0:00:00.023)       0:01:23.592 **************** 
+수요일 10 9월 2025  09:30:32 +0900 (0:00:00.027)       0:01:23.620 **************** 
+수요일 10 9월 2025  09:30:32 +0900 (0:00:00.025)       0:01:23.645 **************** 
+수요일 10 9월 2025  09:30:32 +0900 (0:00:00.026)       0:01:23.671 **************** 
+수요일 10 9월 2025  09:30:32 +0900 (0:00:00.025)       0:01:23.696 **************** 
+수요일 10 9월 2025  09:30:32 +0900 (0:00:00.024)       0:01:23.721 **************** 
+수요일 10 9월 2025  09:30:32 +0900 (0:00:00.027)       0:01:23.749 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.026)       0:01:23.775 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.028)       0:01:23.804 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.025)       0:01:23.829 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.004)       0:01:23.834 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.004)       0:01:23.838 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.004)       0:01:23.843 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.023)       0:01:23.866 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.023)       0:01:23.890 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.024)       0:01:23.915 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.026)       0:01:23.941 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.023)       0:01:23.965 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.024)       0:01:23.990 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.025)       0:01:24.015 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.024)       0:01:24.039 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.005)       0:01:24.044 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.005)       0:01:24.050 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.004)       0:01:24.054 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.032)       0:01:24.087 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.024)       0:01:24.112 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.023)       0:01:24.135 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.028)       0:01:24.164 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.004)       0:01:24.168 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.004)       0:01:24.173 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.016)       0:01:24.190 **************** 
+
+TASK [download : Prep_download | Set a few facts] ******************************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.037)       0:01:24.227 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.018)       0:01:24.246 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.016)       0:01:24.263 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.029)       0:01:24.292 **************** 
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.029)       0:01:24.321 **************** 
+
+TASK [download : Prep_download | Register docker images info] ******************
+ok: [node3]
+ok: [node2]
+ok: [node1]
+수요일 10 9월 2025  09:30:33 +0900 (0:00:00.377)       0:01:24.699 **************** 
+
+TASK [download : Prep_download | Create staging directory on remote node] ******
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:30:34 +0900 (0:00:00.334)       0:01:25.034 **************** 
+수요일 10 9월 2025  09:30:34 +0900 (0:00:00.028)       0:01:25.062 **************** 
+
+TASK [download : Download | Get kubeadm binary and list of required images] ****
+included: /Users/xiilab/Develop/astrago/astrago-deployment/kubespray/versions/v2.28.1/kubespray/roles/download/tasks/prep_kubeadm_images.yml for node1, node2, node3
+수요일 10 9월 2025  09:30:34 +0900 (0:00:00.136)       0:01:25.198 **************** 
+
+TASK [download : Prep_kubeadm_images | Download kubeadm binary] ****************
+included: /Users/xiilab/Develop/astrago/astrago-deployment/kubespray/versions/v2.28.1/kubespray/roles/download/tasks/download_file.yml for node1, node2, node3
+수요일 10 9월 2025  09:30:34 +0900 (0:00:00.164)       0:01:25.362 **************** 
+
+TASK [download : Prep_download | Set a few facts] ******************************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:30:34 +0900 (0:00:00.151)       0:01:25.514 **************** 
+수요일 10 9월 2025  09:30:34 +0900 (0:00:00.031)       0:01:25.545 **************** 
+
+TASK [download : Download_file | Set pathname of cached file] ******************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:30:35 +0900 (0:00:00.261)       0:01:25.806 **************** 
+
+TASK [download : Download_file | Create dest directory on node] ****************
+ok: [node1]
+ok: [node2]
+ok: [node3]
+수요일 10 9월 2025  09:30:35 +0900 (0:00:00.670)       0:01:26.477 **************** 
+수요일 10 9월 2025  09:30:35 +0900 (0:00:00.021)       0:01:26.499 **************** 
+수요일 10 9월 2025  09:30:35 +0900 (0:00:00.016)       0:01:26.515 **************** 
