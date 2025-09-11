@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: astrago-staging-cluster
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: cluster
+    astrago.io/environment: staging
+    astrago.io/branch: stabilize/1.0
+type: Opaque
+stringData:
+  # 클러스터 기본 정보
+  name: astrago-staging-cluster
+  server: https://staging-k8s.company.com:6443  # 실제 스테이징 클러스터 엔드포인트
+  
+  # 인증 설정
+  config: |
+    {
+      "bearerToken": "{{ STAGING_CLUSTER_TOKEN }}",
+      "tlsClientConfig": {
+        "insecure": false,
+        "caData": "{{ STAGING_CLUSTER_CA_CERT }}"
+      }
+    }
+  
+  # ArgoCD 프로젝트
+  project: default
+  upsert: "true"
+  
+  # 허용 네임스페이스 (helmfile에서 사용하는 모든 네임스페이스)
+  namespaces: |
+    astrago,
+    harbor,
+    prometheus,
+    flux,
+    gpu-operator,
+    keycloak,
+    mpi-operator,
+    nfs-provisioner
+  
+  # 클러스터 리소스 접근 허용
+  clusterResources: "true"
+
+---
+# 스테이징 클러스터 설정 도움말
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: staging-cluster-setup-guide
+  namespace: argocd
+data:
+  README.md: |
+    # 스테이징 클러스터 설정 가이드
+    
+    ## 1. 스테이징 클러스터에서 ServiceAccount 생성
+    ```bash
+    # 스테이징 클러스터에서 실행
+    kubectl create namespace argocd-system
+    kubectl create serviceaccount argocd-manager -n argocd-system
+    
+    # 클러스터 관리 권한 부여
+    kubectl create clusterrolebinding argocd-manager \
+      --clusterrole=cluster-admin \
+      --serviceaccount=argocd-system:argocd-manager
+    ```
+    
+    ## 2. 토큰 및 인증서 추출
+    ```bash
+    # 토큰 생성 (Kubernetes 1.24+)
+    kubectl create token argocd-manager -n argocd-system --duration=8760h
+    
+    # CA 인증서 추출
+    kubectl get secret argocd-manager-token -n argocd-system \
+      -o jsonpath='{.data.ca\.crt}'
+    ```
+    
+    ## 3. 클러스터 정보 확인
+    ```bash
+    kubectl cluster-info
+    # Kubernetes control plane is running at https://staging-k8s.company.com:6443
+    ```
+    
+    ## 4. Secret 업데이트
+    staging-cluster.yaml에서 다음 변수들을 실제 값으로 교체:
+    - {{ STAGING_CLUSTER_TOKEN }}
+    - {{ STAGING_CLUSTER_CA_CERT }}
+    
+    ## 5. ArgoCD에 클러스터 등록
+    ```bash
+    kubectl apply -f argocd/clusters/staging-cluster.yaml
+    ```

@@ -83,7 +83,8 @@ releases:
   # Tier 3: Security
   - name: flux
     namespace: flux
-    chart: ./charts/external/flux2
+    chart: fluxcd-community/flux2
+    version: 2.14.0
     installed: true
     wait: true
     timeout: 600
