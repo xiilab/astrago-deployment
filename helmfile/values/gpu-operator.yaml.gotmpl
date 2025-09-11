@@ -38,46 +38,39 @@ gpu-operator:
     enabled: true
     repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
     image: dcgm
-    version: 3.3.9-1-ubuntu22.04
     imagePullPolicy: IfNotPresent
 
   driver:
     enabled: true
     repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
     image: driver
-    version: "550.144.03"
     imagePullPolicy: IfNotPresent
     manager:
       image: k8s-driver-manager
       repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
-      version: v0.7.0
 
   toolkit:
     enabled: true
     repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/k8s
     image: container-toolkit
-    version: v1.17.4-ubuntu20.04
     imagePullPolicy: IfNotPresent
 
   devicePlugin:
     enabled: true
     repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
     image: k8s-device-plugin
-    version: v0.17.0
     imagePullPolicy: IfNotPresent
 
   gfd:
     enabled: true
     repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
     image: k8s-device-plugin
-    version: v0.17.0
     imagePullPolicy: IfNotPresent
 
   migManager:
     enabled: true
     repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
     image: k8s-mig-manager
-    version: v0.10.0-ubuntu20.04
     imagePullPolicy: IfNotPresent
 
   nodeStatusExporter:
