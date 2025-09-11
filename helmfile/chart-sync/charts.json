@@ -17,7 +17,7 @@
     },
     "flux2": {
       "repository": "fluxcd-community",
-      "version": "2.16.4"
+      "version": "2.14.0"
     },
     "harbor": {
       "repository": "harbor",

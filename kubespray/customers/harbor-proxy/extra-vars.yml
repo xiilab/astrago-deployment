@@ -1,0 +1,105 @@
+# Harbor 프록시 캐시를 활용한 CRI-O 설정
+# Rate limit 문제 해결을 위한 미러 레지스트리 설정
+
+# 컨테이너 런타임 설정
+container_manager: crio
+
+# CRI-O 설정
+crio_root: /data/crio/containers
+crio_runtimes:
+  - name: runc
+    path: /usr/bin/runc
+    type: oci
+    root: /run/runc
+    
+# Harbor CA 인증서 설정
+crio_additional_registries:
+  - registry: harbor.10.61.3.11.nip.io
+    ca_cert_path: /etc/ssl/certs/harbor-ca.crt
+
+# CRI-O 레지스트리 미러 설정 (Kubespray 표준 방식)
+crio_registries:
+  # Docker Hub
+  - prefix: docker.io
+    location: docker.io
+    unqualified: true
+    insecure: false
+    blocked: false
+    mirrors:
+      - location: harbor.10.61.3.11.nip.io/dockerhub-cache
+        insecure: false
+  
+  # Docker Hub library (official images)
+  - prefix: docker.io/library
+    location: docker.io/library
+    unqualified: false
+    insecure: false
+    blocked: false
+    mirrors:
+      - location: harbor.10.61.3.11.nip.io/dockerhub-cache/library
+        insecure: false
+  
+  # NVIDIA NGC
+  - prefix: nvcr.io
+    location: nvcr.io
+    unqualified: false
+    insecure: false
+    blocked: false
+    mirrors:
+      - location: harbor.10.61.3.11.nip.io/nvcr-cache
+        insecure: false
+  
+  # Quay.io
+  - prefix: quay.io
+    location: quay.io
+    unqualified: false
+    insecure: false
+    blocked: false
+    mirrors:
+      - location: harbor.10.61.3.11.nip.io/quay-cache
+        insecure: false
+  
+  # Kubernetes Registry
+  - prefix: registry.k8s.io
+    location: registry.k8s.io
+    unqualified: false
+    insecure: false
+    blocked: false
+    mirrors:
+      - location: harbor.10.61.3.11.nip.io/k8s-cache
+        insecure: false
+
+# Harbor CA 인증서 복사 설정
+crio_install_ca_cert: true
+crio_ca_cert_path: /etc/ssl/certs/harbor-ca.crt
+
+# CRI-O 이미지 풀 설정 최적화 
+crio_runtime_options:
+  - name: default_ulimits
+    value: '["nofile=65536:65536"]'
+  - name: pids_limit
+    value: 4096
+  - name: log_size_max
+    value: 52428800
+  - name: container_exits_dir
+    value: /var/run/crio/exits
+    
+# CRI-O 네트워크 설정
+crio_cni_daemon: true
+crio_enable_metrics: true
+
+# 로그 설정
+crio_log_level: info
+crio_log_dir: /var/log/crio/pods
+
+# 추가 Kubespray 설정
+kubeadm_enabled: true
+kube_network_plugin: calico
+kube_pods_subnet: 10.233.64.0/18
+kube_service_addresses: 10.233.0.0/18
+
+# GPU 지원 (NVIDIA용)
+nvidia_gpu_nodes: []  # GPU 노드가 있다면 여기에 추가
+
+# 보안 설정
+podsecuritypolicy_enabled: false

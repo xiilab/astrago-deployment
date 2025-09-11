@@ -3,9 +3,6 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    {{- with .Values.crds.annotations }}
-    {{- . | toYaml | nindent 4 }}
-    {{- end }}
     controller-gen.kubebuilder.io/version: v0.16.1
   labels:
     app.kubernetes.io/component: helm-controller
@@ -379,11 +376,6 @@ spec:
                     description: |-
                       DisableSchemaValidation prevents the Helm install action from validating
                       the values against the JSON Schema.
-                    type: boolean
-                  disableTakeOwnership:
-                    description: |-
-                      DisableTakeOwnership disables taking ownership of existing resources
-                      during the Helm install action. Defaults to false.
                     type: boolean
                   disableWait:
                     description: |-
@@ -798,11 +790,6 @@ spec:
                     description: |-
                       DisableSchemaValidation prevents the Helm upgrade action from validating
                       the values against the JSON Schema.
-                    type: boolean
-                  disableTakeOwnership:
-                    description: |-
-                      DisableTakeOwnership disables taking ownership of existing resources
-                      during the Helm upgrade action. Defaults to false.
                     type: boolean
                   disableWait:
                     description: |-

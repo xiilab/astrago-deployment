@@ -190,7 +190,7 @@ deploy_environment() {
     
     if [[ "$environment" == "default" ]]; then
         print_info "Deploying default environment (branch-based)"
-        helmfile -e default apply
+        helmfile -e default sync
     else
         # Check if customer environment exists
         if [[ ! -d "environments/customers/$environment" ]]; then
@@ -201,8 +201,8 @@ deploy_environment() {
         
         print_info "Deploying customer environment: $environment"
         # Using environment variable approach for dynamic customer
-        CUSTOMER_NAME="$environment" helmfile -e customer apply 2>/dev/null || \
-        helmfile -e "$environment" apply
+        CUSTOMER_NAME="$environment" helmfile -e customer sync 2>/dev/null || \
+        helmfile -e "$environment" sync
     fi
 }
 
