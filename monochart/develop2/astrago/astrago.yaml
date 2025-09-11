@@ -944,7 +944,7 @@ spec:
         - name: astrago
           securityContext:
             {}          
-          image: "docker.io/xiilab/astrago:frontend-stag-2d69"          
+          image: "docker.io/xiilab/astrago:frontend-stag-1253f"          
           env:
           - name: KEYCLOAK_HOST
             value: "http://10.61.3.161:30080/auth/"
