@@ -1,5 +1,5 @@
 # externalIP:
-externalIP: 10.61.3.91
+externalIP: 10.61.3.91 #변경필요 
 
 gpu_operator:
   driver:
@@ -11,7 +11,7 @@ gpu_operator:
 # Volume Settings
 nfs:
   storageClassName: astrago-nfs-csi
-  server: 10.61.3.91
+  server: 10.61.3.91 #변경필요 
   basePath: /nfs-data/astrago
 # Keycloak Settings
 keycloak:
