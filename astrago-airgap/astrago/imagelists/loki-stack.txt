@@ -1,3 +1,3 @@
-# Auto-generated from helmfile template on Thu Sep 11 13:45:30 KST 2025
+# Auto-generated from helmfile template on #오후
 # Source: helmfile template --environment default
 

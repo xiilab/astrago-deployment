@@ -1,24 +1,10 @@
-# Auto-generated from helmfile template on Thu Sep 11 13:45:30 KST 2025
-# Source: helmfile template --environment default
+# Auto-generated with dependencies on 2025-09-11 15:35:00
+# Source: helmfile template --environment default (with dependencies)
+nvcr.io/nvidia/gpu-operator:v24.9.0
+nvcr.io/nvidia/cloud-native/gpu-operator-validator:v24.9.0
+nvcr.io/nvidia/driver:550.127.05-ubuntu22.04
+nvcr.io/nvidia/k8s-device-plugin:v0.17.0-ubi9
+nvcr.io/nvidia/k8s/container-toolkit:v1.17.0-ubuntu20.04
+nvcr.io/nvidia/k8s/dcgm-exporter:3.3.8-3.6.0-ubuntu22.04
 
-repository: nvcr.io/nvidia/cloud-native
-repository: nvcr.io/nvidia
-repository: nvcr.io/nvidia
-repository: nvcr.io/nvidia
-repository: nvcr.io/nvidia/cloud-native
-repository: nvcr.io/nvidia/k8
-repository: nvcr.io/nvidia
-repository: nvcr.io/nvidia/cloud-native
-repository: nvcr.io/nvidia/k8
-repository: nvcr.io/nvidia
-repository: nvcr.io/nvidia/cloud-native
-repository: nvcr.io/nvidia/cloud-native
-repository: nvcr.io/nvidia/cloud-native
-repository: nvcr.io/nvidia/cloud-native
-repository: nvcr.io/nvidia/cloud-native
-repository: nvcr.io/nvidia/cloud-native
-repository: nvcr.io/nvidia
-repository: nvcr.io/nvidia/cloud-native
-repository: nvcr.io/nvidia/cloud-native
-repository: nvcr.io/nvidia
-repository: nvcr.io/nvidia/cloud-native
+

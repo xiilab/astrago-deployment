@@ -1,4 +1,13 @@
-# Auto-generated from helmfile template on Thu Sep 11 13:45:30 KST 2025
-# Source: helmfile template --environment default
+# Auto-generated with dependencies on 2025-09-11 15:35:00
+# Source: helmfile template --environment default (with dependencies)
 
-docker.io/goharbor/nginx-photon:v2.11.1
+docker.io/goharbor/harbor-core:v2.10.2
+docker.io/goharbor/harbor-db:v2.10.2
+docker.io/goharbor/harbor-jobservice:v2.10.2
+docker.io/goharbor/harbor-portal:v2.10.2
+docker.io/goharbor/harbor-registryctl:v2.10.2
+docker.io/goharbor/nginx-photon:v2.10.2
+docker.io/goharbor/redis-photon:v2.10.2
+docker.io/goharbor/registry-photon:v2.10.2
+docker.io/goharbor/trivy-adapter-photon:v2.10.2
+

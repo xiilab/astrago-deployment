@@ -1,8 +1,11 @@
-# Auto-generated from helmfile template on Thu Sep 11 13:45:30 KST 2025
-# Source: helmfile template --environment default
+# Auto-generated with dependencies on 2025-09-11 15:35:00
+# Source: helmfile template --environment default (with dependencies)
 
+docker.io/bitnami/mariadb:10.11.4-debian-11-r46
+docker.io/library/nginx:1.27.0-alpine3.19
 docker.io/xiilab/astrago-posco:batch-stage-c5ad
 docker.io/xiilab/astrago-posco:core-stage-c5ad
 docker.io/xiilab/astrago-posco:frontend-stage-3770
 docker.io/xiilab/astrago-posco:monitor-stage-c5ad
 docker.io/xiilab/astrago:time-prediction-v0.2
+
