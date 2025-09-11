@@ -1,0 +1,8 @@
+# Auto-generated from helmfile template on Thu Sep 11 13:45:30 KST 2025
+# Source: helmfile template --environment default
+
+registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.10.0
+registry.k8s.io/sig-storage/csi-provisioner:v4.0.0
+registry.k8s.io/sig-storage/csi-snapshotter:v6.3.3
+registry.k8s.io/sig-storage/livenessprobe:v2.12.0
+registry.k8s.io/sig-storage/nfsplugin:v4.7.0

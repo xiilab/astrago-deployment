@@ -1,0 +1,4 @@
+# Auto-generated from helmfile template on Thu Sep 11 13:45:30 KST 2025
+# Source: helmfile template --environment default
+
+docker.io/goharbor/nginx-photon:v2.11.1

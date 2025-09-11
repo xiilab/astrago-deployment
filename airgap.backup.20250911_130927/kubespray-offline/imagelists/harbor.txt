@@ -1,0 +1,11 @@
+# Harbor - 컨테이너 레지스트리 (applications.md 기준)
+goharbor/nginx-photon:v2.11.1
+goharbor/harbor-portal:v2.11.1
+goharbor/harbor-core:v2.11.1
+goharbor/harbor-jobservice:v2.11.1
+goharbor/registry-photon:v2.11.1
+goharbor/harbor-registryctl:v2.11.1
+goharbor/trivy-adapter-photon:v2.11.1
+goharbor/harbor-db:v2.11.1
+goharbor/redis-photon:v2.11.1
+goharbor/harbor-exporter:v2.11.1

@@ -1,0 +1,3 @@
+[submodule "astrago-airgap/kubespray-offline"]
+	path = astrago-airgap/kubespray-offline
+	url = https://github.com/kubespray-offline/kubespray-offline.git

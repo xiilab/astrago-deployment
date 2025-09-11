@@ -1,0 +1,8 @@
+# Auto-generated from helmfile template on Thu Sep 11 13:45:30 KST 2025
+# Source: helmfile template --environment default
+
+docker.io/xiilab/astrago-posco:batch-stage-c5ad
+docker.io/xiilab/astrago-posco:core-stage-c5ad
+docker.io/xiilab/astrago-posco:frontend-stage-3770
+docker.io/xiilab/astrago-posco:monitor-stage-c5ad
+docker.io/xiilab/astrago:time-prediction-v0.2

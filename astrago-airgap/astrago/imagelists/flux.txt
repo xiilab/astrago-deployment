@@ -1,0 +1,10 @@
+# Auto-generated from helmfile template on Thu Sep 11 13:45:30 KST 2025
+# Source: helmfile template --environment default
+
+image: ghcr.io/fluxcd/flux-cli
+image: ghcr.io/fluxcd/helm-controller
+image: ghcr.io/fluxcd/image-automation-controller
+image: ghcr.io/fluxcd/image-reflector-controller
+image: ghcr.io/fluxcd/ku
+image: ghcr.io/fluxcd/notification-controller
+image: ghcr.io/fluxcd/

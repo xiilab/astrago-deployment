@@ -1,0 +1,29 @@
+all:
+  vars:
+    http_server: "http://10.61.3.19"
+    registry_host: "10.61.3.19:35000"
+  hosts:
+    master:
+      ansible_host: 10.61.3.8
+      ip: 10.61.3.8
+      access_ip: 10.61.3.8
+    worker:
+      ansible_host: 10.61.3.19
+      ip: 10.61.3.19
+      access_ip: 10.61.3.19
+  children:
+    kube-master:
+      hosts:
+        master:
+    kube-node:
+      hosts:
+        worker:
+    etcd:
+      hosts:
+        master:
+    k8s-cluster:
+      children:
+        kube-master:
+        kube-node:
+    calico-rr:
+      hosts: {}
