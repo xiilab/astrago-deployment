@@ -27,4 +27,10 @@ spec:
     automated:
       prune: true                  # Git에서 지워지면 클러스터에서도 삭제
       selfHeal: true               # 드리프트 자동 복구
+    retry:
+      limit: 5                     # 재시도 횟수
+      backoff:
+        duration: 5s               # 초기 대기 시간
+        factor: 2                  # 백오프 배수
+        maxDuration: 3m            # 최대 대기 시간
 
