@@ -12,12 +12,11 @@ environments:
     - ./environments/base/values.yaml
     - ./environments/customers/astrago/values.yaml
 
+---
 helmDefaults:
   wait: true
   waitForJobs: true
   timeout: 600
-
----
 
 releases:
   # Tier 1: Infrastructure & Addons
@@ -83,8 +82,7 @@ releases:
   # Tier 3: Security
   - name: flux
     namespace: flux
-    chart: fluxcd-community/flux2
-    version: 2.14.0
+    chart: ./charts/external/flux2
     installed: true
     wait: true
     timeout: 600

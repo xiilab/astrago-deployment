@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/name: astrago
     app.kubernetes.io/component: main
     astrago.io/environment: staging
-    astrago.io/branch: stabilize/1.0
+    astrago.io/branch: stabilize-1.0
 spec:
   project: default
   
@@ -21,43 +21,10 @@ spec:
       env:
         - name: HELMFILE_ENVIRONMENT
           value: "staging"
-        - name: HELMFILE_COMMAND
-          value: "sync"
+        - name: LABEL_KEY
+          value: "app"
+        - name: LABEL_VALUE
+          value: "astrago"
   
-  # 스테이징 클러스터에 배포
   destination:
-    server: https://staging-k8s.company.com:6443  # 실제 엔드포인트로 변경 필요
-    namespace: astrago
-  
-  # 스테이징 환경용 동기화 정책
-  syncPolicy:
-    automated:
-      prune: true       # RC 테스트용 - 자동 정리
-      selfHeal: true    # 드리프트 자동 복구
-      allowEmpty: false
-    syncOptions:
-      - CreateNamespace=true
-      - PrunePropagationPolicy=foreground
-      - PruneLast=true
-      - ServerSideApply=true
-    managedNamespaceMetadata:
-      labels:
-        environment: staging
-        astrago.io/managed-by: argocd
-        astrago.io/branch: stabilize/1.0
-  
-  # 애플리케이션 정보
-  info:
-    - name: "Environment"
-      value: "Staging (RC Testing)"
-    - name: "Branch"
-      value: "stabilize/1.0"
-    - name: "Cluster"
-      value: "staging-k8s.company.com"
-    - name: "Auto Sync"
-      value: "Enabled (RC)"
-    - name: "Support"
-      value: "dev-team@company.com"
-  
-  # 리비전 히스토리 제한
-  revisionHistoryLimit: 10
+    server: https://10.61.3.161:6443
