@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: astrago-stabilize
+  name: astrago-staging
   namespace: argocd
   labels:
     app.kubernetes.io/name: astrago
@@ -20,11 +20,13 @@ spec:
       name: helmfile
       env:
         - name: HELMFILE_ENVIRONMENT
-          value: "staging"
-        - name: LABEL_KEY
-          value: "app"
-        - name: LABEL_VALUE
-          value: "astrago"
-  
+          value: "xiilab"
   destination:
     server: https://10.61.3.161:6443
+  syncPolicy:
+    automated:
+      prune: true                  # Git에서 지워지면 클러스터에서도 삭제
+      selfHeal: true               # 드리프트 자동 복구
+    syncOptions:
+    - CreateNamespace=true
+    - ApplyOutOfSyncOnly=true    

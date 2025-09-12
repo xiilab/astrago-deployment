@@ -1,0 +1,8 @@
+# Customer-specific overrides for Astrago customer
+# These values override the base configuration
+
+# Customer-specific network settings
+externalIP: 10.61.3.161
+nfs:
+  server: 10.61.3.2
+  basePath: /kube_storage

@@ -3,12 +3,12 @@
 # Content will vary based on branch: main (dev), stabilize (stage), release (prod)
 
 # externalIP:
-externalIP:
+externalIP: 10.61.3.161
 # Volume Settings
 nfs:
   storageClassName: astrago-nfs-csi
-  server:
-  basePath:
+  server: 10.61.3.2
+  basePath: /kube_storage
   
 # Keycloak Settings
 keycloak:

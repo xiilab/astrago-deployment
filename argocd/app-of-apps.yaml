@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app-of-apps
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: app-of-apps
+    app.kubernetes.io/component: root
+spec:
+  project: default
+  
+  # argocd/applications/ 디렉토리 모니터링
+  source:
+    repoURL: https://github.com/xiilab/astrago-deployment.git
+    targetRevision: stabilize/1.0
+    path: argocd/applications
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  
+  # 자동 동기화 설정
+  syncPolicy:
+    automated:
+      prune: true                    # Git에서 삭제되면 클러스터에서도 삭제
+      selfHeal: true                 # 드리프트 자동 복구
+    syncOptions:
+    - CreateNamespace=true           # 네임스페이스 자동 생성
+    - ApplyOutOfSyncOnly=true        # 변경된 것만 적용
+    - ServerSideApply=true           # Server-side apply 사용
+  
+  # 재시도 정책
+  revisionHistoryLimit: 3
