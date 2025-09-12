@@ -24,10 +24,6 @@ spec:
     automated:
       prune: true                    # Git에서 삭제되면 클러스터에서도 삭제
       selfHeal: true                 # 드리프트 자동 복구
-    syncOptions:
-    - CreateNamespace=true           # 네임스페이스 자동 생성
-    - ApplyOutOfSyncOnly=true        # 변경된 것만 적용
-    - ServerSideApply=true           # Server-side apply 사용
   
   # 재시도 정책
   revisionHistoryLimit: 3
