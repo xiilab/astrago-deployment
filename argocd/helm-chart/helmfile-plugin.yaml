@@ -15,6 +15,6 @@ data:
     spec:
       generate:
         command: ["helmfile"]
-        args: ["template", "--include-crds", "-l", "app=astrago"]
+        args: ["template", "--include-crds", "-l", "argocd=true"]
       discover:
         fileName: "helmfile.yaml.gotmpl"

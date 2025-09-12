@@ -101,6 +101,7 @@ releases:
     installed: true
     wait: true
     labels:
+      argocd: true
       tier: security
       app: keycloak-addons
 
@@ -114,6 +115,7 @@ releases:
     - nfs-provisioner/nfs-provisioner
     - keycloak/keycloak-addons
     labels:
+      argocd: true
       tier: security
       app: keycloak
     values:
@@ -158,6 +160,7 @@ releases:
     needs:
     - nfs-provisioner/nfs-provisioner
     labels:
+      argocd: true
       tier: applications
       app: astrago
     values:
