@@ -27,8 +27,4 @@ spec:
     automated:
       prune: true                  # Git에서 지워지면 클러스터에서도 삭제
       selfHeal: true               # 드리프트 자동 복구
-    syncOptions:
-    - CreateNamespace=true
-    - ApplyOutOfSyncOnly=true
-    - ServerSideApply=true
-    - RespectIgnoreDifferences=true    
+
