@@ -7,6 +7,8 @@ nfs:
   server: 10.61.3.2
   basePath: /kube_storage
 astrago:
+  imagePullSecrets:
+    - name: ghcr-secret
   core:
     registry: "ghcr.io"
     repository: "xiilab/astrago-backend"
