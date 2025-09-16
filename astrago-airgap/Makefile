@@ -1,72 +1,70 @@
-# Astrago Airgap Makefile
-# 표준 명령어 인터페이스
+# Astrago Airgap Makefile - 간소화된 인터페이스
+# kubespray-offline + Astrago 오버레이 방식
 
-.PHONY: help download package deploy clean test
+.PHONY: help prepare download package deploy clean update-kubespray status
 
-# Load configuration
-include airgap.conf
+OVERLAY_SCRIPTS = ./astrago-overlay/scripts
 
 help: ## 사용 가능한 명령어 목록 표시
-	@echo "Astrago Airgap 배포 도구"
-	@echo "========================="
+	@echo "Astrago Airgap 배포 도구 (kubespray-offline 기반)"
+	@echo "================================================="
 	@echo ""
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-download: ## 모든 이미지 및 패키지 다운로드
-	@echo "🔽 Downloading all images and packages..."
-	@$(KUBESPRAY_PATH)/download-all.sh
-	@$(ASTRAGO_SCRIPTS_PATH)/extract_astrago_images.sh
-	@echo "✅ Download completed"
+prepare: ## 1단계: 환경 준비 및 검증
+	@$(OVERLAY_SCRIPTS)/1-prepare.sh
 
-package: ## 배포 패키지 생성
-	@echo "📦 Creating deployment package..."
-	@mkdir -p $(PACKAGE_OUTPUT_DIR)
-	@$(ASTRAGO_SCRIPTS_PATH)/create_astrago_only_package.sh
-	@echo "✅ Package created in $(PACKAGE_OUTPUT_DIR)"
+download: ## 2단계: 모든 이미지 및 패키지 다운로드
+	@$(OVERLAY_SCRIPTS)/2-download.sh
 
-package-full: ## 전체 배포 패키지 생성 (Kubernetes 포함)
-	@echo "📦 Creating full deployment package..."
-	@mkdir -p $(PACKAGE_OUTPUT_DIR)
-	@$(ASTRAGO_SCRIPTS_PATH)/create_delivery_package.sh
-	@echo "✅ Full package created in $(PACKAGE_OUTPUT_DIR)"
+package: ## 3단계: 오프라인 배포 패키지 생성
+	@$(OVERLAY_SCRIPTS)/3-package.sh
 
-deploy: ## Astrago 오프라인 배포
-	@echo "🚀 Deploying Astrago..."
-	@$(ASTRAGO_SCRIPTS_PATH)/offline_deploy_astrago.sh
-	@echo "✅ Deployment completed"
+deploy: ## 4단계: 오프라인 환경에서 배포 (타겟 환경)
+	@$(OVERLAY_SCRIPTS)/4-deploy.sh
 
-clean: ## 임시 파일 및 캐시 정리
-	@echo "🧹 Cleaning up..."
-	@rm -rf $(PACKAGE_OUTPUT_DIR)/temp
-	@rm -rf ./tmp
-	@echo "✅ Cleanup completed"
+# 통합 명령
+build: prepare download package ## 전체 빌드 (1-3단계 통합)
+	@echo "🎉 오프라인 패키지 빌드 완료!"
 
-sync-images: ## helmfile에서 모든 이미지 동기화
-	@echo "🔄 Syncing all images from helmfile..."
-	@$(ASTRAGO_SCRIPTS_PATH)/sync_all_images.sh
-	@echo "✅ Image synchronization completed"
+# 유지보수 명령
+update-kubespray: ## kubespray-offline 최신 버전으로 업데이트
+	@./update-kubespray.sh
 
-test: ## 기본 기능 테스트
-	@echo "🧪 Running tests..."
-	@./bin/test-compatibility.sh
-	@echo "✅ Tests completed"
+update-kubespray-tag: ## 특정 태그로 kubespray-offline 업데이트 (예: make update-kubespray-tag TAG=v1.2.3)
+	@./update-kubespray.sh $(TAG)
 
-status: ## 현재 상태 확인
-	@echo "📊 Astrago Airgap Status:"
-	@echo "========================="
-	@echo "Kubespray-offline: $(shell cd $(KUBESPRAY_PATH) && git describe --tags --always)"
-	@echo "Configuration: $(shell test -f airgap.conf && echo "✅ OK" || echo "❌ Missing")"
-	@echo "Astrago scripts: $(shell test -d $(ASTRAGO_SCRIPTS_PATH) && echo "✅ OK" || echo "❌ Missing")"
-	@echo "Image lists: $(shell ls $(ASTRAGO_IMAGELISTS_PATH)/*.txt 2>/dev/null | wc -l | xargs) files"
+clean: ## 임시 파일 및 빌드 캐시 정리
+	@echo "🧹 정리 중..."
+	@rm -rf ./outputs/temp
+	@rm -rf ./temp
+	@rm -rf ./astrago-overlay/images/imagelists/*.txt
+	@echo "✅ 정리 완료"
 
-# 개발용 명령어
-dev-setup: ## 개발 환경 설정
-	@echo "🔧 Setting up development environment..."
+status: ## 현재 환경 상태 확인
+	@echo "📊 Astrago Airgap 상태 확인:"
+	@echo "===================================="
+	@echo "kubespray-offline: $(shell cd kubespray-offline 2>/dev/null && git describe --tags --always 2>/dev/null || echo '❌ 없음')"
+	@echo "Astrago 오버레이: $(shell test -d astrago-overlay && echo '✅ 준비됨' || echo '❌ 없음')"
+	@echo "Helmfile 경로: $(shell test -d ../helmfile && echo '✅ 존재' || echo '❌ 없음')"
+	@echo "빌드 스크립트: $(shell test -x astrago-overlay/scripts/1-prepare.sh && echo '✅ 준비됨' || echo '❌ 없음')"
+
+# 개발 및 테스트 명령
+test: ## 호환성 및 기능 테스트
+	@echo "🧪 호환성 테스트 실행 중..."
+	@echo "kubespray-offline 상태 확인..."
+	@test -d kubespray-offline || (echo "❌ kubespray-offline 없음" && exit 1)
+	@test -f kubespray-offline/download-all.sh || (echo "❌ download-all.sh 없음" && exit 1)
+	@echo "Astrago 오버레이 상태 확인..."
+	@test -d astrago-overlay/scripts || (echo "❌ 오버레이 스크립트 없음" && exit 1)
+	@test -f astrago-overlay/configs/astrago.conf || (echo "❌ 설정 파일 없음" && exit 1)
+	@echo "✅ 모든 테스트 통과!"
+
+init-submodule: ## Git submodule 초기화 (처음 설정 시)
+	@echo "🔧 Git submodule 초기화..."
+	@echo "⚠️  현재 kubespray-offline을 백업하고 submodule로 전환합니다."
+	@read -p "계속하시겠습니까? (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
+	@mv kubespray-offline kubespray-offline.backup
+	@git submodule add https://github.com/kubespray-offline/kubespray-offline.git kubespray-offline
 	@git submodule update --init --recursive
-	@echo "✅ Development environment ready"
-
-dev-reset: ## 개발 환경 리셋
-	@echo "🔄 Resetting development environment..."
-	@git submodule update --init --recursive
-	@git clean -fd
-	@echo "✅ Environment reset"
+	@echo "✅ Submodule 초기화 완료!"
