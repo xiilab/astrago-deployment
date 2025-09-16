@@ -1,5 +1,9 @@
 global:
   imageRegistry: "{{ .Values.offline.registry | default "" }}"
+  {{- with .Values.astrago.global.imagePullSecrets }}
+  imagePullSecrets:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 
 core:
   replicaCount: 3
