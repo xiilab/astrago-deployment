@@ -7,20 +7,24 @@ nfs:
   server: 10.61.3.2
   basePath: /kube_storage
 astrago:
-  imagePullSecrets:
-    - name: ghcr-secret
   core:
     registry: "ghcr.io"
     repository: "xiilab/astrago-backend"
     imageTag: "core-stage-ca58a8c3"
+    imagePullSecrets:
+      - name: ghcr-secret
   batch:
     registry: "ghcr.io"
     repository: "xiilab/astrago-backend"
     imageTag: "batch-stage-ca58a8c3"
+    imagePullSecrets:
+      - name: ghcr-secret
   monitor:
     registry: "ghcr.io"
     repository: "xiilab/astrago-backend"
     imageTag: "monitor-stage-ca58a8c3"
+    imagePullSecrets:
+      - name: ghcr-secret
   frontend:
     repository: "xiilab/astrago-posco"
     imageTag: "frontend-stage-2e50"
