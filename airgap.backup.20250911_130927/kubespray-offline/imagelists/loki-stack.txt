@@ -1,4 +1,0 @@
-# Loki Stack (applications.md에서 신규 추가)
-docker.io/grafana/loki:2.9.2
-docker.io/grafana/promtail:2.9.2
-docker.io/grafana/fluent-bit-plugin-loki:2.9.2 

@@ -1,4 +1,0 @@
-# Keycloak - 인증 시스템 (applications.md 기준)
-docker.io/bitnami/keycloak:22.0.5-debian-11-r2
-docker.io/bitnami/postgresql:16.1.0-debian-11-r9
-jacobcarlborg/docker-alpine-wget:latest
