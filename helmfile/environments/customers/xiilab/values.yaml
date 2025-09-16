@@ -8,13 +8,16 @@ nfs:
   basePath: /kube_storage
 astrago:
   core:
-    repository: "ghcr.io/xiilab/astrago-backend"
+    registry: "ghcr.io"
+    repository: "xiilab/astrago-backend"
     imageTag: "core-stage-ca58a8c3"
   batch:
-    repository: "ghcr.io/xiilab/astrago-backend"
+    registry: "ghcr.io"
+    repository: "xiilab/astrago-backend"
     imageTag: "batch-stage-ca58a8c3"
   monitor:
-    repository: "ghcr.io/xiilab/astrago-backend"
+    registry: "ghcr.io"
+    repository: "xiilab/astrago-backend"
     imageTag: "monitor-stage-ca58a8c3"
   frontend:
     repository: "xiilab/astrago-posco"
