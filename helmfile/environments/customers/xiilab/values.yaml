@@ -6,17 +6,16 @@ externalIP: 10.61.3.161
 nfs:
   server: 10.61.3.2
   basePath: /kube_storage
-
 astrago:
   core:
     repository: "xiilab/astrago-posco"
-    imageTag: "core-stage-ba01"
+    imageTag: "core-stage-ca58a8c3"
   batch:
     repository: "xiilab/astrago-posco"
-    imageTag: "batch-stage-ba01"
+    imageTag: "batch-stage-ca58a8c3"
   monitor:
     repository: "xiilab/astrago-posco"
-    imageTag: "monitor-stage-ba01"
+    imageTag: "monitor-stage-ca58a8c3"
   frontend:
     repository: "xiilab/astrago-posco"
     imageTag: "frontend-stage-2e50"
