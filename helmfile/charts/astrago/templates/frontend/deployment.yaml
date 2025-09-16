@@ -21,7 +21,7 @@ spec:
       labels:
         app.kubernetes.io/name: astrago-frontend
     spec:
-      {{- with .Values.frontend.imagePullSecrets }}
+      {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
