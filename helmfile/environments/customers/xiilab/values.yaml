@@ -10,13 +10,13 @@ nfs:
 astrago:
   core:
     repository: "xiilab/astrago-posco"
-    imageTag: "core-stage-d296"
+    imageTag: "core-stage-ba01"
   batch:
     repository: "xiilab/astrago-posco"
-    imageTag: "batch-stage-d296"
+    imageTag: "batch-stage-ba01"
   monitor:
     repository: "xiilab/astrago-posco"
-    imageTag: "monitor-stage-d296"
+    imageTag: "monitor-stage-ba01"
   frontend:
     repository: "xiilab/astrago-posco"
     imageTag: "frontend-stage-2e50"

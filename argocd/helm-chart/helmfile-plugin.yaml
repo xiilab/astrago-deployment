@@ -14,7 +14,7 @@ data:
       name: helmfile
     spec:
       generate:
-        command: ["helmfile"]
-        args: ["template", "--include-crds", "-l", "argocd: true"]
+        command: ["sh", "-c"]
+        args: ["helmfile -e ${ARGOCD_ENV_HELMFILE_ENVIRONMENT:-default} template --include-crds -l argocd=true --include-needs"]
       discover:
         fileName: "helmfile.yaml.gotmpl"
