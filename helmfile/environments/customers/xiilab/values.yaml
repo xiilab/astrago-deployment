@@ -23,5 +23,6 @@ astrago:
     repository: "xiilab/astrago-backend"
     imageTag: "monitor-stage-ca58a8c3"
   frontend:
-    repository: "xiilab/astrago-posco"
+    registry: "ghcr.io"
+    repository: "xiilab/astrago-frontend"
     imageTag: "frontend-stage-2e50"
