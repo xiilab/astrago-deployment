@@ -40,3 +40,41 @@ tools/binaries/
 
 # Serena MCP memories
 .serena/
+
+# Log files
+*.log
+logs/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+*.bak
+
+# OS specific files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE specific files
+.idea/
+.vscode/
+*.sublime-*
+
+# Cache directories
+.cache/
+.pytest_cache/
