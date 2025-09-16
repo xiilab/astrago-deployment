@@ -21,7 +21,7 @@ spec:
       labels:
         app.kubernetes.io/name: astrago-backend-core
     spec:
-      {{- with .Values.core.imagePullSecrets }}
+      {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}

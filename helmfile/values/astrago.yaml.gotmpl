@@ -1,8 +1,10 @@
 global:
   imageRegistry: "{{ .Values.offline.registry | default "" }}"
-  {{- with .Values.astrago.global.imagePullSecrets }}
+  {{- if .Values.astrago.global }}
+  {{- if .Values.astrago.global.imagePullSecrets }}
   imagePullSecrets:
-    {{- toYaml . | nindent 4 }}
+    - name: ghcr-secret
+  {{- end }}
   {{- end }}
 
 core:
