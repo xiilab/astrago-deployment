@@ -439,17 +439,97 @@ nodeAffinity:
         - worker
 ```
 
-## 📚 참고 자료
+## 20250917 업데이트 사항
 
-- [Kubernetes 공식 문서](https://kubernetes.io/docs/)
-- [Helm 공식 문서](https://helm.sh/docs/)
-- [Prometheus 공식 문서](https://prometheus.io/docs/)
-- [Keycloak 공식 문서](https://www.keycloak.org/documentation)
+### Rocky8 기준 오픈망 설치 가이드
 
-## 🆘 지원
+#### Rocky VM 환경 설정
 
-설치 과정에서 문제가 발생하면 다음을 참조하세요:
+```bash
+# 최신 패키지 정보 업데이트
+sudo dnf -y update
 
-- [문제 해결 가이드](troubleshooting.md)
-- [FAQ](faq.md)
-- [GitHub Issues](https://github.com/your-org/astrago-deployment/issues)
+# git 설치
+sudo dnf -y install git
+
+# 설치 확인
+git --version
+```
+
+#### AstraGo 배포 코드 다운로드
+
+```bash
+git clone https://github.com/xiilab/astrago-deployment.git
+chmod -R 775 /astrago-deployment 
+
+git checkout release
+```
+
+#### 초기 설정
+
+```bash
+# GUI 설치 프로그램 실행 (UI 표출 시 종료)
+./run_gui_installer.sh
+
+# 가상환경 진입
+source ~/.venv/3.11/bin/activate
+
+# kubespray 디렉토리로 이동
+cd kubespray
+# 클러스터(서버) 설정 파일 편집
+inventory/mycluster/astrago.yaml -> 클러스터(서버)설정
+```
+
+####SSH 키 생성
+ssh-keygen -t rsa -b 4096
+# 모든 노드에 SSH 키 배포
+ssh-copy-id root@{ip}  #모든노드
+
+#### NFS 서버 설치 및 설정
+
+```bash
+# NFS 서버 설치 
+sudo yum install -y nfs-utils
+sudo systemctl enable nfs-server
+sudo systemctl start nfs-server
+
+# 공유 디렉토리 생성
+sudo mkdir -p /nfs-data/astrago
+sudo chown -R nobody:nobody /nfs-data
+sudo chmod -R 755 /nfs-data
+
+# exports 설정
+echo "/nfs-data/astrago *(rw,sync,no_subtree_check,no_root_squash)" | sudo tee -a /etc/exports
+sudo exportfs -a
+```
+
+#### 쿠버네티스 클러스터 설치
+
+```bash
+# 쿠버네티스 클러스터 설치
+ansible-playbook -i inventory/mycluster/astrago.yaml cluster.yml
+```
+
+#### 어플리케이션 실행
+
+다음 두 가지 방법 중 하나를 선택하여 실행:
+
+**방법 1: deploy_astrago.sh 스크립트 사용**
+```bash
+# 환경 설정 변경 필요
+# vi deploy_astrago.sh에서 environment_name="prod" 환경 변경
+./deploy_astrago.sh sync
+```
+
+**방법 2: helmfile 직접 사용**
+```bash
+# 전체 애플리케이션 배포
+helmfile -e {환경명} sync
+
+# 특정 애플리케이션만 배포 (astrago만)
+helmfile -e {환경명} -l app=astrago sync
+
+# 삭제 시
+helmfile -e {환경명} destroy
+```
+
