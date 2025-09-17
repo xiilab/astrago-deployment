@@ -79,5 +79,5 @@ kube_vip_services_enabled: false
 kube_proxy_strict_arp: true
 
 # 인증서 유효기간 10년 설정
-certificates_duration: 87600h  # 10년 = 365 * 10 * 24시간
-kubeadm_certificate_key_rotation_policy: always
+auto_renew_certificates: true
+

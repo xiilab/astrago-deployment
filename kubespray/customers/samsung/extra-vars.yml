@@ -77,3 +77,6 @@ kube_vip_services_enabled: false
 
 # kube-proxy 설정 (kube-vip와 호환성을 위해)
 kube_proxy_strict_arp: true
+
+# 인증서 자동 갱신 설정 (권장)
+auto_renew_certificates: true
