@@ -2,12 +2,78 @@
 container_manager: crio
 
 # CRI-O 이미지 저장 위치
-crio_root: /data/crio/containers
+crio_root: /DATA/crio/containers
 
-# CRI-O 레지스트리 설정 (Kubespray 표준 방식)
+# CRI-O 레지스트리 설정 (Harbor 미러링 포함)
 crio_registries:
+  # Docker Hub 설정 (Harbor 미러 포함)
   - prefix: docker.io
     location: docker.io
     unqualified: true
     insecure: false
     blocked: false
+    mirrors:
+      - location: harbor.10.61.3.11.nip.io/dockerhub-cache
+        insecure: false
+
+  # Docker Hub Library (Harbor 미러)
+  - prefix: docker.io/library
+    location: docker.io/library
+    unqualified: false
+    insecure: false
+    blocked: false
+    mirrors:
+      - location: harbor.10.61.3.11.nip.io/dockerhub-cache/library
+        insecure: false
+
+  # NVIDIA NGC (Harbor 미러)
+  - prefix: nvcr.io
+    location: nvcr.io
+    unqualified: false
+    insecure: false
+    blocked: false
+    mirrors:
+      - location: harbor.10.61.3.11.nip.io/nvcr-cache
+        insecure: false
+
+  # Quay.io (Harbor 미러)
+  - prefix: quay.io
+    location: quay.io
+    unqualified: false
+    insecure: false
+    blocked: false
+    mirrors:
+      - location: harbor.10.61.3.11.nip.io/quay-cache
+        insecure: false
+
+  # Kubernetes Registry (Harbor 미러 - 폐쇄망 필수)
+  - prefix: registry.k8s.io
+    location: registry.k8s.io
+    unqualified: false
+    insecure: false
+    blocked: false
+    mirrors:
+      - location: harbor.10.61.3.11.nip.io/k8s-cache
+        insecure: false
+
+# Harbor insecure registry 설정 (HTTPS 인증서 없는 경우)
+crio_insecure_registries:
+  - "harbor.10.61.3.11.nip.io"
+
+# Registry 인증 정보 (필요시 설정)
+# crio_registry_auth:
+#   "harbor.10.61.3.11.nip.io":
+#     username: "admin" 
+#     password: "Harbor12345"
+
+# kube-vip 설정 (HA Control Plane)
+kube_vip_enabled: true
+kube_vip_address: 10.61.3.126
+kube_vip_port: 6443
+kube_vip_interface: "eth2"  # 자동 감지
+kube_vip_arp_enabled: true
+kube_vip_controlplane_enabled: true
+kube_vip_services_enabled: false
+
+# kube-proxy 설정 (kube-vip와 호환성을 위해)
+kube_proxy_strict_arp: true

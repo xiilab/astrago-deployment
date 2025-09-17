@@ -65,3 +65,19 @@ crio_insecure_registries:
 #   "harbor.10.61.3.11.nip.io":
 #     username: "admin" 
 #     password: "Harbor12345"
+
+# kube-vip 설정 (HA Control Plane)
+kube_vip_enabled: true
+kube_vip_address: 10.61.3.160
+kube_vip_port: 6443
+kube_vip_interface: ""  # 자동 감지
+kube_vip_arp_enabled: true
+kube_vip_controlplane_enabled: true
+kube_vip_services_enabled: false
+
+# kube-proxy 설정 (kube-vip와 호환성을 위해)
+kube_proxy_strict_arp: true
+
+# 인증서 유효기간 10년 설정
+certificates_duration: 87600h  # 10년 = 365 * 10 * 24시간
+kubeadm_certificate_key_rotation_policy: always
