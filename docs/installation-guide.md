@@ -439,11 +439,14 @@ nodeAffinity:
         - worker
 ```
 
-## 20250917 업데이트 사항
+## 📅 20250917 업데이트 사항
 
-### Rocky8 기준 오픈망 설치 가이드
+### 🐧 Rocky Linux 8 오픈망 설치 가이드
 
-#### Rocky VM 환경 설정
+> **🎯 대상 환경**: Rocky Linux 8 기반 오픈망 환경  
+> **📋 요구사항**: 인터넷 연결, root 권한, 다중 노드 클러스터
+
+#### 1️⃣ Rocky VM 환경 설정
 
 ```bash
 # 최신 패키지 정보 업데이트
@@ -456,7 +459,7 @@ sudo dnf -y install git
 git --version
 ```
 
-#### AstraGo 배포 코드 다운로드
+#### 2️⃣ AstraGo 배포 코드 다운로드
 
 ```bash
 git clone https://github.com/xiilab/astrago-deployment.git
@@ -465,7 +468,7 @@ chmod -R 775 /astrago-deployment
 git checkout release
 ```
 
-#### 초기 설정
+#### 3️⃣ 초기 설정
 
 ```bash
 # GUI 설치 프로그램 실행 (UI 표출 시 종료)
@@ -476,16 +479,29 @@ source ~/.venv/3.11/bin/activate
 
 # kubespray 디렉토리로 이동
 cd kubespray
-# 클러스터(서버) 설정 파일 편집
-inventory/mycluster/astrago.yaml -> 클러스터(서버)설정
 ```
 
-####SSH 키 생성
-ssh-keygen -t rsa -b 4096
-# 모든 노드에 SSH 키 배포
-ssh-copy-id root@{ip}  #모든노드
+> **📝 설정 파일 편집**  
+> `inventory/mycluster/astrago.yaml` 파일에서 클러스터(서버) 설정을 진행하세요.
 
-#### NFS 서버 설치 및 설정
+#### 4️⃣ SSH 키 설정
+
+```bash
+# SSH 키 생성
+ssh-keygen -t rsa -b 4096
+
+# 모든 노드에 SSH 키 배포
+ssh-copy-id root@{node_ip}  # 각 노드 IP로 반복 실행
+```
+
+#### 5️⃣ 방화벽 설정
+
+```bash
+# 모든 노드에서 방화벽 해제
+ssh root@{node_ip} "systemctl stop firewalld && systemctl disable firewalld"
+```
+
+#### 6️⃣ NFS 서버 설치 및 설정
 
 ```bash
 # NFS 서버 설치 
@@ -503,33 +519,70 @@ echo "/nfs-data/astrago *(rw,sync,no_subtree_check,no_root_squash)" | sudo tee -
 sudo exportfs -a
 ```
 
-#### 쿠버네티스 클러스터 설치
+#### 7️⃣ 쿠버네티스 클러스터 설치
 
 ```bash
 # 쿠버네티스 클러스터 설치
 ansible-playbook -i inventory/mycluster/astrago.yaml cluster.yml
 ```
 
-#### 어플리케이션 실행
 
-다음 두 가지 방법 중 하나를 선택하여 실행:
+#### 🔧 CRI-O Short-name 설정
 
-**방법 1: deploy_astrago.sh 스크립트 사용**
+> **📌 중요**: 컨테이너 이미지 풀링 시 short-name 문제 해결을 위한 설정
+
 ```bash
-# 환경 설정 변경 필요
-# vi deploy_astrago.sh에서 environment_name="prod" 환경 변경
+# 모든 노드에서 registries 설정 파일 편집
+sudo vi /etc/containers/registries.conf.d/01-unqualified.conf 수정
+```
+
+**설정 내용:**
+```ini
+# Short-name 설정
+unqualified-search-registries = ["docker.io"]
+short-name-mode = "permissive"
+```
+
+```bash
+# 모든 노드에서 CRI-O 서비스 재시작
+sudo systemctl restart crio
+```
+
+#### 8️⃣ 애플리케이션 배포
+
+다음 두 가지 방법 중 하나를 선택하여 실행하세요:
+
+##### 🚀 방법 1: deploy_astrago.sh 스크립트 사용
+
+```bash
+# 환경 설정 변경
+vi deploy_astrago.sh  # environment_name="prod" 설정
+
+# 배포 실행
 ./deploy_astrago.sh sync
 ```
 
-**방법 2: helmfile 직접 사용**
+##### 🔧 방법 2: helmfile 직접 사용
+
 ```bash
 # 전체 애플리케이션 배포
 helmfile -e {환경명} sync
 
-# 특정 애플리케이션만 배포 (astrago만)
+# 특정 애플리케이션만 배포 (예: astrago만)
 helmfile -e {환경명} -l app=astrago sync
+```
 
-# 삭제 시
+##### 🗑️ 애플리케이션 삭제
+
+```bash
+# helmfile을 사용한 삭제
 helmfile -e {환경명} destroy
 ```
+
+---
+
+> **💡 참고사항**
+> - `{환경명}`: `dev`, `prod`, `stage` 등 환경에 맞게 설정
+> - `{node_ip}`: 실제 노드의 IP 주소로 변경
+> - 모든 명령어는 root 권한으로 실행하거나 sudo를 사용하세요
 
