@@ -13,15 +13,15 @@ astrago:
   core:
     registry: "ghcr.io"
     repository: "xiilab/astrago-backend"
-    imageTag: "core-stage-1.0-bd279cbf"
+    imageTag: "core-stage-1.0-51c82292"
   batch:
     registry: "ghcr.io"
     repository: "xiilab/astrago-backend"
-    imageTag: "batch-stage-1.0-bd279cbf"
+    imageTag: "batch-stage-1.0-51c82292"
   monitor:
     registry: "ghcr.io"
     repository: "xiilab/astrago-backend"
-    imageTag: "monitor-stage-1.0-bd279cbf"
+    imageTag: "monitor-stage-1.0-51c82292"
   frontend:
     registry: "ghcr.io"
     repository: "xiilab/astrago-frontend"
