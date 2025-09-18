@@ -25,4 +25,4 @@ astrago:
   frontend:
     registry: "ghcr.io"
     repository: "xiilab/astrago-frontend"
-    imageTag: "frontend-stage-1.0-6326008d"
+    imageTag: "frontend-stage-1.0-78d73037"
