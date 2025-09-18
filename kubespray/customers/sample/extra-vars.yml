@@ -14,13 +14,16 @@ crio_registries:
 
 # kube-vip 설정 (HA Control Plane)
 kube_vip_enabled: true
-kube_vip_address: 10.1.1.100  # VIP 주소 (환경에 맞게 변경)
-kube_vip_port: 6443
-kube_vip_version: 0.8.2
-kube_vip_interface: ""  # 자동 감지 (필요시 인터페이스명 지정)
 kube_vip_arp_enabled: true
 kube_vip_controlplane_enabled: true
+kube_vip_address: 10.61.3.160 # VIP 주소 (환경에 맞게 변경)
+loadbalancer_apiserver:
+  address: "{{ kube_vip_address }}"
+  port: 6443
+kube_vip_interface: "" # 자동 감지 (필요시 인터페이스명 지정)
 kube_vip_services_enabled: false
+kube_vip_dns_mode: first
+kube_vip_lb_fwdmethod: local
 
 # kube-proxy 설정 (kube-vip와 호환성을 위해)
 kube_proxy_strict_arp: true
