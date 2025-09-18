@@ -45,10 +45,10 @@ if ! command -v sshpass &> /dev/null; then
 fi
 
 # Set up and activate Python virtual environment
-if [ ! -d "$HOME/.venv/3.11" ]; then
-    python3.11 -m venv ~/.venv/3.11
+if [ ! -d "$HOME/.venv/3.12" ]; then
+    python3.12 -m venv ~/.venv/3.12
 fi
-source ~/.venv/3.11/bin/activate
+source ~/.venv/3.12/bin/activate
 
 # Move to Kubespray directory and install dependencies
 cd "$KUBESPRAY_DIR"
@@ -56,4 +56,4 @@ pip install -r requirements.txt
 
 # Run Ansible playbooks
 ansible-playbook -i inventory/offline/astrago.yaml --become --become-user=root $ANSIBLE_DIR/offline-repo.yml --extra-vars="ansible_user=$username ansible_password=$password ansible_become_pass=$password"
-ansible-playbook -i inventory/offline/astrago.yaml --become --become-user=root cluster.yml --extra-vars="ansible_user=$username ansible_password=$password ansible_become_pass=$password"
+ansible-playbook -i inventory/offline/astrago.yaml --become --become-user=root cluster.yml --skip-tags containerd,reset_containerd --extra-vars="ansible_user=$username ansible_password=$password ansible_become_pass=$password -vvvv"

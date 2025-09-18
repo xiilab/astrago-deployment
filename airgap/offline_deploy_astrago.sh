@@ -4,7 +4,7 @@ export LANG=en_US.UTF-8
 CURRENT_DIR=$(dirname "$(realpath "$0")")/..
 
 # Fixing the environment name
-environment_name="astrago"
+environment_name="prod"
 
 # Function to check and install binaries
 install_binary() {
