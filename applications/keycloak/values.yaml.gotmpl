@@ -61,6 +61,10 @@ lifecycleHooks:
           /opt/bitnami/keycloak/bin/kcadm.sh update realms/master -s sslRequired=NONE --server http://localhost:8080/auth/ --realm master --user admin --password "{{ .Values.keycloak.adminPassword }}" >> /opt/bitnami/keycloak/poststart.log 2>&1
 
 postgresql:
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/postgresql
+    tag: 16.1.0-debian-11-r9
   auth:
     postgresPassword: postgres
     username: bn_keycloak
