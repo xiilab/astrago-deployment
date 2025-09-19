@@ -60,6 +60,8 @@ gpu-operator:
     repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
     image: k8s-device-plugin
     imagePullPolicy: IfNotPresent
+    config:
+      name: nvidia-plugin-config-mps
 
   gfd:
     enabled: true
