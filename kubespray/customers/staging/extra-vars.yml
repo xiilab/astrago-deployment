@@ -75,7 +75,7 @@ loadbalancer_apiserver:
   address: "{{ kube_vip_address }}"
   port: 6443
 kube_vip_interface: "" # 자동 감지 (필요시 인터페이스명 지정)
-kube_vip_services_enabled: false
+kube_vip_services_enabled: true
 kube_vip_dns_mode: first
 kube_vip_lb_fwdmethod: local
 
