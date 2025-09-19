@@ -57,34 +57,35 @@ astrago:
   oneview:
     enabled: false
 # Loki Settings
-loki:
-  replicas: 1
-  resources:
-    limits:
-      cpu: "2000m"
-      memory: "4Gi"
-    requests:
-      cpu: "1000m"
-      memory: "2Gi"
-  persistence:
-    enabled: true
-    size: "100Gi"
-    storageClass: "astrago-nfs-csi"
-  retention:
-    enabled: true
-    period: "2160h" # 90 days for production environment
-    compaction_interval: "10m"
-    delete_delay: "2h"
-    delete_worker_count: 150
-# Promtail Settings
-promtail:
-  resources:
-    limits:
-      cpu: "500m"
-      memory: "1Gi"
-    requests:
-      cpu: "200m"
-      memory: "512Mi"
+# loki:
+#   replicas: 1
+#   resources:
+#     limits:
+#       cpu: "2000m"
+#       memory: "4Gi"
+#     requests:
+#       cpu: "1000m"
+#       memory: "2Gi"
+#   persistence:
+#     enabled: true
+#     size: "100Gi"
+#     storageClass: "astrago-nfs-csi"
+#   retention:
+#     enabled: true
+#     period: "2160h" # 90 days for production environment
+#     compaction_interval: "10m"
+#     delete_delay: "2h"
+#     delete_worker_count: 150
+# # Promtail Settings
+# promtail:
+#   resources:
+#     limits:
+#       cpu: "500m"
+#       memory: "1Gi"
+#     requests:
+#       cpu: "200m"
+#       memory: "512Mi"
+      
 harbor:
   servicePort: 30002
   enabled: true
