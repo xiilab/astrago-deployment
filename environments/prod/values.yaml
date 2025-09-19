@@ -1,13 +1,11 @@
 # externalIP:
 externalIP: 10.61.3.91 #변경필요 
-
 gpu_operator:
   driver:
-    version: "570.172.08"      # 설치된 NVIDIA GPU Driver Version
+    version: "570.172.08" # 설치된 NVIDIA GPU Driver Version
   fabricManager:
-    version: "570.172.08"      # Fabric Manager Version == NVIDIA GPU Driver Version 
-    enabled: true              # Enable fabric manager
-
+    version: "570.172.08" # Fabric Manager Version == NVIDIA GPU Driver Version 
+    enabled: true # Enable fabric manager
 # Volume Settings
 nfs:
   storageClassName: astrago-nfs-csi
@@ -20,7 +18,7 @@ keycloak:
   servicePort: 30001
   image:
     repository: xiilab/astrago-keycloak-theme
-    tag: "68de" # common/values.yaml의 themeVersion과 동기화
+    tag: "4c99" # common/values.yaml의 themeVersion과 동기화
     pullPolicy: Always
 # Astrago Settings
 astrago:
@@ -85,7 +83,7 @@ astrago:
 #     requests:
 #       cpu: "200m"
 #       memory: "512Mi"
-      
+
 harbor:
   servicePort: 30002
   enabled: true
