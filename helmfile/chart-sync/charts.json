@@ -8,7 +8,8 @@
     "cowboysysop": "https://cowboysysop.github.io/charts/",
     "csi-driver-nfs": "https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts",
     "grafana": "https://grafana.github.io/helm-charts",
-    "node-feature-discovery": "https://kubernetes-sigs.github.io/node-feature-discovery/charts"
+    "node-feature-discovery": "https://kubernetes-sigs.github.io/node-feature-discovery/charts",
+    "ingress-nginx": "https://kubernetes.github.io/ingress-nginx"
   },
   "charts": {
     "kube-prometheus-stack": {
@@ -38,6 +39,10 @@
     "csi-driver-nfs": {
       "repository": "csi-driver-nfs",
       "version": "v4.9.0"
+    },
+    "ingress-nginx": {
+      "repository": "ingress-nginx",
+      "version": "4.13.2"
     }
   }
 }
