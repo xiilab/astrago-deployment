@@ -61,6 +61,17 @@ releases:
     values:
     - ./values/gpu-operator.yaml.gotmpl
 
+  - name: ingress-nginx
+    namespace: ingress-nginx
+    chart: ./charts/external/ingress-nginx
+    installed: true
+    wait: true
+    timeout: 600
+    labels:
+      tier: infrastructure
+      app: ingress-nginx
+    values:
+    - ./values/ingress-nginx.yaml.gotmpl
 
   # Tier 2: Monitoring
   - name: prometheus

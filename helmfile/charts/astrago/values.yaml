@@ -248,11 +248,6 @@ scheduler:
     registry: registry.k8s.io
     repository: kube-scheduler
     tag: v1.28.4
-timePrediction:
-  image:
-    registry: docker.io
-    repository: xiilab/astrago
-    tag: time-prediction-v0.2
 metricServer:
   image:
     registry: registry.k8s.io

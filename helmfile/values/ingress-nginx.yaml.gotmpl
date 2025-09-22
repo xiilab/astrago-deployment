@@ -1,0 +1,33 @@
+controller:
+  kind: DaemonSet
+
+  hostNetwork: true
+  dnsPolicy: ClusterFirstWithHostNet
+
+  publishService:
+    enabled: true
+
+  service:
+    type: LoadBalancer
+    {{- if .Values.ingressNginx.loadBalancerIP }}
+    loadBalancerIP: "{{ .Values.ingressNginx.loadBalancerIP }}"
+    {{- end }}
+    externalTrafficPolicy: Local
+    # internalTrafficPolicy: Local  # (선택)
+
+  ingressClassResource:
+    name: nginx
+    enabled: true
+    default: true
+
+  # 필요 시 특정 노드만 사용
+  # nodeSelector:
+  #   node-role.kubernetes.io/worker: ""
+
+  tolerations:
+    - key: "node-role.kubernetes.io/master"
+      operator: "Exists"
+      effect: "NoSchedule"
+    - key: "node-role.kubernetes.io/control-plane"
+      operator: "Exists"
+      effect: "NoSchedule"
