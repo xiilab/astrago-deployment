@@ -2,12 +2,11 @@
 # These values override the base configuration
 
 # Customer-specific network settings
-externalIP: 10.61.3.161
 nfs:
   server: 10.61.3.2
   basePath: /kube_storage
 astrago:
-  proxyUrl: http://demo.astrago.ai
+  baseUrl: http://demo.astrago.ai
   global:
     imagePullSecrets:
       - name: ghcr-secret
@@ -27,3 +26,7 @@ astrago:
     registry: "ghcr.io"
     repository: "xiilab/astrago-frontend"
     imageTag: "frontend-stage-1.0-bdca8512"
+
+# Ingress NGINX LoadBalancer IP for xiilab environment
+ingressNginx:
+  loadBalancerIP: "10.61.3.163"
