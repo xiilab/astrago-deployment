@@ -5,6 +5,13 @@
 nfs:
   server: 10.61.3.2
   basePath: /kube_storage
+
+# Keycloak Settings (customer-specific image)
+keycloak:
+  image:
+    registry: "ghcr.io"
+    repository: "xiilab/keycloak-astrago"
+    tag: "22.0.5-theme-latest"
 astrago:
   baseUrl: http://demo.astrago.ai
   global:

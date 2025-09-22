@@ -13,6 +13,10 @@ keycloak:
   adminUser: admin
   adminPassword: xiirocks
   servicePort: 30001
+  image:
+    registry: "docker.io"
+    repository: "bitnami/keycloak"
+    tag: "22.0.5-debian-11-r2"
 
 # Astrago Settings
 astrago:
