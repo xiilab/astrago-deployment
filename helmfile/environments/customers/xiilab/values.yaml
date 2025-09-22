@@ -10,8 +10,8 @@ nfs:
 keycloak:
   image:
     registry: "ghcr.io"
-    repository: "xiilab/keycloak-astrago"
-    tag: "22.0.5-theme-latest"
+    repository: "xiilab/astrago-keycloak-theme"
+    tag: "v1.2.0"
 astrago:
   baseUrl: http://demo.astrago.ai
   global:
