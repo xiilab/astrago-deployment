@@ -2,8 +2,6 @@
 # This file contains the base configuration for the current branch
 # Content will vary based on branch: main (dev), stabilize (stage), release (prod)
 
-# externalIP:
-externalIP: 
 # Volume Settings
 nfs:
   storageClassName: astrago-nfs-csi
@@ -18,11 +16,11 @@ keycloak:
 
 # Astrago Settings
 astrago:
-  proxyUrl:
-  servicePort: 30080
+  baseUrl: "http://127.0.0.1:30080"  # 전체 외부 접근 URL (scheme://host:port)
+  servicePort: 30080                 # NodePort (내부 서비스용)
   userInitPassword: astrago
   keycloak:
-    externalKeycloakUrl:
+    baseUrl: ""  # If different from astrago.baseUrl, specify here (e.g., external Keycloak)
     realm: astrago
     client: astrago-client
     clientSecret: astragosecret
@@ -55,6 +53,10 @@ harbor:
   servicePort: 30002
   enabled: true
   adminPassword: Harbor12345
+
+# Ingress NGINX Settings
+ingressNginx:
+  loadBalancerIP:  # Will be set per customer environment
 offline:
   registry: # 192.168.56.11:35000
   httpServer: # http://192.168.56.11
