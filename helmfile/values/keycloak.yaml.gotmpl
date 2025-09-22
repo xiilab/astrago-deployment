@@ -2,7 +2,7 @@ global:
   imageRegistry: "{{ .Values.offline.registry | default "" }}"
 
 image:
-  registry: "{{ .Values.keycloak.image.registry | default "ghcr.io" }}"
+  registry: "{{ .Values.keycloak.image.registry | default "docker.io" }}"
   repository: "{{ .Values.keycloak.image.repository | default "xiilab/astrago-keycloak-theme" }}"
   tag: "{{ .Values.keycloak.image.tag | default "v1.2.0" }}"
 

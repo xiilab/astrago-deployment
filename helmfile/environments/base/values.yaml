@@ -14,7 +14,7 @@ keycloak:
   adminPassword: xiirocks
   servicePort: 30001
   image:
-    registry: "ghcr.io"
+    registry: "docker.io"
     repository: "xiilab/astrago-keycloak-theme"
     tag: "v1.2.0"
 

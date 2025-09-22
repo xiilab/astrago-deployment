@@ -9,7 +9,7 @@ nfs:
 # Keycloak Settings (customer-specific image)
 keycloak:
   image:
-    registry: "ghcr.io"
+    registry: "docker.io"
     repository: "xiilab/astrago-keycloak-theme"
     tag: "v1.2.0"
 astrago:
