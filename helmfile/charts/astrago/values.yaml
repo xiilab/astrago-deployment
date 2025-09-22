@@ -248,3 +248,8 @@ scheduler:
     registry: registry.k8s.io
     repository: kube-scheduler
     tag: v1.28.4
+metricServer:
+  image:
+    registry: registry.k8s.io
+    repository: metrics-server/metrics-server
+    tag: v0.7.0
