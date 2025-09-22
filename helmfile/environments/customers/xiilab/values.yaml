@@ -7,7 +7,7 @@ nfs:
   server: 10.61.3.2
   basePath: /kube_storage
 astrago:
-  proxyUrl: demo.astrago.ai
+  proxyUrl: http://demo.astrago.ai
   global:
     imagePullSecrets:
       - name: ghcr-secret
