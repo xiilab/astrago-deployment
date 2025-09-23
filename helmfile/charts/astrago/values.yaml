@@ -19,7 +19,7 @@ core:
   image:
     registry: docker.io
     repository: xiilab/astrago
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: "core-v1.0.82"
   podAnnotations: {}
@@ -60,7 +60,7 @@ batch:
   image:
     registry: docker.io
     repository: xiilab/astrago
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: batch-v1.0.82
   service:
@@ -102,7 +102,7 @@ monitor:
   image:
     registry: docker.io
     repository: xiilab/astrago
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: monitor-v1.0.82
   service:
@@ -128,50 +128,6 @@ monitor:
     requests:
       cpu: 250m
       memory: 512Mi
-
-  autoscaling:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 100
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
-experiment:
-  replicaCount: 1
-  image:
-    registry: docker.io
-    repository: xiilab/astrago
-    pullPolicy: Always
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: experiment-v1.0.15
-  service:
-    type: ClusterIP
-    port: 8080
-  podAnnotations: {}
-  podSecurityContext: {}
-  # fsGroup: 2000
-
-  securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
-
-  resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
 
   autoscaling:
     enabled: false
@@ -255,14 +211,3 @@ ingress:
       X-Real-IP $remote_addr
     # 추가 최적화 설정
     nginx.ingress.kubernetes.io/proxy-busy-buffers-size: "256k"
-
-scheduler:
-  image:
-    registry: registry.k8s.io
-    repository: kube-scheduler
-    tag: v1.28.4
-metricServer:
-  image:
-    registry: registry.k8s.io
-    repository: metrics-server/metrics-server
-    tag: v0.7.0
