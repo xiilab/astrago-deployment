@@ -3,39 +3,35 @@
 
 # Customer-specific network settings
 nfs:
-  server: 10.61.3.2  # xiilab NFS 서버
-
+  server: 10.61.3.2 # xiilab NFS 서버
 # Keycloak Settings - base에서 기본 활성화됨
 
 # Astrago Settings - xiilab 전용 설정
 astrago:
-  baseUrl: http://demo.astrago.ai  # xiilab 도메인
+  baseUrl: http://demo.astrago.ai # xiilab 도메인
   global:
     imagePullSecrets:
-      - name: ghcr-secret  # GHCR 프라이빗 레지스트리 접근
-
+      - name: ghcr-secret # GHCR 프라이빗 레지스트리 접근
   # xiilab 전용 이미지 태그 (GHCR)
   core:
     registry: "ghcr.io"
     repository: "xiilab/astrago-backend"
-    imageTag: "core-stage-1.0-00e50ff5"
+    imageTag: "core-stage-1.0-fa3d2b0a"
   batch:
     registry: "ghcr.io"
     repository: "xiilab/astrago-backend"
-    imageTag: "batch-stage-1.0-00e50ff5"
+    imageTag: "batch-stage-1.0-fa3d2b0a"
   monitor:
     registry: "ghcr.io"
     repository: "xiilab/astrago-backend"
-    imageTag: "monitor-stage-1.0-00e50ff5"
+    imageTag: "monitor-stage-1.0-fa3d2b0a"
   frontend:
     registry: "ghcr.io"
     repository: "xiilab/astrago-frontend"
     imageTag: "frontend-stage-1.0-bdca8512"
-
 # Astrago Ingress Settings - xiilab 전용 도메인
 ingress:
-  host: demo.astrago.ai  # xiilab 전용 도메인
-
+  host: demo.astrago.ai # xiilab 전용 도메인
 # LoadBalancer IP - xiilab 인프라
 ingressNginx:
-  loadBalancerIP: "10.61.3.163"  # xiilab LoadBalancer IP
+  loadBalancerIP: "10.61.3.163" # xiilab LoadBalancer IP
