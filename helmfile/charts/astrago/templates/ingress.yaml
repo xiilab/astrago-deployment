@@ -28,16 +28,7 @@ spec:
   - http:
   {{- end }}
       paths:
-      # Frontend - 기본 라우트 (가장 마지막에 배치)
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: astrago-frontend
-            port:
-              number: 3000
-
-      # API 라우팅 - 구체적인 경로부터 순서대로
+      # API 라우팅 - 구체적인 경로부터 먼저 배치
       - path: /api/v1/core
         pathType: Prefix
         backend:
@@ -54,6 +45,14 @@ spec:
             port:
               number: 8080
 
+      - path: /api/v1/report
+        pathType: Prefix
+        backend:
+          service:
+            name: astrago-backend-monitor
+            port:
+              number: 8080
+
       - path: /api/v1/batch
         pathType: Prefix
         backend:
@@ -61,7 +60,6 @@ spec:
             name: astrago-backend-batch
             port:
               number: 8080
-
 
       # WebSocket 라우팅
       - path: /ws/workload
@@ -71,4 +69,13 @@ spec:
             name: astrago-backend-core
             port:
               number: 8080
+
+      # Frontend - 기본 라우트 (가장 마지막에 배치)
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: astrago-frontend
+            port:
+              number: 3000
 {{- end }}
