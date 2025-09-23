@@ -14,10 +14,7 @@ auth:
   adminUser: "{{ .Values.keycloak.adminUser }}"
   adminPassword: "{{ .Values.keycloak.adminPassword }}"
 service:
-  type: NodePort
-  nodePorts:
-    http: "{{ .Values.keycloak.servicePort }}"
-    https: "30002"
+  type: ClusterIP
 
 extraEnvVars:
   - name: KEYCLOAK_EXTRA_ARGS
@@ -45,6 +42,36 @@ lifecycleHooks:
             sleep 5
           done
           /opt/bitnami/keycloak/bin/kcadm.sh update realms/master -s sslRequired=NONE --server http://localhost:8080/auth/ --realm master --user admin --password "{{ .Values.keycloak.adminPassword }}" >> /opt/bitnami/keycloak/poststart.log 2>&1
+
+# Ingress configuration for nginx ingress controller
+ingress:
+  enabled: {{ .Values.keycloak.ingress.enabled | default false }}
+  ingressClassName: "nginx"
+  hostname: "{{ .Values.astrago.baseUrl | trimPrefix "http://" | trimPrefix "https://" }}"
+  path: "/auth"
+  pathType: Prefix
+  servicePort: http
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
+    # Keycloak 특화 최적화 설정
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
+    # 세션 관리 최적화
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/session-cookie-name: "KEYCLOAK_SESSION"
+    nginx.ingress.kubernetes.io/session-cookie-max-age: "86400"
+  tls: {{ .Values.keycloak.ingress.tls.enabled | default false }}
+  {{- if .Values.keycloak.ingress.tls.enabled }}
+  secrets:
+    - name: {{ .Values.keycloak.ingress.tls.secretName }}
+      key: ""
+      certificate: ""
+  {{- end }}
 
 postgresql:
   image:

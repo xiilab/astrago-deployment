@@ -1,22 +1,23 @@
-# Customer-specific overrides for Astrago customer
+# Customer-specific overrides for xiilab environment
 # These values override the base configuration
 
 # Customer-specific network settings
 nfs:
-  server: 10.61.3.2
-  basePath: /kube_storage
+  server: 10.61.3.2  # xiilab NFS 서버
 
-# Keycloak Settings (customer-specific image)
+# Keycloak Settings - xiilab 환경에서 Ingress 활성화
 keycloak:
-  image:
-    registry: "docker.io"
-    repository: "xiilab/astrago-keycloak-theme"
-    tag: "v1.2.0"
+  ingress:
+    enabled: true  # xiilab 환경에서 Keycloak Ingress 활성화
+
+# Astrago Settings - xiilab 전용 설정
 astrago:
-  baseUrl: http://demo.astrago.ai
+  baseUrl: http://demo.astrago.ai  # xiilab 도메인
   global:
     imagePullSecrets:
-      - name: ghcr-secret
+      - name: ghcr-secret  # GHCR 프라이빗 레지스트리 접근
+
+  # xiilab 전용 이미지 태그 (GHCR)
   core:
     registry: "ghcr.io"
     repository: "xiilab/astrago-backend"
@@ -34,6 +35,11 @@ astrago:
     repository: "xiilab/astrago-frontend"
     imageTag: "frontend-stage-1.0-bdca8512"
 
-# Ingress NGINX LoadBalancer IP for xiilab environment
+# Astrago Ingress Settings - xiilab 활성화
+ingress:
+  enabled: true  # xiilab 환경에서 Ingress 활성화
+  host: demo.astrago.ai  # xiilab 전용 도메인
+
+# LoadBalancer IP - xiilab 인프라
 ingressNginx:
-  loadBalancerIP: "10.61.3.163"
+  loadBalancerIP: "10.61.3.163"  # xiilab LoadBalancer IP

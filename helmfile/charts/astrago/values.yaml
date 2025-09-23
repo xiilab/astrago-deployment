@@ -35,9 +35,8 @@ core:
   # runAsUser: 1000
 
   service:
-    type: NodePort
+    type: ClusterIP
     port: 8080
-    nodePort: 30081
   resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
@@ -68,9 +67,8 @@ batch:
     # Overrides the image tag whose default is the chart appVersion.    
     tag: batch-v1.0.82
   service:
-    type: NodePort
+    type: ClusterIP
     port: 8080
-    nodePort: 30082
   podAnnotations: {}
   podSecurityContext: {}
   # fsGroup: 2000
@@ -111,12 +109,11 @@ monitor:
     registry: docker.io
     repository: xiilab/astrago
     pullPolicy: Always
-    # Overrides the image tag whose default is the chart appVersion.    
+    # Overrides the image tag whose default is the chart appVersion.
     tag: monitor-v1.0.82
   service:
-    type: NodePort
+    type: ClusterIP
     port: 8080
-    nodePort: 30083
   podAnnotations: {}
   podSecurityContext: {}
   # fsGroup: 2000
@@ -159,9 +156,8 @@ experiment:
     # Overrides the image tag whose default is the chart appVersion.
     tag: experiment-v1.0.15
   service:
-    type: NodePort
+    type: ClusterIP
     port: 8080
-    nodePort: 30084
   podAnnotations: {}
   podSecurityContext: {}
   # fsGroup: 2000
@@ -234,15 +230,44 @@ frontend:
   nodeSelector: {}
   tolerations: []
   affinity: {}
-proxy:
-  image:
-    registry: docker.io
-    repository: library/nginx
-    tag: 1.27.0-alpine3.19
-  service:
-    type: NodePort
-    port: 80
-    nodePort: 30080
+# proxy:  # Removed - replaced by nginx ingress
+#   image:
+#     registry: docker.io
+#     repository: library/nginx
+#     tag: 1.27.0-alpine3.19
+#   service:
+#     type: NodePort
+#     port: 80
+#     nodePort: 30080
+
+# Ingress configuration for nginx ingress controller
+# nginx-proxy를 대체하는 표준 Kubernetes Ingress 설정
+ingress:
+  enabled: false  # 기본값은 false로 설정하여 기존 환경에 영향 없음
+  className: "nginx"  # nginx ingress controller 사용
+  host: ""  # 빈 문자열이면 host 없이 모든 IP/도메인에서 접근 허용
+  # 환경별 오버라이드 예시:
+  # - 기본 환경: host: "" (모든 접근 허용)
+  # - 인증서 환경: host: "custom.domain.com"
+  tls:
+    enabled: false  # TLS/SSL 인증서 사용 여부
+    secretName: ""  # TLS Secret 이름 (tls.enabled: true일 때 필수)
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"  # 파일 업로드 무제한
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
+    nginx.ingress.kubernetes.io/client-header-buffer-size: "8k"
+    # WebSocket 지원 (nginx ingress에서 자동 처리되지만 명시적 설정)
+    nginx.ingress.kubernetes.io/proxy-set-headers: |
+      X-Forwarded-For $proxy_add_x_forwarded_for
+      X-Forwarded-Proto $scheme
+      X-Real-IP $remote_addr
+    # 추가 최적화 설정
+    nginx.ingress.kubernetes.io/proxy-busy-buffers-size: "256k"
+
 scheduler:
   image:
     registry: registry.k8s.io

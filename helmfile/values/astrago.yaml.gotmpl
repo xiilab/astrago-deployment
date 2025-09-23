@@ -259,6 +259,17 @@ mariadb:
       socket=/opt/bitnami/mariadb/tmp/mysql.sock
       pid-file=/opt/bitnami/mariadb/tmp/mysqld.pid
 
+# Ingress configuration
+{{- if .Values.ingress.enabled }}
+ingress:
+  enabled: {{ .Values.ingress.enabled }}
+  className: {{ .Values.ingress.className | default "nginx" }}
+  host: {{ .Values.ingress.host | default "" }}
+  tls:
+    enabled: {{ .Values.ingress.tls.enabled | default false }}
+    secretName: {{ .Values.ingress.tls.secretName | default "" }}
+{{- end }}
+
 nfs:
   size: 10Gi
   accessModes:

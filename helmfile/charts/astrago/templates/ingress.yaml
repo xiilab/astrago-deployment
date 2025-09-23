@@ -1,0 +1,74 @@
+{{- if .Values.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "common.fullname" . }}-ingress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "common.labels" . | nindent 4 }}
+  annotations:
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host | quote }}
+      secretName: {{ .Values.ingress.tls.secretName }}
+  {{- end }}
+  rules:
+  {{- if .Values.ingress.host }}
+  - host: {{ .Values.ingress.host | quote }}
+    http:
+  {{- else }}
+  - http:
+  {{- end }}
+      paths:
+      # Frontend - 기본 라우트 (가장 마지막에 배치)
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: astrago-frontend
+            port:
+              number: 3000
+
+      # API 라우팅 - 구체적인 경로부터 순서대로
+      - path: /api/v1/core
+        pathType: Prefix
+        backend:
+          service:
+            name: astrago-backend-core
+            port:
+              number: 8080
+
+      - path: /api/v1/monitor
+        pathType: Prefix
+        backend:
+          service:
+            name: astrago-backend-monitor
+            port:
+              number: 8080
+
+      - path: /api/v1/batch
+        pathType: Prefix
+        backend:
+          service:
+            name: astrago-backend-batch
+            port:
+              number: 8080
+
+
+      # WebSocket 라우팅
+      - path: /ws/workload
+        pathType: Prefix
+        backend:
+          service:
+            name: astrago-backend-core
+            port:
+              number: 8080
+{{- end }}

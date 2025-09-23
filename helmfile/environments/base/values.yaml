@@ -17,6 +17,11 @@ keycloak:
     registry: "docker.io"
     repository: "xiilab/astrago-keycloak-theme"
     tag: "v1.2.0"
+  ingress:
+    enabled: false  # 기본값 false로 기존 환경 보호
+    tls:
+      enabled: false
+      secretName: ""  # TLS 인증서 미사용
 
 # Astrago Settings
 astrago:
@@ -58,9 +63,19 @@ harbor:
   enabled: true
   adminPassword: Harbor12345
 
+# Astrago Ingress Settings (기본값)
+ingress:
+  enabled: false  # 기본값 false, 고객별 환경에서 활성화
+  className: nginx
+  host: ""  # 고객별로 도메인 설정
+  tls:
+    enabled: false
+    secretName: ""
+
 # Ingress NGINX Settings
 ingressNginx:
   loadBalancerIP:  # Will be set per customer environment
+
 offline:
   registry: # 192.168.56.11:35000
   httpServer: # http://192.168.56.11
