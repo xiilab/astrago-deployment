@@ -29,7 +29,7 @@ core:
     - name: KEYCLOAK_REALM
       value: {{ .Values.astrago.keycloak.realm }}
     - name: KEYCLOAK_AUTH-SERVER-URL
-      value: {{ .Values.astrago.keycloak.baseUrl | default .Values.astrago.baseUrl }}/auth/
+      value: {{ .Values.astrago.keycloak.baseUrl | default .Values.astrago.baseUrl }}/auth
     - name: KEYCLOAK_RESOURCE
       value: {{ .Values.astrago.keycloak.client }}
     - name: ADMIN_NAME
@@ -101,7 +101,7 @@ batch:
     - name: KEYCLOAK_REALM
       value: {{ .Values.astrago.keycloak.realm }}
     - name: KEYCLOAK_AUTH-SERVER-URL
-      value: {{ .Values.astrago.keycloak.baseUrl | default .Values.astrago.baseUrl }}/auth/
+      value: {{ .Values.astrago.keycloak.baseUrl | default .Values.astrago.baseUrl }}/auth
     - name: KEYCLOAK_RESOURCE
       value: {{ .Values.astrago.keycloak.client }}
     - name: ADMIN_NAME
@@ -163,7 +163,7 @@ frontend:
     tag: "{{ .Values.astrago.frontend.imageTag }}" 
   env:
     - name: KEYCLOAK_HOST
-      value: {{ .Values.astrago.keycloak.baseUrl | default .Values.astrago.baseUrl }}/auth/
+      value: {{ .Values.astrago.keycloak.baseUrl | default .Values.astrago.baseUrl }}/auth
     - name: KEYCLOAK_REALME
       value: {{ .Values.astrago.keycloak.realm }}
     - name: KEYCLOAK_CLIENT_ID
