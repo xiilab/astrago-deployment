@@ -5,10 +5,7 @@
 nfs:
   server: 10.61.3.2  # xiilab NFS 서버
 
-# Keycloak Settings - xiilab 환경에서 Ingress 활성화
-keycloak:
-  ingress:
-    enabled: true  # xiilab 환경에서 Keycloak Ingress 활성화
+# Keycloak Settings - base에서 기본 활성화됨
 
 # Astrago Settings - xiilab 전용 설정
 astrago:
@@ -35,9 +32,8 @@ astrago:
     repository: "xiilab/astrago-frontend"
     imageTag: "frontend-stage-1.0-bdca8512"
 
-# Astrago Ingress Settings - xiilab 활성화
+# Astrago Ingress Settings - xiilab 전용 도메인
 ingress:
-  enabled: true  # xiilab 환경에서 Ingress 활성화
   host: demo.astrago.ai  # xiilab 전용 도메인
 
 # LoadBalancer IP - xiilab 인프라

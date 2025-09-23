@@ -2,13 +2,11 @@ environments:
   # Default environment (uses base folder based on branch)
   default:
     values:
-    - ./environments/common/values.yaml
     - ./environments/base/values.yaml
-  
+
   # Customer environments (release branch only)
   xiilab:
     values:
-    - ./environments/common/values.yaml
     - ./environments/base/values.yaml
     - ./environments/customers/xiilab/values.yaml
 
