@@ -26,13 +26,14 @@ core:
   podSecurityContext: {}
   # fsGroup: 2000
 
-  securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+    runAsGroup: 1001
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
 
   service:
     type: ClusterIP
@@ -69,13 +70,14 @@ batch:
   podSecurityContext: {}
   # fsGroup: 2000
 
-  securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+    runAsGroup: 1001
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
 
   resources:
     limits:
@@ -110,13 +112,14 @@ monitor:
   podSecurityContext: {}
   # fsGroup: 2000
 
-  securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+    runAsGroup: 1001
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
 
   resources:
     limits:
@@ -197,13 +200,14 @@ frontend:
       cpu: 100m
       memory: 256Mi
 
-  securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+    runAsGroup: 1001
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
 
   autoscaling:
     enabled: false
