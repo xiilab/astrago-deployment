@@ -68,7 +68,7 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
             successThreshold: 1
-            failureThreshold: 10
+            failureThreshold: 18  # 60 + (18 * 10) = 240초 (4분)
           resources:
             {{- toYaml .Values.monitor.resources | nindent 12 }}
       {{- with .Values.monitor.nodeSelector }}
