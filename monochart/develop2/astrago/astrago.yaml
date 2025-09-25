@@ -914,7 +914,7 @@ spec:
         - name: astrago
           securityContext:
             {}          
-          image: "docker.io/xiilab/astrago:frontend-stag-7982"          
+          image: "docker.io/xiilab/astrago:frontend-stag-0206"          
           env:
           - name: KEYCLOAK_REALME
             value: "astrago"
