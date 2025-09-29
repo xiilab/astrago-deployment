@@ -46,6 +46,7 @@ lifecycleHooks:
 # Ingress configuration - minimal overrides
 ingress:
   enabled: {{ .Values.keycloak.ingress.enabled | default false }}
+  ingressClassName: "nginx"
   {{- if .Values.keycloak.ingress.host }}
   hostname: "{{ .Values.keycloak.ingress.host }}"
   {{- end }}
