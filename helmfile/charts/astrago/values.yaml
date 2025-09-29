@@ -168,18 +168,4 @@ ingress:
   tls:
     enabled: false  # TLS/SSL 인증서 사용 여부
     secretName: ""  # TLS Secret 이름 (tls.enabled: true일 때 필수)
-  annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: "0"  # 파일 업로드 무제한
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
-    nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
-    nginx.ingress.kubernetes.io/client-header-buffer-size: "8k"
-    # WebSocket 지원 (nginx ingress에서 자동 처리되지만 명시적 설정)
-    nginx.ingress.kubernetes.io/proxy-set-headers: |
-      X-Forwarded-For $proxy_add_x_forwarded_for
-      X-Forwarded-Proto $scheme
-      X-Real-IP $remote_addr
-    # 추가 최적화 설정
-    nginx.ingress.kubernetes.io/proxy-busy-buffers-size: "256k"
+  annotations: {}  # annotations는 values 파일에서 동적으로 설정됨

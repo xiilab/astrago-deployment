@@ -32,6 +32,10 @@ astrago:
 # Astrago Ingress Settings - xiilab 전용 도메인
 ingress:
   host: demo.astrago.ai # xiilab 전용 도메인
+  tls:
+    enabled: true
+    secretName: "astrago-tls-cert"
+    clusterIssuer: "letsencrypt-prod"  # cert-manager 사용
 # LoadBalancer IP - xiilab 인프라
 ingressNginx:
   loadBalancerIP: "10.61.3.163" # xiilab LoadBalancer IP

@@ -270,6 +270,33 @@ ingress:
   tls:
     enabled: {{ .Values.ingress.tls.enabled | default false }}
     secretName: {{ .Values.ingress.tls.secretName | default "" }}
+    clusterIssuer: {{ .Values.ingress.tls.clusterIssuer | default "" }}
+  annotations:
+    # 기본 nginx annotation (항상 적용)
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
+    nginx.ingress.kubernetes.io/client-header-buffer-size: "8k"
+    nginx.ingress.kubernetes.io/proxy-set-headers: |
+      X-Forwarded-For $proxy_add_x_forwarded_for
+      X-Forwarded-Proto $scheme
+      X-Real-IP $remote_addr
+    nginx.ingress.kubernetes.io/proxy-busy-buffers-size: "256k"
+    # cert-manager annotation (조건부 적용)
+    {{- if and .Values.ingress.tls.enabled .Values.ingress.tls.clusterIssuer }}
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.tls.clusterIssuer | quote }}
+    {{- end }}
+    # 환경별 추가 annotation (있을 경우 merge)
+    {{- with .Values.ingress.additionalAnnotations }}
+    {{- range $key, $value := . }}
+    {{- if $value }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+    {{- end }}
+    {{- end }}
 {{- end }}
 
 nfs:

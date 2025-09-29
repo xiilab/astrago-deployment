@@ -71,6 +71,11 @@ ingress:
   tls:
     enabled: false
     secretName: ""
+    clusterIssuer: ""  # cert-manager ClusterIssuer (예: "letsencrypt-prod", "letsencrypt-staging")
+  # 환경별 추가 annotation 설정
+  additionalAnnotations:
+    # cert-manager annotation (clusterIssuer가 설정된 경우에만 적용)
+    # 다른 환경별 annotation도 여기서 추가 가능
 
 # Ingress NGINX Settings
 ingressNginx:
