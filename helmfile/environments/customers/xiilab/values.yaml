@@ -45,7 +45,9 @@ keycloak:
     host: "demo.astrago.ai"  # xiilab 도메인 (Astrago와 동일)
     tls:
       enabled: true
-      secretName: "astrago-tls-cert"  # Astrago와 동일한 인증서 사용
+      secretName: "keycloak-tls-cert"  # Keycloak 전용 인증서
+    additionalAnnotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-staging"  # Let's Encrypt 인증서 자동 발급
   image:
     tag: "v1.2.0"
 # LoadBalancer IP - xiilab 인프라
