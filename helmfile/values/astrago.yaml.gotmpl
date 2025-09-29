@@ -154,6 +154,20 @@ monitor:
       value: "SELECT 1"
     - name: SPRING_MVC_PATHMATCH_MATCHING-STRATEGY
       value: ant_path_matcher
+    - name: SPRING_SECURITY_OAUTH2_RESOURCE-SERVER_JWT_ISSUER-URI
+      value: {{ .Values.astrago.keycloak.baseUrl | default .Values.astrago.baseUrl }}/auth/realms/{{ .Values.astrago.keycloak.realm }}
+    - name: SPRING_SECURITY_OAUTH2_RESOURCE-SERVER_JWT_JWK-SET-URI
+      value: {{ .Values.astrago.keycloak.baseUrl | default .Values.astrago.baseUrl }}/auth/realms/{{ .Values.astrago.keycloak.realm }}/protocol/openid-connect/certs
+    - name: KEYCLOAK_REALM
+      value: {{ .Values.astrago.keycloak.realm }}
+    - name: KEYCLOAK_AUTH-SERVER-URL
+      value: {{ .Values.astrago.keycloak.baseUrl | default .Values.astrago.baseUrl }}/auth
+    - name: KEYCLOAK_RESOURCE
+      value: {{ .Values.astrago.keycloak.client }}
+    - name: ADMIN_NAME
+      value: {{ .Values.keycloak.adminUser }}
+    - name: ADMIN_PASSWORD
+      value: {{ .Values.keycloak.adminPassword }}
     - name: PROMETHEUS_URL
       value: http://prometheus-kube-prometheus-prometheus.prometheus.svc.cluster.local:9090
 
