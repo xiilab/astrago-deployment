@@ -25,9 +25,91 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "common.serviceAccountName" . }}      
+      serviceAccountName: {{ include "common.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.core.podSecurityContext | nindent 8 }}
+      {{- if .Values.ingress.tls.secretName }}
+      initContainers:
+        - name: ca-cert-installer
+          image: "{{ default .Values.global.imageRegistry "docker.io" }}/openjdk:11-jre-slim"
+          command: ["sh", "-c"]
+          args:
+          - |
+            set -euo pipefail
+            echo "$(date): Starting TLS certificate installation process"
+
+            # 인증서 유효성 검증 함수
+            validate_cert() {
+              local cert_file="$1"
+              local cert_type="$2"
+
+              if ! openssl x509 -noout -text -in "$cert_file" >/dev/null 2>&1; then
+                echo "ERROR: Invalid certificate format in $cert_file" >&2
+                return 1
+              fi
+
+              local expiry_date=$(openssl x509 -enddate -noout -in "$cert_file" 2>/dev/null | cut -d= -f2)
+              echo "INFO: $cert_type certificate expires: $expiry_date"
+
+              return 0
+            }
+
+            # CA 인증서 설치 함수
+            install_cert() {
+              local cert_file="$1"
+              local alias="$2"
+
+              if ! keytool -import -trustcacerts -keystore "$JAVA_HOME/lib/security/cacerts" \
+                -storepass changeit -alias "$alias" -file "$cert_file" -noverify 2>/dev/null; then
+                echo "ERROR: Failed to install certificate $cert_file" >&2
+                return 1
+              fi
+
+              echo "SUCCESS: Installed certificate $cert_file with alias $alias"
+              return 0
+            }
+
+            # 메인 처리 로직
+            cert_installed=false
+
+            if [ -f /tls-certs/ca.crt ]; then
+              echo "INFO: Found CA certificate, validating..."
+              if validate_cert "/tls-certs/ca.crt" "CA"; then
+                if install_cert "/tls-certs/ca.crt" "custom-ca"; then
+                  cert_installed=true
+                fi
+              fi
+            elif [ -f /tls-certs/tls.crt ]; then
+              echo "INFO: Found TLS certificate, validating..."
+              if validate_cert "/tls-certs/tls.crt" "TLS"; then
+                if install_cert "/tls-certs/tls.crt" "tls-cert"; then
+                  cert_installed=true
+                fi
+              fi
+            else
+              echo "INFO: No custom certificate found, using default cacerts"
+            fi
+
+            # cacerts 복사
+            if ! cp "$JAVA_HOME/lib/security/cacerts" /shared-cacerts/ 2>/dev/null; then
+              echo "ERROR: Failed to copy cacerts to shared volume" >&2
+              exit 1
+            fi
+
+            if [ "$cert_installed" = true ]; then
+              echo "SUCCESS: TLS certificate installation completed successfully"
+            else
+              echo "INFO: Using default cacerts without custom certificates"
+            fi
+
+            echo "$(date): Certificate installation process finished"
+          volumeMounts:
+          - name: tls-secret-volume
+            mountPath: /tls-certs
+            readOnly: true
+          - name: shared-cacerts
+            mountPath: /shared-cacerts
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -42,6 +124,11 @@ spec:
           volumeMounts:
             - name: astrago-workload-log
               mountPath: /root/astrago
+            {{- if .Values.ingress.tls.secretName }}
+            - name: shared-cacerts
+              mountPath: /usr/local/openjdk-11/lib/security/cacerts
+              subPath: cacerts
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.core.service.port }}
@@ -79,6 +166,13 @@ spec:
         - name: astrago-workload-log
           persistentVolumeClaim:
             claimName: workload-log-pvc
+        {{- if .Values.ingress.tls.secretName }}
+        - name: tls-secret-volume
+          secret:
+            secretName: {{ .Values.ingress.tls.secretName }}
+        - name: shared-cacerts
+          emptyDir: {}
+        {{- end }}
       {{- with .Values.core.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

@@ -127,6 +127,10 @@ kubectl get pods -A
 kubectl get svc -A
 kubectl get pvc -A
 
+# Ingress 및 네트워크 상태 확인 (신규 추가)
+kubectl get ingress -A
+kubectl get svc -n ingress-nginx
+
 # Helmfile 배포 상태 확인
 cd helmfile/
 helmfile -e default status
@@ -135,6 +139,9 @@ helmfile -e default status
 kubectl get all -n astrago
 kubectl get all -n prometheus
 kubectl get all -n keycloak
+
+# Ingress 접근성 테스트 (신규 추가)
+curl -H "Host: demo.astrago.ai" http://$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}')/
 ```
 
 ### 로그 확인
@@ -159,6 +166,58 @@ yq eval . environments/base/values.yaml
 
 # 차트 의존성 확인
 helm dependency list charts/astrago/
+```
+
+## 🌐 Ingress 기반 접근
+
+### 기본 접근 방법
+- **LoadBalancer IP로 직접 접근**: `http://10.61.3.163/` (IP는 환경별 상이)
+- **Host 헤더 필요**: `demo.astrago.ai` 또는 환경별 설정된 도메인
+- **단일 진입점**: 모든 API와 프론트엔드가 통합된 접근점
+
+### 주요 엔드포인트
+- **프론트엔드**: `http://IP/`
+- **Core API**: `http://IP/api/v1/core/`
+- **Monitor API**: `http://IP/api/v1/monitor/`
+- **Batch API**: `http://IP/api/v1/batch/`
+- **Report API**: `http://IP/api/v1/report/`
+- **WebSocket**: `ws://IP/ws/workload/`
+
+### 접근 테스트 명령어
+```bash
+# Host 헤더를 포함한 접근 (필수)
+curl -H "Host: demo.astrago.ai" http://10.61.3.163/
+
+# API 엔드포인트 테스트
+curl -H "Host: demo.astrago.ai" http://10.61.3.163/api/v1/core/
+
+# Ingress 상태 확인
+kubectl get ingress -n astrago
+kubectl describe ingress astrago-ingress -n astrago
+
+# LoadBalancer IP 확인
+kubectl get svc -n ingress-nginx
+```
+
+### 환경별 Ingress 설정
+```yaml
+# 기본 환경 (모든 IP 허용) - base/values.yaml
+ingress:
+  enabled: true
+  host: ""  # 모든 Host에서 접근 허용
+
+# 고객 환경 (특정 도메인) - customers/xiilab/values.yaml
+ingress:
+  enabled: true
+  host: "demo.astrago.ai"  # 특정 도메인만 허용
+
+# TLS 인증서 환경
+ingress:
+  enabled: true
+  host: "secure.astrago.com"
+  tls:
+    enabled: true
+    secretName: "astrago-tls-cert"
 ```
 
 ## 📁 환경별 설정 관리
@@ -203,9 +262,16 @@ helm dependency list charts/astrago/
 
 ### 일반적인 문제들
 - **Chart path 오류**: `helmfile.yaml.gotmpl`의 chart 경로 확인
-- **Values 오버라이드 실패**: 환경별 values.yaml 우선순위 확인  
+- **Values 오버라이드 실패**: 환경별 values.yaml 우선순위 확인
 - **의존성 오류**: needs 설정 및 네임스페이스 생성 순서 확인
 - **도구 버전 불일치**: `tools/versions.conf` 확인 후 재다운로드
+
+### Ingress 관련 문제 해결
+- **접근 불가 (404 에러)**: Host 헤더 없이 접근시 발생, `curl -H "Host: 도메인"` 사용
+- **LoadBalancer IP 미할당**: `kubectl get svc -n ingress-nginx` 확인, 인프라 LoadBalancer 지원 필요
+- **라우팅 실패**: `kubectl describe ingress astrago-ingress -n astrago`로 백엔드 연결 상태 확인
+- **WebSocket 연결 실패**: nginx ingress의 WebSocket 어노테이션 및 업스트림 연결 확인
+- **파일 업로드 실패**: `proxy-body-size: "0"` 어노테이션이 적용되었는지 확인
 
 ### 디버깅 명령어
 ```bash
@@ -218,6 +284,16 @@ kubectl get events -n <namespace> --sort-by='.lastTimestamp'
 
 # 차트 렌더링 확인
 helm template <release-name> <chart-path> -f <values-file>
+
+# Ingress 관련 디버깅
+kubectl get ingress -A                           # 모든 Ingress 리소스 확인
+kubectl describe ingress astrago-ingress -n astrago  # Ingress 상세 정보
+kubectl get svc -n ingress-nginx                 # nginx-ingress 서비스 상태
+kubectl logs -n ingress-nginx -l app.kubernetes.io/name=ingress-nginx  # nginx 로그 확인
+
+# 네트워크 연결 테스트
+curl -v -H "Host: demo.astrago.ai" http://LOADBALANCER-IP/  # 접근 테스트
+kubectl port-forward -n astrago svc/astrago-frontend 3000:3000  # 직접 서비스 테스트
 ```
 
 ## 💡 모범 사례
@@ -227,6 +303,8 @@ helm template <release-name> <chart-path> -f <values-file>
 3. **의존성 관리**: Tier 기반 배포 순서를 지키고 needs 설정 활용
 4. **백업**: 중요한 설정 변경 전 현재 상태 백업
 5. **모니터링**: 배포 후 반드시 상태 확인 및 로그 검토
+6. **Ingress 관리**: Host 헤더 설정을 환경에 맞게 조정하고 LoadBalancer IP 할당 확인
+7. **접근성 테스트**: 배포 후 반드시 실제 접근 가능성을 curl이나 브라우저로 검증
 
 ## 🔗 관련 문서
 - [상세 설치 가이드](docs/installation-guide.md)
