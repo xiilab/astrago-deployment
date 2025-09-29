@@ -53,6 +53,8 @@ ingress:
   {{- if .Values.keycloak.ingress.tls.enabled }}
   tls: true
   {{- end }}
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
 
 postgresql:
   image:
