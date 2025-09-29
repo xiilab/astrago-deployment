@@ -43,6 +43,9 @@ ingress:
 keycloak:
   ingress:
     host: "demo.astrago.ai"  # xiilab 도메인 (Astrago와 동일)
+    tls:
+      enabled: true
+      secretName: "astrago-tls-cert"  # Astrago와 동일한 인증서 사용
   image:
     tag: "v1.2.0"
 # LoadBalancer IP - xiilab 인프라
