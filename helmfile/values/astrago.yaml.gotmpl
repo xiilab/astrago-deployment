@@ -270,7 +270,6 @@ ingress:
   tls:
     enabled: {{ .Values.ingress.tls.enabled | default false }}
     secretName: {{ .Values.ingress.tls.secretName | default "" }}
-    clusterIssuer: {{ .Values.ingress.tls.clusterIssuer | default "" }}
   annotations:
     # 기본 nginx annotation (항상 적용)
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
@@ -285,10 +284,6 @@ ingress:
       X-Forwarded-Proto $scheme
       X-Real-IP $remote_addr
     nginx.ingress.kubernetes.io/proxy-busy-buffers-size: "256k"
-    # cert-manager annotation (조건부 적용)
-    {{- if and .Values.ingress.tls.enabled .Values.ingress.tls.clusterIssuer }}
-    cert-manager.io/cluster-issuer: {{ .Values.ingress.tls.clusterIssuer | quote }}
-    {{- end }}
     # 환경별 추가 annotation (있을 경우 merge)
     {{- with .Values.ingress.additionalAnnotations }}
     {{- range $key, $value := . }}
