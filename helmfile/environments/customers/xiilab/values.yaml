@@ -36,14 +36,16 @@ ingress:
     enabled: true # K8s ingress에서 TLS 처리
     secretName: "astrago-tls-cert"
   additionalAnnotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-staging" # Let's Encrypt 인증서 자동 발급
-    nginx.ingress.kubernetes.io/ssl-redirect: "false" # 외부 nginx에서 이미 처리하므로 비활성화
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "false" # 외부 nginx에서 이미 처리하므로 비활성화
+    cert-manager.io/cluster-issuer: "letsencrypt-staging"  # Let's Encrypt 인증서 자동 발급
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"  # K8s ingress에서 SSL redirect 처리
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"  # K8s ingress에서 강제 SSL redirect
 # Keycloak Settings - xiilab 전용 도메인
 keycloak:
   ingress:
-    host: "demo.astrago.ai" # xiilab 도메인 (Astrago와 동일)
-    # TLS는 astrago ingress에서 이미 처리하므로 비활성화
+    host: "demo.astrago.ai"  # xiilab 도메인 (Astrago와 동일)
+    tls:
+      enabled: true  # Astrago와 동일한 TLS 인증서 사용
+      secretName: "astrago-tls-cert"
   image:
     tag: "v0.1.2_test"
 # LoadBalancer IP - xiilab 인프라
