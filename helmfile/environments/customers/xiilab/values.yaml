@@ -46,8 +46,6 @@ keycloak:
     tls:
       enabled: true
       secretName: "keycloak-tls-cert"  # Keycloak 전용 인증서
-    additionalAnnotations:
-      cert-manager.io/cluster-issuer: "letsencrypt-staging"  # Let's Encrypt 인증서 자동 발급
   image:
     tag: "v1.2.0"
 # LoadBalancer IP - xiilab 인프라

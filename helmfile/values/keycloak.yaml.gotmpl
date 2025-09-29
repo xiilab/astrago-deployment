@@ -52,10 +52,6 @@ ingress:
   {{- if .Values.keycloak.ingress.tls.enabled }}
   tls: true
   {{- end }}
-  {{- if .Values.keycloak.ingress.additionalAnnotations }}
-  annotations:
-    {{- toYaml .Values.keycloak.ingress.additionalAnnotations | nindent 4 }}
-  {{- end }}
 
 postgresql:
   image:
