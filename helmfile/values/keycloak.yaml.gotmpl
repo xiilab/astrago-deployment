@@ -19,10 +19,6 @@ service:
 extraEnvVars:
   - name: KEYCLOAK_EXTRA_ARGS
     value: "--import-realm --spi-login-protocol-openid-connect-legacy-logout-redirect-uri=true"
-  {{- if or .Values.keycloak.ingress.tls.enabled (hasPrefix "https://" (.Values.astrago.baseUrl | default "")) }}
-  - name: KEYCLOAK_ENABLE_HTTPS
-    value: "true"
-  {{- end }}
 
 extraVolumes:
   - name: realm-config
