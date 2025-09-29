@@ -186,6 +186,26 @@ monitor:
       value: ant_path_matcher
     - name: PROMETHEUS_URL
       value: http://prometheus-kube-prometheus-prometheus.prometheus.svc.cluster.local:9090
+    #2025.09.29 공통설정 : 관리자페이지 대시보드 사용자별 자원사용량
+    - name: KEYCLOAK_REALM
+      value: {{ .Values.astrago.keycloak.realm }}
+    - name: KEYCLOAK_AUTH-SERVER-URL
+      {{ if .Values.astrago.keycloak.externalKeycloakUrl }}
+      value: {{ .Values.astrago.keycloak.externalKeycloakUrl }}
+      {{ else if .Values.astrago.proxyUrl }}
+      value: {{ .Values.astrago.proxyUrl }}/auth/
+      {{ else }}
+      value: http://{{ .Values.externalIP }}:{{ .Values.astrago.servicePort }}/auth/
+      {{ end }}
+    - name: KEYCLOAK_RESOURCE
+      value: {{ .Values.astrago.keycloak.client }}
+    - name: ADMIN_NAME
+      value: {{ .Values.keycloak.adminUser }}
+    - name: ADMIN_PASSWORD
+      value: {{ .Values.keycloak.adminPassword }}
+    - name: ADMIN_INIT-PASSWORD
+      value: {{ .Values.astrago.userInitPassword }}
+
 
 frontend:
   image:
