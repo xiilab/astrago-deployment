@@ -32,7 +32,7 @@ spec:
       initContainers:
         - name: ca-cert-installer
           image: "{{ default .Values.global.imageRegistry "docker.io" }}/openjdk:11-jre-slim"
-          command: ["sh", "-c"]
+          command: ["bash", "-c"]
           args:
           - |
             set -euo pipefail
@@ -113,8 +113,8 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
-            {{- toYaml .Values.batch.securityContext | nindent 12 }}          
-          image: "{{ default .Values.batch.image.registry .Values.global.imageRegistry }}/{{ .Values.batch.image.repository }}:{{ .Values.batch.image.tag }}"          
+            {{- toYaml .Values.batch.securityContext | nindent 12 }}
+          image: "{{ default .Values.batch.image.registry .Values.global.imageRegistry }}/{{ .Values.batch.image.repository }}:{{ .Values.batch.image.tag }}"
           env:
           {{- range $key, $obj := .Values.batch.env }}
             - name: {{ $obj.name }}

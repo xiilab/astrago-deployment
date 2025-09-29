@@ -39,6 +39,10 @@ ingress:
     cert-manager.io/cluster-issuer: "letsencrypt-staging"  # staging 환경용
     nginx.ingress.kubernetes.io/ssl-redirect: "true"  # HTTP -> HTTPS 리다이렉트
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"  # 강제 HTTPS 리다이렉트
+# Keycloak Settings - xiilab 전용 도메인
+keycloak:
+  ingress:
+    host: "demo.astrago.ai"  # xiilab 도메인 (Astrago와 동일)
 # LoadBalancer IP - xiilab 인프라
 ingressNginx:
   loadBalancerIP: "10.61.3.163" # xiilab LoadBalancer IP

@@ -47,7 +47,9 @@ lifecycleHooks:
 ingress:
   enabled: {{ .Values.keycloak.ingress.enabled | default false }}
   ingressClassName: "nginx"
-  hostname: "{{ .Values.astrago.baseUrl | trimPrefix "http://" | trimPrefix "https://" }}"
+  {{- if .Values.keycloak.ingress.host }}
+  hostname: "{{ .Values.keycloak.ingress.host }}"
+  {{- end }}
   path: "/auth"
   pathType: Prefix
   servicePort: http
