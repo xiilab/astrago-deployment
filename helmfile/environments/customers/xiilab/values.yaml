@@ -43,7 +43,7 @@ ingress:
 keycloak:
   ingress:
     host: "demo.astrago.ai" # xiilab 도메인 (Astrago와 동일)
-    # TLS는 외부 nginx에서 처리하므로 K8s ingress에서는 비활성화
+    # TLS는 Astrago ingress에서 처리되므로 별도 설정 불필요
   image:
     tag: "v0.1.2_test"
 # LoadBalancer IP - xiilab 인프라
