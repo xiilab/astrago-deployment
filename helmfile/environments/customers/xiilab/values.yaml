@@ -34,7 +34,9 @@ ingress:
   host: demo.astrago.ai # xiilab 전용 도메인
   tls:
     enabled: false  # 외부 nginx에서 TLS 처리
+    secretName: "astrago-tls-cert"  # Backend cacerts용 인증서는 필요
   additionalAnnotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-staging"  # Backend cacerts용 인증서 생성
     # 외부 nginx에서 TLS 터미네이션하므로 내부는 HTTP 처리
     nginx.ingress.kubernetes.io/ssl-redirect: "false"  # HTTP 허용
     nginx.ingress.kubernetes.io/force-ssl-redirect: "false"  # HTTPS 강제 해제
