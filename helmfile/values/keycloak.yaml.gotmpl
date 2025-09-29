@@ -19,12 +19,6 @@ service:
 extraEnvVars:
   - name: KEYCLOAK_EXTRA_ARGS
     value: "--import-realm --spi-login-protocol-openid-connect-legacy-logout-redirect-uri=true"
-  {{- if .Values.keycloak.ingress.host }}
-  - name: KC_HOSTNAME_URL
-    value: "https://{{ .Values.keycloak.ingress.host }}/auth"
-  - name: KC_HOSTNAME_ADMIN_URL
-    value: "https://{{ .Values.keycloak.ingress.host }}/auth"
-  {{- end }}
 
 extraVolumes:
   - name: realm-config
@@ -58,16 +52,10 @@ ingress:
   {{- end }}
   {{- if .Values.keycloak.ingress.tls.enabled }}
   tls: true
-  selfSigned: false
   {{- if .Values.keycloak.ingress.tls.secretName }}
   existingSecret: "{{ .Values.keycloak.ingress.tls.secretName }}"
   {{- end }}
   {{- end }}
-  annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "{{ .Values.keycloak.ingress.tls.enabled | default false }}"
-    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
-    nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
-    nginx.ingress.kubernetes.io/proxy-busy-buffers-size: "256k"
 
 postgresql:
   image:
