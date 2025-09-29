@@ -53,20 +53,6 @@ ingress:
   path: "/auth"
   pathType: Prefix
   servicePort: http
-  annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: "0"
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
-    # Keycloak 특화 최적화 설정
-    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
-    nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
-    # 세션 관리 최적화
-    nginx.ingress.kubernetes.io/affinity: "cookie"
-    nginx.ingress.kubernetes.io/session-cookie-name: "KEYCLOAK_SESSION"
-    nginx.ingress.kubernetes.io/session-cookie-max-age: "86400"
   tls: {{ .Values.keycloak.ingress.tls.enabled | default false }}
   {{- if .Values.keycloak.ingress.tls.enabled }}
   secrets:
