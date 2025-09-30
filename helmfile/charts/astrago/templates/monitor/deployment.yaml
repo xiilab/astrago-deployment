@@ -167,7 +167,7 @@ spec:
               log_success "Cacerts copied to shared volume successfully"
 
               # 복사된 파일 정보 로깅
-              local cacerts_size=$(stat -f%z /shared-cacerts/cacerts 2>/dev/null || stat -c%s /shared-cacerts/cacerts 2>/dev/null || echo "unknown")
+              cacerts_size=$(stat -f%z /shared-cacerts/cacerts 2>/dev/null || stat -c%s /shared-cacerts/cacerts 2>/dev/null || echo "unknown")
               log_info "Shared cacerts size: ${cacerts_size} bytes"
             else
               log_warn "Failed to copy cacerts to shared volume, container will use default cacerts"
