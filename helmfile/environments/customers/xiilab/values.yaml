@@ -28,7 +28,7 @@ astrago:
   frontend:
     registry: "ghcr.io"
     repository: "xiilab/astrago-frontend"
-    imageTag: "frontend-stage-1.0-c40c0bb4"
+    imageTag: "frontend-stage-1.0-de783097"
 # Astrago Ingress Settings - xiilab 전용 도메인
 ingress:
   host: demo.astrago.ai # xiilab 전용 도메인
