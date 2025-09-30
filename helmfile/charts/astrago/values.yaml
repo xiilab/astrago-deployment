@@ -37,7 +37,7 @@ core:
       memory: 2Gi
     requests:
       cpu: 500m
-      memory: 1Gi
+      memory: 1536Mi
   autoscaling:
     enabled: false
     minReplicas: 1
@@ -102,11 +102,11 @@ monitor:
 
   resources:
     limits:
-      cpu: 500m
-      memory: 1Gi
+      cpu: 1000m
+      memory: 2560Mi
     requests:
-      cpu: 250m
-      memory: 512Mi
+      cpu: 500m
+      memory: 1536Mi
 
   autoscaling:
     enabled: false
@@ -129,11 +129,11 @@ frontend:
 
   resources:
     limits:
-      cpu: 200m
-      memory: 512Mi
+      cpu: 600m
+      memory: 1Gi
     requests:
-      cpu: 100m
-      memory: 256Mi
+      cpu: 300m
+      memory: 512Mi
 
   securityContext: {}
 

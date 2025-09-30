@@ -227,20 +227,20 @@ spec:
             httpGet:
               path: /actuator/health
               port: http
-            initialDelaySeconds: 15
-            periodSeconds: 5
-            timeoutSeconds: 5
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 10
             successThreshold: 1
             failureThreshold: 3
           startupProbe:
             httpGet:
               path: /actuator/health
               port: http
-            initialDelaySeconds: 60
-            periodSeconds: 10
-            timeoutSeconds: 5
+            initialDelaySeconds: 90
+            periodSeconds: 15
+            timeoutSeconds: 10
             successThreshold: 1
-            failureThreshold: 18  # 60 + (18 * 10) = 240초 (4분)
+            failureThreshold: 12  # 90 + (12 * 15) = 270초 (4.5분)
           resources:
             {{- toYaml .Values.monitor.resources | nindent 12 }}
       {{- if .Values.ingress.tls.secretName }}
