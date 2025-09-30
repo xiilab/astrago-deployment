@@ -32,24 +32,70 @@ spec:
       initContainers:
         - name: ca-cert-installer
           image: "{{ default .Values.global.imageRegistry "docker.io" }}/openjdk:11-jre-slim"
+          env:
+          - name: DEBUG_MODE
+            value: "{{ .Values.global.debugMode | default "false" }}"
           command: ["bash", "-c"]
           args:
           - |
             set -euo pipefail
-            echo "$(date): Starting TLS certificate installation process"
+
+            # 구조화된 로깅 시스템
+            SCRIPT_NAME="tls-cert-installer"
+            start_time=$(date '+%s')
+
+            log_info() {
+              echo "$(date '+%Y-%m-%d %H:%M:%S') [INFO] [${SCRIPT_NAME}] $*" >&2
+            }
+
+            log_warn() {
+              echo "$(date '+%Y-%m-%d %H:%M:%S') [WARN] [${SCRIPT_NAME}] $*" >&2
+            }
+
+            log_error() {
+              echo "$(date '+%Y-%m-%d %H:%M:%S') [ERROR] [${SCRIPT_NAME}] $*" >&2
+            }
+
+            log_debug() {
+              if [ "${DEBUG_MODE:-false}" = "true" ]; then
+                echo "$(date '+%Y-%m-%d %H:%M:%S') [DEBUG] [${SCRIPT_NAME}] $*" >&2
+              fi
+            }
+
+            log_success() {
+              echo "$(date '+%Y-%m-%d %H:%M:%S') [SUCCESS] [${SCRIPT_NAME}] $*" >&2
+            }
+
+            # 상세 인증서 정보 로깅
+            log_cert_info() {
+              local cert_file="$1"
+              local cert_type="$2"
+
+              if [ -f "$cert_file" ]; then
+                local subject=$(openssl x509 -subject -noout -in "$cert_file" 2>/dev/null | cut -d= -f2- | sed 's/^ *//')
+                local issuer=$(openssl x509 -issuer -noout -in "$cert_file" 2>/dev/null | cut -d= -f2- | sed 's/^ *//')
+                local expiry=$(openssl x509 -enddate -noout -in "$cert_file" 2>/dev/null | cut -d= -f2)
+
+                log_info "Certificate Details: type=$cert_type, subject=\"$subject\", issuer=\"$issuer\", expires=\"$expiry\""
+              else
+                log_error "Certificate file not found: $cert_file"
+              fi
+            }
 
             # 인증서 유효성 검증 함수
             validate_cert() {
               local cert_file="$1"
               local cert_type="$2"
 
+              log_debug "Validating certificate: $cert_file (type: $cert_type)"
+
               if ! openssl x509 -noout -text -in "$cert_file" >/dev/null 2>&1; then
-                echo "ERROR: Invalid certificate format in $cert_file" >&2
+                log_error "Invalid certificate format in $cert_file"
                 return 1
               fi
 
               local expiry_date=$(openssl x509 -enddate -noout -in "$cert_file" 2>/dev/null | cut -d= -f2)
-              echo "INFO: $cert_type certificate expires: $expiry_date"
+              log_info "$cert_type certificate validation passed, expires: $expiry_date"
 
               return 0
             }
@@ -59,50 +105,88 @@ spec:
               local cert_file="$1"
               local alias="$2"
 
+              log_debug "Installing certificate: $cert_file with alias: $alias"
+
               if ! keytool -import -trustcacerts -keystore "$JAVA_HOME/lib/security/cacerts" \
                 -storepass changeit -alias "$alias" -file "$cert_file" -noverify 2>/dev/null; then
-                echo "ERROR: Failed to install certificate $cert_file" >&2
+                log_error "Failed to install certificate $cert_file with alias $alias"
                 return 1
               fi
 
-              echo "SUCCESS: Installed certificate $cert_file with alias $alias"
+              log_success "Installed certificate $cert_file with alias $alias"
               return 0
             }
+
+            # 시작 로그
+            log_info "=== TLS Certificate Installation Started ==="
+            log_info "Environment: namespace=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace 2>/dev/null || echo 'unknown'), pod=$(hostname)"
+            log_info "Java Version: $(java -version 2>&1 | head -n1 || echo 'unknown')"
+            log_debug "JAVA_HOME: $JAVA_HOME"
 
             # 메인 처리 로직
             cert_installed=false
 
+            log_info "Searching for TLS certificates in /tls-certs/"
             if [ -f /tls-certs/ca.crt ]; then
-              echo "INFO: Found CA certificate, validating..."
+              log_info "Found CA certificate file"
+              log_cert_info "/tls-certs/ca.crt" "CA"
+
               if validate_cert "/tls-certs/ca.crt" "CA"; then
+                log_success "CA certificate validation passed"
                 if install_cert "/tls-certs/ca.crt" "custom-ca"; then
+                  log_success "CA certificate installed successfully"
                   cert_installed=true
+                else
+                  log_warn "CA certificate installation failed, continuing with default cacerts"
                 fi
+              else
+                log_error "CA certificate validation failed"
               fi
             elif [ -f /tls-certs/tls.crt ]; then
-              echo "INFO: Found TLS certificate, validating..."
+              log_info "Found TLS certificate file"
+              log_cert_info "/tls-certs/tls.crt" "TLS"
+
               if validate_cert "/tls-certs/tls.crt" "TLS"; then
+                log_success "TLS certificate validation passed"
                 if install_cert "/tls-certs/tls.crt" "tls-cert"; then
+                  log_success "TLS certificate installed successfully"
                   cert_installed=true
+                else
+                  log_warn "TLS certificate installation failed, continuing with default cacerts"
                 fi
+              else
+                log_error "TLS certificate validation failed"
               fi
             else
-              echo "INFO: No custom certificate found, using default cacerts"
+              log_info "No custom certificates found, using default Java cacerts"
             fi
 
-            # cacerts 복사
-            if ! cp "$JAVA_HOME/lib/security/cacerts" /shared-cacerts/ 2>/dev/null; then
-              echo "ERROR: Failed to copy cacerts to shared volume" >&2
-              exit 1
-            fi
+            # cacerts 복사 (실패 시에도 계속 진행)
+            log_info "Copying cacerts to shared volume..."
+            if cp "$JAVA_HOME/lib/security/cacerts" /shared-cacerts/ 2>/dev/null; then
+              log_success "Cacerts copied to shared volume successfully"
 
-            if [ "$cert_installed" = true ]; then
-              echo "SUCCESS: TLS certificate installation completed successfully"
+              # 복사된 파일 정보 로깅
+              local cacerts_size=$(stat -f%z /shared-cacerts/cacerts 2>/dev/null || stat -c%s /shared-cacerts/cacerts 2>/dev/null || echo "unknown")
+              log_info "Shared cacerts size: ${cacerts_size} bytes"
             else
-              echo "INFO: Using default cacerts without custom certificates"
+              log_warn "Failed to copy cacerts to shared volume, container will use default cacerts"
+              log_warn "TLS certificate trust chain may not be properly configured"
             fi
 
-            echo "$(date): Certificate installation process finished"
+            # 최종 상태 로그
+            if [ "$cert_installed" = true ]; then
+              log_success "=== TLS Certificate Installation Completed Successfully ==="
+              log_info "Custom certificate installed and integrated with Java cacerts"
+            else
+              log_info "=== TLS Certificate Installation Completed ==="
+              log_info "Using default Java cacerts (no custom certificate installed)"
+            fi
+
+            # 실행 시간 로깅
+            end_time=$(date '+%s')
+            execution_time=$((end_time - start_time))
+            log_info "Total execution time: ${execution_time} seconds"
           volumeMounts:
           - name: tls-secret-volume
             mountPath: /tls-certs
