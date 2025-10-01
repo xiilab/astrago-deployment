@@ -43,18 +43,20 @@ lifecycleHooks:
           done
           /opt/bitnami/keycloak/bin/kcadm.sh update realms/master -s sslRequired=NONE --server http://localhost:8080/auth/ --realm master --user admin --password "{{ .Values.keycloak.adminPassword }}" >> /opt/bitnami/keycloak/poststart.log 2>&1
 
-# Ingress configuration - minimal overrides
+# Ingress configuration - uses externalAccess for consistency
 ingress:
-  enabled: {{ .Values.keycloak.ingress.enabled | default false }}
+  enabled: true  # Always create Ingress
   ingressClassName: "nginx"
-  {{- if .Values.keycloak.ingress.host }}
-  hostname: "{{ .Values.keycloak.ingress.host }}"
-  {{- end }}
-  {{- if .Values.keycloak.ingress.tls.enabled }}
+  {{- if eq .Values.externalAccess.mode "domain" }}
+  hostname: "{{ .Values.externalAccess.domain.name }}"
+  {{- if .Values.externalAccess.domain.tls.enabled }}
   tls: true
-  {{- if .Values.keycloak.ingress.tls.secretName }}
-  existingSecret: "{{ .Values.keycloak.ingress.tls.secretName }}"
+  existingSecret: "{{ .Values.externalAccess.domain.tls.secretName }}"
   {{- end }}
+  {{- else }}
+  # IP mode: no hostname specified (accessible from all IPs)
+  hostname: ""
+  tls: false
   {{- end }}
   annotations:
     nginx.ingress.kubernetes.io/priority: "100"

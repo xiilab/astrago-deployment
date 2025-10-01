@@ -38,12 +38,6 @@ astrago:
       repository: "xiilab/astrago-frontend"  # frontend만 다른 repository 사용
       tag: "frontend-stage-1.0-de783097"
 
-# Ingress annotations (도메인 모드이지만 외부 nginx에서 TLS 처리하므로 k8s 리다이렉트 비활성화)
-ingress:
-  additionalAnnotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
-
 # Keycloak Settings
 keycloak:
   image:
