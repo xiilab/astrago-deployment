@@ -27,11 +27,11 @@ astrago:
     repository: "xiilab/astrago-backend"
   components:
     core:
-      tag: "core-stage-1.0-df745040"
+      tag: "core-stage-1.0-eaf91591"
     batch:
-      tag: "batch-stage-1.0-df745040"
+      tag: "batch-stage-1.0-eaf91591"
     monitor:
-      tag: "monitor-stage-1.0-df745040"
+      tag: "monitor-stage-1.0-eaf91591"
     frontend:
       tag: "frontend-stage-1.0-d4b9c31d"
 # Keycloak Settings
