@@ -184,7 +184,7 @@ monitor:
 frontend:
   image:
     registry: "{{ .Values.astrago.imageDefaults.registry }}"
-    repository: "{{ .Values.astrago.imageDefaults.repository }}"
+    repository: "{{ .Values.astrago.components.frontend.repository | default .Values.astrago.imageDefaults.repository }}"
     tag: "{{ .Values.astrago.components.frontend.tag }}"
     pullPolicy: "{{ .Values.astrago.imageDefaults.pullPolicy }}" 
   env:

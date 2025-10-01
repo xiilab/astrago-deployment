@@ -37,8 +37,8 @@ astrago:
   servicePort: 30080                 # NodePort (내부 서비스용)
   userInitPassword: astrago
   imageDefaults:
-    registry: "docker.io"
-    repository: "xiilab/astrago-posco"
+    registry: "ghcr.io"
+    repository: "xiilab/astrago-backend"
     pullPolicy: "IfNotPresent"
   keycloak:
     baseUrl: ""  # If different from astrago.baseUrl, specify here (e.g., external Keycloak)
@@ -59,6 +59,7 @@ astrago:
     monitor:
       tag: "monitor-stage-c5ad"
     frontend:
+      repository: "xiilab/astrago-frontend"  # Frontend는 별도 레포지토리 사용
       tag: "frontend-stage-3770"
   oneview:
     enabled: false
