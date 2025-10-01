@@ -36,10 +36,6 @@ astrago:
   baseUrl: "http://127.0.0.1:30080"  # 전체 외부 접근 URL (scheme://host:port)
   servicePort: 30080                 # NodePort (내부 서비스용)
   userInitPassword: astrago
-  imageDefaults:
-    registry: "ghcr.io"
-    repository: "xiilab/astrago-backend"
-    pullPolicy: "IfNotPresent"
   keycloak:
     baseUrl: ""  # If different from astrago.baseUrl, specify here (e.g., external Keycloak)
     realm: astrago
@@ -51,6 +47,13 @@ astrago:
     username: astrago
     password: xiirocks
     maxLifetime: "1800000"
+
+  # 이미지 기본 설정 (components에 적용)
+  imageDefaults:
+    registry: "ghcr.io"
+    repository: "xiilab/astrago-backend"
+    pullPolicy: "IfNotPresent"
+
   components:
     core:
       tag: "core-stage-c5ad"
