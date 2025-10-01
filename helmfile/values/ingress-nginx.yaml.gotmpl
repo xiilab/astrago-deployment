@@ -9,8 +9,8 @@ controller:
 
   service:
     type: LoadBalancer
-    {{- if .Values.ingressNginx.loadBalancerIP }}
-    loadBalancerIP: "{{ .Values.ingressNginx.loadBalancerIP }}"
+    {{- if .Values.externalAccess.ip.address }}
+    loadBalancerIP: "{{ .Values.externalAccess.ip.address }}"
     {{- end }}
     externalTrafficPolicy: Local
     # internalTrafficPolicy: Local  # (선택)

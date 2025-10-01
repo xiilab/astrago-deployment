@@ -6,13 +6,13 @@
 externalAccess:
   mode: "ip"  # "ip" or "domain"
   ip:
-    address: ""  # Same as ingressNginx.loadBalancerIP (user's actual access point)
+    address: ""  # LoadBalancer IP for ingress-nginx controller (user's actual access point)
     port: ""
   domain:
     name: ""
     tls:
       enabled: false
-      issuer: ""
+      issuer: ""  # cert-manager ClusterIssuer (e.g., "letsencrypt-prod") - leave empty to use existing Secret
       secretName: ""
 
 # Volume Settings
@@ -89,10 +89,6 @@ ingress:
     # nginx.ingress.kubernetes.io/ssl-redirect: "true"
     # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     # 다른 환경별 annotation도 여기서 추가 가능
-
-# Ingress NGINX Settings
-ingressNginx:
-  loadBalancerIP:  # Will be set per customer environment
 
 offline:
   registry: # 192.168.56.11:35000

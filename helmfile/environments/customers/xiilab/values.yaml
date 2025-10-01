@@ -5,12 +5,12 @@
 externalAccess:
   mode: "domain"  # Using domain-based access with TLS
   ip:
-    address: "10.61.3.163"  # LoadBalancer IP (same as ingressNginx.loadBalancerIP)
+    address: "10.61.3.163"  # LoadBalancer IP (ingress-nginx controller)
   domain:
     name: "demo.astrago.ai"
     tls:
       enabled: true
-      issuer: "letsencrypt-prod"
+      issuer: "letsencrypt-prod"  # cert-manager가 인증서 자동 생성
       secretName: "astrago-tls-cert"
 
 # Customer-specific network settings
@@ -48,7 +48,3 @@ ingress:
 keycloak:
   image:
     tag: "v0.1.2_test"
-
-# LoadBalancer IP - xiilab 인프라
-ingressNginx:
-  loadBalancerIP: "10.61.3.163" # xiilab LoadBalancer IP
