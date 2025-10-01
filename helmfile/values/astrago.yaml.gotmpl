@@ -10,9 +10,10 @@ global:
 core:
   replicaCount: 3
   image:
-    registry: "{{ .Values.astrago.core.registry }}"
-    repository: "{{ .Values.astrago.core.repository }}"
-    tag: "{{ .Values.astrago.core.imageTag }}"
+    registry: "{{ .Values.astrago.imageDefaults.registry }}"
+    repository: "{{ .Values.astrago.imageDefaults.repository }}"
+    tag: "{{ .Values.astrago.components.core.tag }}"
+    pullPolicy: "{{ .Values.astrago.imageDefaults.pullPolicy }}"
   env:
     - name: SPRING_JPA_HIBERNATE_DDL-AUTO
       value: none
@@ -69,9 +70,10 @@ core:
       value: "SELECT 1"
 batch:
   image:
-    registry: "{{ .Values.astrago.batch.registry }}"
-    repository: "{{ .Values.astrago.batch.repository }}"
-    tag: "{{ .Values.astrago.batch.imageTag }}"
+    registry: "{{ .Values.astrago.imageDefaults.registry }}"
+    repository: "{{ .Values.astrago.imageDefaults.repository }}"
+    tag: "{{ .Values.astrago.components.batch.tag }}"
+    pullPolicy: "{{ .Values.astrago.imageDefaults.pullPolicy }}"
   env:
     - name: SPRING_JPA_HIBERNATE_DDL-AUTO
       value: none
@@ -125,9 +127,10 @@ batch:
 
 monitor:
   image:
-    registry: "{{ .Values.astrago.monitor.registry }}"
-    repository: "{{ .Values.astrago.monitor.repository }}"
-    tag: "{{ .Values.astrago.monitor.imageTag }}" 
+    registry: "{{ .Values.astrago.imageDefaults.registry }}"
+    repository: "{{ .Values.astrago.imageDefaults.repository }}"
+    tag: "{{ .Values.astrago.components.monitor.tag }}"
+    pullPolicy: "{{ .Values.astrago.imageDefaults.pullPolicy }}" 
   env:
     - name: SPRING_JPA_HIBERNATE_DDL-AUTO
       value: none
@@ -175,10 +178,10 @@ monitor:
 
 frontend:
   image:
-    registry: "{{ .Values.astrago.frontend.registry }}"
-    repository: "{{ .Values.astrago.frontend.repository }}"
-    pullPolicy: Always
-    tag: "{{ .Values.astrago.frontend.imageTag }}" 
+    registry: "{{ .Values.astrago.imageDefaults.registry }}"
+    repository: "{{ .Values.astrago.components.frontend.repository | default .Values.astrago.imageDefaults.repository }}"
+    tag: "{{ .Values.astrago.components.frontend.tag }}"
+    pullPolicy: "{{ .Values.astrago.imageDefaults.pullPolicy }}" 
   env:
     - name: KEYCLOAK_HOST
       value: {{ .Values.astrago.keycloak.baseUrl | default .Values.astrago.baseUrl }}/auth
@@ -282,10 +285,20 @@ mariadb:
 ingress:
   enabled: {{ .Values.ingress.enabled }}
   className: {{ .Values.ingress.className | default "nginx" }}
-  host: {{ .Values.ingress.host | default "" }}
+  {{- if eq .Values.externalAccess.mode "domain" }}
+  host: {{ .Values.externalAccess.domain.name }}
+  {{- else }}
+  host: ""
+  {{- end }}
+  {{- if eq .Values.externalAccess.mode "domain" }}
   tls:
-    enabled: {{ .Values.ingress.tls.enabled | default false }}
-    secretName: {{ .Values.ingress.tls.secretName | default "" }}
+    enabled: {{ .Values.externalAccess.domain.tls.enabled }}
+    secretName: {{ .Values.externalAccess.domain.tls.secretName }}
+  {{- else }}
+  tls:
+    enabled: false
+    secretName: ""
+  {{- end }}
   annotations:
     # 기본 nginx annotation (항상 적용)
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
@@ -303,6 +316,10 @@ ingress:
     {{ $key }}: {{ $value | quote }}
     {{- end }}
     {{- end }}
+    {{- end }}
+    # cert-manager issuer annotation (도메인 모드 + TLS 활성화 시 자동 추가)
+    {{- if and (eq .Values.externalAccess.mode "domain") .Values.externalAccess.domain.tls.enabled .Values.externalAccess.domain.tls.issuer }}
+    cert-manager.io/cluster-issuer: {{ .Values.externalAccess.domain.tls.issuer | quote }}
     {{- end }}
 {{- end }}
 

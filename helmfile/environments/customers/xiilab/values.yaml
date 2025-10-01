@@ -1,58 +1,49 @@
 # Customer-specific overrides for xiilab environment
 # These values override the base configuration
 
+# External Access Configuration
+externalAccess:
+  mode: "domain"  # Using domain-based access with TLS
+  ip:
+    address: "10.61.3.163"  # LoadBalancer IP (ingress-nginx controller)
+  domain:
+    name: "demo.astrago.ai"
+    tls:
+      enabled: true
+      issuer: "letsencrypt-prod"  # cert-manager가 인증서 자동 생성
+      secretName: "astrago-tls-cert"
+
 # Customer-specific network settings
 nfs:
   server: 10.61.3.2 # xiilab NFS 서버
-# Keycloak Settings - base에서 기본 활성화됨
 
 # Astrago Settings - xiilab 전용 설정
 astrago:
-  baseUrl: https://demo.astrago.ai # xiilab 도메인 (TLS 사용)
+  baseUrl: https://demo.astrago.ai  # 외부 접근 URL
   global:
     imagePullSecrets:
       - name: ghcr-secret # GHCR 프라이빗 레지스트리 접근
-  # xiilab 전용 이미지 태그 (GHCR)
-  core:
+  # xiilab 전용 이미지 설정 (GHCR)
+  imageDefaults:
     registry: "ghcr.io"
     repository: "xiilab/astrago-backend"
-    imageTag: "core-stage-1.0-d9d0323a"
-  batch:
-    registry: "ghcr.io"
-    repository: "xiilab/astrago-backend"
-    imageTag: "batch-stage-1.0-d9d0323a"
-  monitor:
-    registry: "ghcr.io"
-    repository: "xiilab/astrago-backend"
-    imageTag: "monitor-stage-1.0-d9d0323a"
-  frontend:
-    registry: "ghcr.io"
-    repository: "xiilab/astrago-frontend"
-    imageTag: "frontend-stage-1.0-de783097"
   components:
     core:
-      tag: core-stage-1.0-df745040
+      tag: "core-stage-1.0-df745040"
     batch:
-      tag: batch-stage-1.0-df745040
+      tag: "batch-stage-1.0-df745040"
     monitor:
-      tag: monitor-stage-1.0-df745040
-# Astrago Ingress Settings - xiilab 전용 도메인
+      tag: "monitor-stage-1.0-df745040"
+    frontend:
+      tag: "frontend-stage-1.0-de783097"
+
+# Ingress annotations (도메인 모드이지만 외부 nginx에서 TLS 처리하므로 k8s 리다이렉트 비활성화)
 ingress:
-  host: demo.astrago.ai # xiilab 전용 도메인
-  tls:
-    enabled: true # K8s ingress에서 TLS 처리
-    secretName: "astrago-tls-cert"
   additionalAnnotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod" # Let's Encrypt 실제 인증서 자동 발급
-    nginx.ingress.kubernetes.io/ssl-redirect: "false" # 외부 nginx에서 처리하므로 비활성화
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "false" # 외부 nginx에서 처리하므로 비활성화
-# Keycloak Settings - xiilab 전용 도메인
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+
+# Keycloak Settings
 keycloak:
-  ingress:
-    host: "demo.astrago.ai" # xiilab 도메인 (Astrago와 동일)
-    # TLS는 Astrago ingress에서 처리되므로 별도 설정 불필요
   image:
     tag: "v0.1.2_test"
-# LoadBalancer IP - xiilab 인프라
-ingressNginx:
-  loadBalancerIP: "10.61.3.163" # xiilab LoadBalancer IP
