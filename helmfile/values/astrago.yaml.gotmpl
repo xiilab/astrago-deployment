@@ -295,10 +295,6 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
     nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
     nginx.ingress.kubernetes.io/client-header-buffer-size: "8k"
-    nginx.ingress.kubernetes.io/proxy-set-headers: |
-      X-Forwarded-For $proxy_add_x_forwarded_for
-      X-Forwarded-Proto $scheme
-      X-Real-IP $remote_addr
     nginx.ingress.kubernetes.io/proxy-busy-buffers-size: "256k"
     # 환경별 추가 annotation (있을 경우 merge)
     {{- with .Values.ingress.additionalAnnotations }}
