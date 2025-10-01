@@ -74,6 +74,9 @@ gpu-operator:
     repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
     image: k8s-mig-manager
     imagePullPolicy: IfNotPresent
+    config:
+      name: "custom-mig-parted-config"
+      default: "all-disabled"
 
   nodeStatusExporter:
     enabled: false
