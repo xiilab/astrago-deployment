@@ -33,7 +33,7 @@ astrago:
     monitor:
       tag: "monitor-stage-1.0-4dfffec3"
     frontend:
-      tag: "frontend-stage-1.0-9b506b09"
+      tag: "frontend-stage-1.0-293ec783"
 # Keycloak Settings
 keycloak:
   image:
