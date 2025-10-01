@@ -72,6 +72,8 @@ gpu-operator:
     repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
     image: k8s-device-plugin
     #version: v0.17.0
+    config:
+      name: nvidia-plugin-config-mps
     imagePullPolicy: IfNotPresent
 
   gfd:
@@ -86,6 +88,9 @@ gpu-operator:
     repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
     image: k8s-mig-manager
     #version: v0.10.0-ubuntu20.04
+    config:
+      name: "custom-mig-parted-config"
+      default: "all-disabled"
     imagePullPolicy: IfNotPresent
 
   nodeStatusExporter:
