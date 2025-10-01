@@ -21,12 +21,10 @@ astrago:
   global:
     imagePullSecrets:
       - name: ghcr-secret # GHCR 프라이빗 레지스트리 접근
-
   # 이미지 기본 설정 (components에 적용) - xiilab 전용 (GHCR)
   imageDefaults:
     registry: "ghcr.io"
     repository: "xiilab/astrago-backend"
-
   components:
     core:
       tag: "core-stage-1.0-4dfffec3"
@@ -35,8 +33,8 @@ astrago:
     monitor:
       tag: "monitor-stage-1.0-4dfffec3"
     frontend:
-      repository: "xiilab/astrago-frontend"  # Frontend는 별도 레포지토리 사용
-      tag: "frontend-stage-1.0-293ec783"
+      repository: "xiilab/astrago-frontend" # Frontend는 별도 레포지토리 사용
+      tag: "frontend-stage-1.0-5f38ea8a"
 # Keycloak Settings
 keycloak:
   image:
