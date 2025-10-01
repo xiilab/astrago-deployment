@@ -1,60 +1,37 @@
+# Harbor Configuration for Astrago
+# Optimized for Docker image push/pull only
+
 expose:
-  type: nodePort
+  # Use clusterIP - no Ingress created, access via Astrago Ingress later
+  type: clusterIP
   tls:
     enabled: false
-  nodePort:
-    name: harbor
-    ports:
-      http:
-        port: 80
-        nodePort: 30002
-      https:
-        port: 443
-        nodePort: 30003
-externalURL: http://{{ .Values.externalIP }}:{{ .Values.harbor.servicePort }}
+
+externalURL: http://harbor-core.harbor.svc.cluster.local
+
+# Persistence - only for critical data
 persistence:
   enabled: true
   resourcePolicy: "keep"
   persistentVolumeClaim:
+    # Registry: stores Docker image layers and manifests (REQUIRED)
     registry:
-      existingClaim: ""
       storageClass: "{{ .Values.nfs.storageClassName }}"
-      subPath: ""
       accessMode: ReadWriteOnce
       size: 5Gi
-      annotations: {}
-    jobservice:
-      jobLog:
-        existingClaim: ""
-        storageClass: "{{ .Values.nfs.storageClassName }}"
-        subPath: ""
-        accessMode: ReadWriteOnce
-        size: 1Gi
-        annotations: {}
+    # Database: stores metadata (projects, users, tags) (REQUIRED)
     database:
-      existingClaim: ""
       storageClass: "{{ .Values.nfs.storageClassName }}"
-      subPath: ""
       accessMode: ReadWriteOnce
       size: 1Gi
-      annotations: {}
+    # Redis: cache data (using PVC for StatefulSet compatibility)
     redis:
-      existingClaim: ""
       storageClass: "{{ .Values.nfs.storageClassName }}"
-      subPath: ""
-      accessMode: ReadWriteOnce
       size: 1Gi
-      annotations: {}
-    trivy:
-      existingClaim: ""
-      storageClass: "{{ .Values.nfs.storageClassName }}"
-      subPath: ""
-      accessMode: ReadWriteOnce
-      size: 5Gi
-      annotations: {}
 
 harborAdminPassword: "{{ .Values.harbor.adminPassword }}"
 
+# Image repositories
 nginx:
   image:
     repository: "{{ .Values.offline.registry | default "docker.io" }}/goharbor/nginx-photon"
@@ -67,6 +44,10 @@ core:
 jobservice:
   image:
     repository: "{{ .Values.offline.registry | default "docker.io" }}/goharbor/harbor-jobservice"
+  # Store logs in database instead of PVC
+  jobLoggers:
+    - database
+    - stdout
 registry:
   registry:
     image:
@@ -74,20 +55,30 @@ registry:
   controller:
     image:
       repository: "{{ .Values.offline.registry | default "docker.io" }}/goharbor/harbor-registryctl"
-trivy:
-  enabled: true
-  image:
-    repository: "{{ .Values.offline.registry | default "docker.io" }}/goharbor/trivy-adapter-photon"
+
+# Database
 database:
   type: internal
   internal:
     image:
       repository: "{{ .Values.offline.registry | default "docker.io" }}/goharbor/harbor-db"
+
+# Redis cache - no persistence needed (cache is ephemeral)
 redis:
   type: internal
   internal:
     image:
       repository: "{{ .Values.offline.registry | default "docker.io" }}/goharbor/redis-photon"
-exporter:
-  image:
-    repository: "{{ .Values.offline.registry | default "docker.io" }}/goharbor/harbor-exporter"
+
+# Disable optional components (not needed for basic push/pull)
+trivy:
+  enabled: false
+
+metrics:
+  enabled: false
+
+chartmuseum:
+  enabled: false
+
+notary:
+  enabled: false
