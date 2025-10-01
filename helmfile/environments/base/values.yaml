@@ -30,12 +30,6 @@ keycloak:
     registry: "docker.io"
     repository: "xiilab/astrago-keycloak-theme"
     tag: "v1.2.0"
-  ingress:
-    enabled: true  # 고객 배포시 기본 활성화
-    host: ""  # 빈 값이면 모든 IP/도메인에서 접근 허용 (고객별 설정)
-    tls:
-      enabled: false
-      secretName: ""  # TLS 인증서 미사용
 
 # Astrago Settings
 astrago:
@@ -73,22 +67,6 @@ harbor:
   servicePort: 30002
   enabled: true
   adminPassword: Harbor12345
-
-# Astrago Ingress Settings (기본값)
-ingress:
-  enabled: true  # 고객 배포시 기본 활성화
-  className: nginx
-  host: ""  # 고객별로 도메인 설정
-  tls:
-    enabled: false
-    secretName: ""
-  # 환경별 추가 annotation 설정
-  additionalAnnotations: {}
-    # 예시: cert-manager + HTTPS 리다이렉트
-    # cert-manager.io/cluster-issuer: "letsencrypt-staging"  # 또는 "letsencrypt-prod"
-    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    # 다른 환경별 annotation도 여기서 추가 가능
 
 offline:
   registry: # 192.168.56.11:35000

@@ -51,8 +51,13 @@ core:
       value: "admin"
     - name: HARBOR_PASSWORD
       value: "{{ .Values.harbor.adminPassword | default "Harbor12345" }}"
+    {{- if eq .Values.externalAccess.mode "domain" }}
     - name: ASTRAGO_INGRESS_DEFAULT_HOST
-      value: "{{ .Values.ingress.host | default "" }}"
+      value: "{{ .Values.externalAccess.domain.name }}"
+    {{- else }}
+    - name: ASTRAGO_INGRESS_DEFAULT_HOST
+      value: ""
+    {{- end }}
     # HikariCP 연결 풀 최적화 설정
     - name: SPRING_DATASOURCE_HIKARI_CONNECTION-TIMEOUT
       value: "30000"  # 30초
@@ -280,21 +285,18 @@ mariadb:
       socket=/opt/bitnami/mariadb/tmp/mysql.sock
       pid-file=/opt/bitnami/mariadb/tmp/mysqld.pid
 
-# Ingress configuration
-{{- if .Values.ingress.enabled }}
+# Ingress configuration - uses externalAccess for consistency
 ingress:
-  enabled: {{ .Values.ingress.enabled }}
-  className: {{ .Values.ingress.className | default "nginx" }}
+  enabled: true  # Always create Ingress
+  className: "nginx"
   {{- if eq .Values.externalAccess.mode "domain" }}
   host: {{ .Values.externalAccess.domain.name }}
-  {{- else }}
-  host: ""
-  {{- end }}
-  {{- if eq .Values.externalAccess.mode "domain" }}
   tls:
     enabled: {{ .Values.externalAccess.domain.tls.enabled }}
     secretName: {{ .Values.externalAccess.domain.tls.secretName }}
   {{- else }}
+  # IP mode: no host specified (accessible from all IPs)
+  host: ""
   tls:
     enabled: false
     secretName: ""
@@ -309,19 +311,10 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
     nginx.ingress.kubernetes.io/client-header-buffer-size: "8k"
     nginx.ingress.kubernetes.io/proxy-busy-buffers-size: "256k"
-    # 환경별 추가 annotation (있을 경우 merge)
-    {{- with .Values.ingress.additionalAnnotations }}
-    {{- range $key, $value := . }}
-    {{- if $value }}
-    {{ $key }}: {{ $value | quote }}
-    {{- end }}
-    {{- end }}
-    {{- end }}
     # cert-manager issuer annotation (도메인 모드 + TLS 활성화 시 자동 추가)
     {{- if and (eq .Values.externalAccess.mode "domain") .Values.externalAccess.domain.tls.enabled .Values.externalAccess.domain.tls.issuer }}
     cert-manager.io/cluster-issuer: {{ .Values.externalAccess.domain.tls.issuer | quote }}
     {{- end }}
-{{- end }}
 
 nfs:
   size: 10Gi
