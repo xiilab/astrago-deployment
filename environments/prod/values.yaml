@@ -25,6 +25,45 @@ astrago:
   proxyUrl:
   servicePort: 30080
   userInitPassword: astrago
+  global:
+    imagePullSecrets:
+      - name: ghcr-pull-secret # GHCR 프라이빗 레지스트리 접근
+  ghcr:
+    enabled: true
+    server: ghcr.io
+    username: dev-xiilab
+    password: "YOUR_TOKEN_HERE"  # ← 나중에 여기에 토큰 입력
+    email: dev@xiilab.com
+
+  # === TLS SSL SET ===
+  tls:
+    secretName: "astrago-tls-secret"  # USED TLS Secret NAME
+  
+  # === Ingress SETTING (Secret create) ===
+  ingress:
+    enabled: true
+    className: "nginx"
+    host: "10.61.3.33.nip.io"
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      # limit size (proxy-config.yaml의 client_max_body_size 0)
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+      # proxy buffer size (proxy-config.yaml)
+      nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+      nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
+      # Timeout set (proxy-config.yaml)
+      nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+      # large header size
+      nginx.ingress.kubernetes.io/large-client-header-buffers: "8 8k"
+    tls:
+      enabled: true  # astrago-tls-secret
+  
+  # === Truststore set (Secret) ===  
+  truststore:
+    enabled: true  # astrago-truststore-cert
+
   keycloak:
     externalKeycloakUrl:
     realm: astrago
@@ -54,35 +93,6 @@ astrago:
     imageTag: frontend-stage-2e50
   oneview:
     enabled: false
-# Loki Settings
-# loki:
-#   replicas: 1
-#   resources:
-#     limits:
-#       cpu: "2000m"
-#       memory: "4Gi"
-#     requests:
-#       cpu: "1000m"
-#       memory: "2Gi"
-#   persistence:
-#     enabled: true
-#     size: "100Gi"
-#     storageClass: "astrago-nfs-csi"
-#   retention:
-#     enabled: true
-#     period: "2160h" # 90 days for production environment
-#     compaction_interval: "10m"
-#     delete_delay: "2h"
-#     delete_worker_count: 150
-# # Promtail Settings
-# promtail:
-#   resources:
-#     limits:
-#       cpu: "500m"
-#       memory: "1Gi"
-#     requests:
-#       cpu: "200m"
-#       memory: "512Mi"
 
 harbor:
   servicePort: 30002

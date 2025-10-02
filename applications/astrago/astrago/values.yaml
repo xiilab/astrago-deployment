@@ -258,3 +258,60 @@ metricServer:
     registry: registry.k8s.io
     repository: metrics-server/metrics-server
     tag: v0.7.0
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    # File upload size limit (unlimited like in proxy config)
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    # Proxy timeouts to match nginx config
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    # Proxy buffer settings
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+    nginx.ingress.kubernetes.io/proxy-buffers: "4 256k"
+    nginx.ingress.kubernetes.io/proxy-busy-buffers-size: "256k"
+    # WebSocket support for /ws/workload/ endpoint
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+    # CORS support for Loki API
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
+    # SSL redirect
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: 10.61.3.33.nip.io
+      paths:
+        - path: /
+          pathType: Prefix
+          service: nginx-service
+          port: 80
+  tls:
+    - secretName: astrago-tls-secret
+      hosts:
+        - 10.61.3.33.nip.io
+
+# ASTRAGO 설정 (환경별로 values.yaml.gotmpl에서 오버라이드됨)
+astrago:
+  # TLS 인증서 설정
+  tls:
+    secretName: "astrago-tls-secret"  # TLS Secret 이름 (환경별로 설정 가능)
+    cert: ""  # 환경별로 설정
+    key: ""   # 환경별로 설정
+  
+  # Ingress 설정
+  ingress:
+    enabled: true
+    className: "nginx"
+    host: "localhost"  # 환경별로 설정
+    annotations: {}
+    tls:
+      enabled: false  # 환경별로 설정
+  
+  # Java Truststore 설정
+  truststore:
+    enabled: false  # 환경별로 설정
