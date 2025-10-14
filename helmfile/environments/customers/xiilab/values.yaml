@@ -34,7 +34,7 @@ astrago:
       tag: "monitor-stage-1.0-4dfffec3"
     frontend:
       repository: "xiilab/astrago-frontend" # Frontend는 별도 레포지토리 사용
-      tag: "frontend-stage-1.0-5f38ea8a"
+      tag: "frontend-stage-1.0-29756a6b"
 # Keycloak Settings
 keycloak:
   image:
