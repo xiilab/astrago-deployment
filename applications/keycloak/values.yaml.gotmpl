@@ -15,10 +15,12 @@ auth:
   adminUser: "{{ .Values.keycloak.adminUser }}"
   adminPassword: "{{ .Values.keycloak.adminPassword }}"
 service:
-  type: NodePort
+  type: {{ .Values.keycloak.service.type | default "NodePort" }}
+  {{- if eq .Values.keycloak.service.type "NodePort" }}
   nodePorts:
     http: "{{ .Values.keycloak.servicePort }}"
     https: "30002"
+  {{- end }}
 
 extraEnvVars:
   - name: KEYCLOAK_EXTRA_ARGS

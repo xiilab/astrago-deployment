@@ -13,6 +13,12 @@ core:
     registry: "{{ .Values.astrago.core.registry }}"
     repository: "{{ .Values.astrago.core.repository }}"
     tag: "{{ .Values.astrago.core.imageTag }}"
+  {{- if hasKey .Values.astrago "global" }}
+  {{- if hasKey .Values.astrago.global "imagePullSecrets" }}
+  imagePullSecrets:
+    {{- toYaml .Values.astrago.global.imagePullSecrets | nindent 4 }}
+  {{- end }}
+  {{- end }}
   env:
     - name: SPRING_JPA_HIBERNATE_DDL-AUTO
       value: none
@@ -95,6 +101,12 @@ batch:
     registry: "{{ .Values.astrago.batch.registry }}"
     repository: "{{ .Values.astrago.batch.repository }}"
     tag: "{{ .Values.astrago.batch.imageTag }}"
+  {{- if hasKey .Values.astrago "global" }}
+  {{- if hasKey .Values.astrago.global "imagePullSecrets" }}
+  imagePullSecrets:
+    {{- toYaml .Values.astrago.global.imagePullSecrets | nindent 4 }}
+  {{- end }}
+  {{- end }}
   env:
     - name: SPRING_JPA_HIBERNATE_DDL-AUTO
       value: none
@@ -172,7 +184,13 @@ monitor:
   image:
     registry: "{{ .Values.astrago.monitor.registry }}"
     repository: "{{ .Values.astrago.monitor.repository }}"
-    tag: "{{ .Values.astrago.monitor.imageTag }}" 
+    tag: "{{ .Values.astrago.monitor.imageTag }}"
+  {{- if hasKey .Values.astrago "global" }}
+  {{- if hasKey .Values.astrago.global "imagePullSecrets" }}
+  imagePullSecrets:
+    {{- toYaml .Values.astrago.global.imagePullSecrets | nindent 4 }}
+  {{- end }}
+  {{- end }}
   env:
     - name: SPRING_JPA_HIBERNATE_DDL-AUTO
       value: none
@@ -233,7 +251,13 @@ frontend:
     registry: "{{ .Values.astrago.frontend.registry }}"
     repository: "{{ .Values.astrago.frontend.repository }}"
     pullPolicy: Always
-    tag: "{{ .Values.astrago.frontend.imageTag }}" 
+    tag: "{{ .Values.astrago.frontend.imageTag }}"
+  {{- if hasKey .Values.astrago "global" }}
+  {{- if hasKey .Values.astrago.global "imagePullSecrets" }}
+  imagePullSecrets:
+    {{- toYaml .Values.astrago.global.imagePullSecrets | nindent 4 }}
+  {{- end }}
+  {{- end }}
   env:
     - name: KEYCLOAK_HOST
       {{ if .Values.astrago.keycloak.externalKeycloakUrl }}
@@ -284,6 +308,10 @@ proxy:
     nodePort: {{ .Values.astrago.servicePort  }}
 
 mariadb:
+  image:
+    registry: "{{ .Values.offline.registry | default "docker.io" }}"
+    repository: bitnamilegacy/mariadb
+    tag: 10.11.4-debian-11-r46
   auth:
     rootPassword: {{ .Values.astrago.mariadb.rootPassword }}
     database: astrago

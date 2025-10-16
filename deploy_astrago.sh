@@ -2,7 +2,7 @@
 export LANG=en_US.UTF-8
 
 # Fixing the environment name
-environment_name="astrago"
+environment_name="prod"
 
 CURRENT_DIR=$(dirname "$(realpath "$0")")
 

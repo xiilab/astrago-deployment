@@ -1,5 +1,7 @@
-# externalIP:
-externalIP: 10.61.3.91 #변경필요 
+externalIP: 10.61.3.83 #변경필요 
+ingress:
+  enabled: true
+
 gpu_operator:
   driver:
     version: "570.172.08" # 설치된 NVIDIA GPU Driver Version
@@ -9,31 +11,26 @@ gpu_operator:
 # Volume Settings
 nfs:
   storageClassName: astrago-nfs-csi
-  server: 10.61.3.91 #변경필요 
+  server: 10.61.3.83 #변경필요 
   basePath: /nfs-data/astrago
 # Keycloak Settings
 keycloak:
   adminUser: admin
   adminPassword: xiirocks
   servicePort: 30001
+  serviceType: ClusterIP  # ClusterIP OR NodePort
   image:
     repository: xiilab/astrago-keycloak-theme
     tag: "v1.2.0" # common/values.yaml의 themeVersion과 동기화
     pullPolicy: Always
 # Astrago Settings
 astrago:
-  proxyUrl:
+  proxyUrl: https://10.61.3.83.nip.io
   servicePort: 30080
   userInitPassword: astrago
   global:
     imagePullSecrets:
       - name: ghcr-pull-secret # GHCR 프라이빗 레지스트리 접근
-  ghcr:
-    enabled: true
-    server: ghcr.io
-    username: dev-xiilab
-    password: "YOUR_TOKEN_HERE"  # ← 나중에 여기에 토큰 입력
-    email: dev@xiilab.com
 
   # === TLS SSL SET ===
   tls:
@@ -51,6 +48,7 @@ astrago:
       # proxy buffer size (proxy-config.yaml)
       nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
       nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
+      nginx.ingress.kubernetes.io/proxy-busy-buffers-size: "256k"  # ← proxy-buffer-size보다 크거나 같아야함.
       # Timeout set (proxy-config.yaml)
       nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
       nginx.ingress.kubernetes.io/proxy-send-timeout: "300"

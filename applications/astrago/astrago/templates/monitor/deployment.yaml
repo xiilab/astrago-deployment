@@ -68,6 +68,14 @@ spec:
               protocol: TCP
           resources:
             {{- toYaml .Values.monitor.resources | nindent 12 }}
+      {{- if .Values.astrago.truststore.enabled }}
+      volumes:
+        - name: truststore
+          emptyDir: {}
+        - name: {{ .Values.astrago.tls.secretName | default "astrago-tls-secret" }}
+          secret:
+            secretName: {{ .Values.astrago.tls.secretName | default "astrago-tls-secret" }}
+      {{- end }}
       {{- with .Values.monitor.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
