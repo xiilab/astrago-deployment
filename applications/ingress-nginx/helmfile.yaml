@@ -3,6 +3,7 @@ releases:
   namespace: ingress-nginx
   chart: ingress-nginx
   wait: true
+  installed: {{ .Values.ingress.enabled }}  # Ingress 모드일 때만 설치
   labels:
     app: ingress-nginx
   values:
