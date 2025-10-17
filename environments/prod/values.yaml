@@ -1,6 +1,6 @@
 externalIP: 10.61.3.83 #변경필요 
 ingress:
-  enabled: true
+  enabled: false  # NodePort 모드 기본값 (--mode=ingress로 변경 가능)
 
 gpu_operator:
   driver:
@@ -38,7 +38,7 @@ astrago:
   
   # === Ingress SETTING (Secret create) ===
   ingress:
-    enabled: true
+    enabled: false  # NodePort 모드 기본값 (--mode=ingress로 변경 가능)
     className: "nginx"
     host: "10.61.3.33.nip.io"
     annotations:

@@ -25,15 +25,19 @@ install_binary() {
 
 # Function to print usage
 print_usage() {
-    echo "Usage: $0 [env|sync|destroy]"
+    echo "Usage: $0 [env|sync|destroy] [OPTIONS]"
     echo ""
     echo "env          : Create a new environment configuration file. Prompts the user for the external connection IP address, NFS server IP address, and base path of NFS."
     echo "sync         : Install (or update) the entire Astrago app for the already configured environment."
     echo "destroy      : Uninstall the entire Astrago app for the already configured environment."
     echo "sync <app name>    : Install (or update) a specific app."
-    echo "                Usage: $0 sync <app name>"
+    echo "                Usage: $0 sync <app name> [--mode=nodeport|ingress]"
     echo "destroy <app name> : Uninstall a specific app."
     echo "                Usage: $0 destroy <app name>"
+    echo ""
+    echo "OPTIONS:"
+    echo "  --mode=nodeport  : Use NodePort access mode (default)"
+    echo "  --mode=ingress   : Use Ingress access mode"
     echo ""
     echo "Available Apps:"
     echo "nfs-provisioner"
@@ -97,10 +101,40 @@ get_base_path() {
 
 # Main function
 main() {
-    case "$1" in
-        "--help")
-            print_usage
-            ;;
+    # Parse --mode option (default: nodeport)
+    ACCESS_MODE="nodeport"
+    APP_NAME=""
+    COMMAND=""
+    
+    for arg in "$@"; do
+        case "$arg" in
+            --mode=*)
+                ACCESS_MODE="${arg#*=}"
+                ;;
+            --help)
+                print_usage
+                ;;
+            env|sync|destroy)
+                COMMAND="$arg"
+                ;;
+            *)
+                if [ -z "$APP_NAME" ] && [ -n "$COMMAND" ]; then
+                    APP_NAME="$arg"
+                fi
+                ;;
+        esac
+    done
+    
+    # Set ingress.enabled based on ACCESS_MODE
+    if [ "$ACCESS_MODE" = "ingress" ]; then
+        INGRESS_ENABLED="true"
+        echo "===> Access Mode: Ingress"
+    else
+        INGRESS_ENABLED="false"
+        echo "===> Access Mode: NodePort (default)"
+    fi
+    
+    case "$COMMAND" in
         "env")
             # Get the external IP address from the user
             get_ip_address external_ip "Enter the connection URL (e.g. 10.61.3.12)"
@@ -126,12 +160,18 @@ main() {
         "sync" | "destroy")
             if [ ! -d "environments/$environment_name" ]; then
                 echo "Environment is not configured. Please run env first."
-            elif [ -n "$2" ]; then
-                echo "Running helmfile -e $environment_name -l app=$2 $1."
-                helmfile -e "$environment_name" -l "app=$2" "$1"
+            elif [ -n "$APP_NAME" ]; then
+                echo "Running helmfile -e $environment_name -l app=$APP_NAME $COMMAND."
+                helmfile -e "$environment_name" -l "app=$APP_NAME" \
+                    --set ingress.enabled=$INGRESS_ENABLED \
+                    --set astrago.ingress.enabled=$INGRESS_ENABLED \
+                    "$COMMAND"
             else
-                echo "Running helmfile -e $environment_name $1."
-                helmfile -e "$environment_name" "$1"
+                echo "Running helmfile -e $environment_name $COMMAND."
+                helmfile -e "$environment_name" \
+                    --set ingress.enabled=$INGRESS_ENABLED \
+                    --set astrago.ingress.enabled=$INGRESS_ENABLED \
+                    "$COMMAND"
             fi
             ;;
         *)
