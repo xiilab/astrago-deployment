@@ -74,21 +74,21 @@ astrago:
     password: xiirocks
     maxLifetime: "1800000"
   core:
-    registry: "docker.io"
-    repository: "xiilab/astrago-posco"
-    imageTag: "core-stage-224a"
+    registry: "ghcr.io"
+    repository: "xiilab/astrago-backend"
+    imageTag: "core-stage-1.0-0f278276"
   batch:
-    registry: "docker.io"
-    repository: "xiilab/astrago-posco"
-    imageTag: "batch-stage-224a"
+    registry: "ghcr.io"
+    repository: "xiilab/astrago-backend"
+    imageTag: "batch-stage-1.0-0f278276"
   monitor:
-    registry: "docker.io"
-    repository: "xiilab/astrago-posco"
-    imageTag: "monitor-stage-224a"
+    registry: "ghcr.io"
+    repository: "xiilab/astrago-backend"
+    imageTag: "monitor-stage-1.0-0f278276"
   frontend:
-    registry: "docker.io"
-    repository: "xiilab/astrago-posco"
-    imageTag: frontend-stage-2e50
+    registry: "ghcr.io"
+    repository: "xiilab/astrago-frontend"
+    imageTag: "frontend-stage-1.0-9c31f980"
   oneview:
     enabled: false
 
