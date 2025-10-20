@@ -96,6 +96,8 @@ core:
     - name: JAVA_OPTS
       value: "-Djavax.net.ssl.trustStore=/opt/truststore/cacerts -Djavax.net.ssl.trustStorePassword=changeit"
     {{- end }}
+    - name: IS_INGRESS
+      value: {{ .Values.ingress.enabled }}
 batch:
   image:
     registry: "{{ .Values.astrago.batch.registry }}"
