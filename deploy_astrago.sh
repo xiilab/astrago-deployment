@@ -162,20 +162,32 @@ main() {
                 echo "Environment is not configured. Please run env first."
             elif [ -n "$APP_NAME" ]; then
                 echo "Running helmfile -e $environment_name -l app=$APP_NAME $COMMAND."
-                helmfile -e "$environment_name" -l "app=$APP_NAME" \
-                    --set ingress.enabled=$INGRESS_ENABLED \
-                    --set astrago.ingress.enabled=$INGRESS_ENABLED \
-                    --set astrago.ingress.tls.enabled=$INGRESS_ENABLED \
-                    --set astrago.truststore.enabled=$INGRESS_ENABLED \
-                    "$COMMAND"
+                if [ "$COMMAND" = "sync" ]; then
+                    # sync는 --set 옵션 사용
+                    helmfile -e "$environment_name" -l "app=$APP_NAME" \
+                        --set ingress.enabled=$INGRESS_ENABLED \
+                        --set astrago.ingress.enabled=$INGRESS_ENABLED \
+                        --set astrago.ingress.tls.enabled=$INGRESS_ENABLED \
+                        --set astrago.truststore.enabled=$INGRESS_ENABLED \
+                        "$COMMAND"
+                else
+                    # destroy는 --set 옵션 없이
+                    helmfile -e "$environment_name" -l "app=$APP_NAME" "$COMMAND"
+                fi
             else
                 echo "Running helmfile -e $environment_name $COMMAND."
-                helmfile -e "$environment_name" \
-                    --set ingress.enabled=$INGRESS_ENABLED \
-                    --set astrago.ingress.enabled=$INGRESS_ENABLED \
-                    --set astrago.ingress.tls.enabled=$INGRESS_ENABLED \
-                    --set astrago.truststore.enabled=$INGRESS_ENABLED \
-                    "$COMMAND"
+                if [ "$COMMAND" = "sync" ]; then
+                    # sync는 --set 옵션 사용
+                    helmfile -e "$environment_name" \
+                        --set ingress.enabled=$INGRESS_ENABLED \
+                        --set astrago.ingress.enabled=$INGRESS_ENABLED \
+                        --set astrago.ingress.tls.enabled=$INGRESS_ENABLED \
+                        --set astrago.truststore.enabled=$INGRESS_ENABLED \
+                        "$COMMAND"
+                else
+                    # destroy는 --set 옵션 없이
+                    helmfile -e "$environment_name" "$COMMAND"
+                fi
             fi
             ;;
         *)

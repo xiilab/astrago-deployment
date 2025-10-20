@@ -40,7 +40,7 @@ astrago:
   ingress:
     enabled: false  # NodePort 모드 기본값 (--mode=ingress로 변경 가능)
     className: "nginx"
-    host: "10.61.3.33.nip.io"
+    host: "10.61.3.83.nip.io"  # externalIP와 일치하도록 수정
     annotations:
       nginx.ingress.kubernetes.io/ssl-redirect: "true"
       # limit size (proxy-config.yaml의 client_max_body_size 0)
