@@ -165,12 +165,16 @@ main() {
                 helmfile -e "$environment_name" -l "app=$APP_NAME" \
                     --set ingress.enabled=$INGRESS_ENABLED \
                     --set astrago.ingress.enabled=$INGRESS_ENABLED \
+                    --set astrago.ingress.tls.enabled=$INGRESS_ENABLED \
+                    --set astrago.truststore.enabled=$INGRESS_ENABLED \
                     "$COMMAND"
             else
                 echo "Running helmfile -e $environment_name $COMMAND."
                 helmfile -e "$environment_name" \
                     --set ingress.enabled=$INGRESS_ENABLED \
                     --set astrago.ingress.enabled=$INGRESS_ENABLED \
+                    --set astrago.ingress.tls.enabled=$INGRESS_ENABLED \
+                    --set astrago.truststore.enabled=$INGRESS_ENABLED \
                     "$COMMAND"
             fi
             ;;

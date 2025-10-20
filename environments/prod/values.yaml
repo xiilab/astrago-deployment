@@ -56,11 +56,11 @@ astrago:
       # large header size
       nginx.ingress.kubernetes.io/large-client-header-buffers: "8 8k"
     tls:
-      enabled: true  # astrago-tls-secret
+      enabled: false  # Ingress 모드일 때만 필요 (NodePort 기본값: false)
   
   # === Truststore set (Secret) ===  
   truststore:
-    enabled: true  # astrago-truststore-cert
+    enabled: false  # Ingress 모드일 때만 필요 (NodePort 기본값: false)
 
   keycloak:
     externalKeycloakUrl:
