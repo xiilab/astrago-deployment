@@ -18,14 +18,14 @@ keycloak:
   adminUser: admin
   adminPassword: xiirocks
   servicePort: 30001
-  serviceType: ClusterIP  # ClusterIP OR NodePort
+  serviceType: #ClusterIP  # ClusterIP OR NodePort
   image:
     repository: xiilab/astrago-keycloak-theme
     tag: "v1.2.0" # common/values.yaml의 themeVersion과 동기화
     pullPolicy: Always
 # Astrago Settings
 astrago:
-  proxyUrl: https://10.61.3.83.nip.io
+  proxyUrl: #https://10.61.3.83.nip.io
   servicePort: 30080
   userInitPassword: astrago
   global:
@@ -40,7 +40,7 @@ astrago:
   ingress:
     enabled: false  # NodePort 모드 기본값 (--mode=ingress로 변경 가능)
     className: "nginx"
-    host: "10.61.3.83.nip.io"  # externalIP와 일치하도록 수정
+    host: #"10.61.3.83.nip.io"  # externalIP와 일치하도록 수정
     annotations:
       nginx.ingress.kubernetes.io/ssl-redirect: "true"
       # limit size (proxy-config.yaml의 client_max_body_size 0)
