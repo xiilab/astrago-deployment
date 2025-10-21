@@ -389,7 +389,7 @@ astrago:
     secretName: "{{ .Values.astrago.tls.secretName | default "astrago-tls-secret" }}"
 
   ingress:
-    enabled: {{ .Values.astrago.ingress.enabled | default true }}
+    enabled: {{ .Values.astrago.ingress.enabled | default false }}
     className: "{{ .Values.astrago.ingress.className | default "nginx" }}"
     host: "{{ .Values.astrago.ingress.host | default .Values.externalIP }}"
     annotations:
