@@ -27,11 +27,11 @@ astrago:
     repository: "xiilab/astrago-backend"
   components:
     core:
-      tag: "core-stage-1.0-fe6cb042"
+      tag: "core-stage-1.0-0c54602d"
     batch:
-      tag: "batch-stage-1.0-fe6cb042"
+      tag: "batch-stage-1.0-0c54602d"
     monitor:
-      tag: "monitor-stage-1.0-fe6cb042"
+      tag: "monitor-stage-1.0-0c54602d"
     frontend:
       repository: "xiilab/astrago-frontend" # Frontend는 별도 레포지토리 사용
       tag: "frontend-stage-1.0-9c31f980"
