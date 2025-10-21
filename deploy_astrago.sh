@@ -101,11 +101,39 @@ get_base_path() {
 
 # Main function
 main() {
+    # Check and install yq (mikefarah/yq) if not available or wrong version
+    YQ_CORRECT=false
+    if command -v yq &> /dev/null; then
+        # Check if it's the correct yq (mikefarah/yq)
+        if yq --version 2>&1 | grep -q "mikefarah"; then
+            YQ_CORRECT=true
+        else
+            echo "Wrong yq version detected (Python yq). Installing correct yq (mikefarah/yq)..."
+        fi
+    else
+        echo "yq not found. Installing yq (mikefarah/yq)..."
+    fi
+
+    if [ "$YQ_CORRECT" = false ]; then
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS
+            brew install mikefarah/tap/yq
+        elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            # Linux
+            YQ_VERSION="v4.35.1"
+            YQ_BINARY="yq_linux_amd64"
+            wget "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BINARY}" -O /tmp/yq_new
+            sudo mv /tmp/yq_new /usr/local/bin/yq
+            sudo chmod +x /usr/local/bin/yq
+        fi
+        echo "yq (mikefarah/yq) installed successfully."
+    fi
+
     # Parse --mode option (default: nodeport)
     ACCESS_MODE="nodeport"
     APP_NAME=""
     COMMAND=""
-    
+
     for arg in "$@"; do
         case "$arg" in
             --mode=*)
@@ -124,16 +152,7 @@ main() {
                 ;;
         esac
     done
-    
-    # Set ingress.enabled based on ACCESS_MODE
-    if [ "$ACCESS_MODE" = "ingress" ]; then
-        INGRESS_ENABLED="true"
-        echo "===> Access Mode: Ingress"
-    else
-        INGRESS_ENABLED="false"
-        echo "===> Access Mode: NodePort (default)"
-    fi
-    
+
     case "$COMMAND" in
         "env")
             # Get the external IP address from the user
@@ -160,32 +179,30 @@ main() {
         "sync" | "destroy")
             if [ ! -d "environments/$environment_name" ]; then
                 echo "Environment is not configured. Please run env first."
-            elif [ -n "$APP_NAME" ]; then
-                echo "Running helmfile -e $environment_name -l app=$APP_NAME $COMMAND."
-                if [ "$COMMAND" = "sync" ]; then
-                    # sync는 --set 옵션 사용
-                    helmfile -e "$environment_name" -l "app=$APP_NAME" \
-                        --set ingress.enabled=$INGRESS_ENABLED \
-                        --set astrago.ingress.enabled=$INGRESS_ENABLED \
-                        --set astrago.ingress.tls.enabled=$INGRESS_ENABLED \
-                        --set astrago.truststore.enabled=$INGRESS_ENABLED \
-                        "$COMMAND"
-                else
-                    # destroy는 --set 옵션 없이
-                    helmfile -e "$environment_name" -l "app=$APP_NAME" "$COMMAND"
-                fi
             else
-                echo "Running helmfile -e $environment_name $COMMAND."
-                if [ "$COMMAND" = "sync" ]; then
-                    # sync는 --set 옵션 사용
-                    helmfile -e "$environment_name" \
-                        --set ingress.enabled=$INGRESS_ENABLED \
-                        --set astrago.ingress.enabled=$INGRESS_ENABLED \
-                        --set astrago.ingress.tls.enabled=$INGRESS_ENABLED \
-                        --set astrago.truststore.enabled=$INGRESS_ENABLED \
-                        "$COMMAND"
+                # Update values.yaml based on ACCESS_MODE
+                VALUES_FILE="environments/$environment_name/values.yaml"
+                if [ "$ACCESS_MODE" = "ingress" ]; then
+                    echo "===> Access Mode: Ingress"
+                    echo "Updating $VALUES_FILE for Ingress mode..."
+                    yq -i '.ingress.enabled = true' "$VALUES_FILE"
+                    yq -i '.astrago.ingress.enabled = true' "$VALUES_FILE"
+                    yq -i '.astrago.ingress.tls.enabled = true' "$VALUES_FILE"
+                    yq -i '.astrago.truststore.enabled = true' "$VALUES_FILE"
                 else
-                    # destroy는 --set 옵션 없이
+                    echo "===> Access Mode: NodePort (default)"
+                    echo "Updating $VALUES_FILE for NodePort mode..."
+                    yq -i '.ingress.enabled = false' "$VALUES_FILE"
+                    yq -i '.astrago.ingress.enabled = false' "$VALUES_FILE"
+                    yq -i '.astrago.ingress.tls.enabled = false' "$VALUES_FILE"
+                    yq -i '.astrago.truststore.enabled = false' "$VALUES_FILE"
+                fi
+
+                if [ -n "$APP_NAME" ]; then
+                    echo "Running helmfile -e $environment_name -l app=$APP_NAME $COMMAND."
+                    helmfile -e "$environment_name" -l "app=$APP_NAME" "$COMMAND"
+                else
+                    echo "Running helmfile -e $environment_name $COMMAND."
                     helmfile -e "$environment_name" "$COMMAND"
                 fi
             fi
@@ -201,4 +218,3 @@ for cmd in helm helmfile kubectl; do
     install_binary $cmd
 done
 main "$@"
-

@@ -75,13 +75,13 @@ data:
         #   proxy_send_timeout 300;
         #   proxy_read_timeout 300;
         #   send_timeout 300;
-          
+
         #   # CORS 헤더 설정
         #   add_header 'Access-Control-Allow-Origin' '*' always;
         #   add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
         #   add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
         #   add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
-          
+
         #   # OPTIONS 요청 처리 (CORS preflight)
         #   if ($request_method = 'OPTIONS') {
         #     add_header 'Access-Control-Allow-Origin' '*';
@@ -111,22 +111,34 @@ data:
         location /auth/ {  # '/auth/'로 경로를 명확히 지정
           proxy_pass http://keycloak.keycloak.svc/auth/;
 
-          # 요청의 Host 헤더에서 포트를 추출하여 X-Forwarded-Port로 설정
+          {{- if .Values.ingress.enabled }}
+          # Ingress 모드: HTTPS 프로토콜과 포트를 고정
+          proxy_set_header X-Forwarded-Host $host;
+          proxy_set_header X-Forwarded-Port 443;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto https;
+          {{- else }}
+          # NodePort 모드: 동적으로 프로토콜과 포트 설정
           set $forwarded_port "";
           if ($http_host ~* ":(\d+)$") {
             set $forwarded_port $1;
           }
-
           proxy_set_header X-Forwarded-Host $host;
           proxy_set_header X-Forwarded-Port $forwarded_port;
           proxy_set_header X-Real-IP $remote_addr;
           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
           proxy_set_header X-Forwarded-Proto $scheme;
+          {{- end }}
         }
 
         # '/auth'로 요청이 들어오면 '/auth/'로 리디렉션
         location = /auth {
-          return 301 $scheme://$http_host/auth/;                
+          {{- if .Values.ingress.enabled }}
+          return 301 https://$http_host/auth/;
+          {{- else }}
+          return 301 $scheme://$http_host/auth/;
+          {{- end }}
         }
 
         # 웹소켓 프록시 설정
