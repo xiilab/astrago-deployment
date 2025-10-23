@@ -4,7 +4,8 @@ export LANG=en_US.UTF-8
 # Fixing the environment name
 environment_name="prod"
 
-CURRENT_DIR=$(dirname "$(realpath "$0")")
+# Portable alternative to realpath (works on Ubuntu, RedHat, and older systems)
+CURRENT_DIR=$(cd "$(dirname "$0")" && pwd)
 
 # Function to check and install binaries
 install_binary() {
@@ -12,8 +13,17 @@ install_binary() {
     if ! command -v $cmd &> /dev/null; then
         echo "===> Installing $cmd"
         if [[ -f "$CURRENT_DIR/tools/linux/$cmd" ]]; then
-            sudo cp "$CURRENT_DIR/tools/linux/$cmd" /usr/local/bin/
-            sudo chmod +x /usr/local/bin/$cmd
+            # Handle sudo availability (works on both Ubuntu and RedHat)
+            if [ "$EUID" -ne 0 ] && command -v sudo &> /dev/null; then
+                sudo cp "$CURRENT_DIR/tools/linux/$cmd" /usr/local/bin/
+                sudo chmod +x /usr/local/bin/$cmd
+            elif [ "$EUID" -eq 0 ]; then
+                cp "$CURRENT_DIR/tools/linux/$cmd" /usr/local/bin/
+                chmod +x /usr/local/bin/$cmd
+            else
+                echo "FATAL: This script requires root privileges. Run as root or install sudo."
+                exit 1
+            fi
         else
             echo "FATAL: $cmd binary not found in tools folder."
             exit 1
@@ -119,12 +129,32 @@ main() {
             # macOS
             brew install mikefarah/tap/yq
         elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-            # Linux
+            # Linux - with wget/curl fallback for compatibility
             YQ_VERSION="v4.35.1"
             YQ_BINARY="yq_linux_amd64"
-            wget "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BINARY}" -O /tmp/yq_new
-            sudo mv /tmp/yq_new /usr/local/bin/yq
-            sudo chmod +x /usr/local/bin/yq
+            YQ_URL="https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BINARY}"
+
+            # Download with wget or curl (works on both Ubuntu and RedHat)
+            if command -v wget &> /dev/null; then
+                wget "${YQ_URL}" -O /tmp/yq_new
+            elif command -v curl &> /dev/null; then
+                curl -L "${YQ_URL}" -o /tmp/yq_new
+            else
+                echo "FATAL: Neither wget nor curl found. Please install wget or curl."
+                exit 1
+            fi
+
+            # Handle sudo availability (works on both Ubuntu and RedHat)
+            if [ "$EUID" -ne 0 ] && command -v sudo &> /dev/null; then
+                sudo mv /tmp/yq_new /usr/local/bin/yq
+                sudo chmod +x /usr/local/bin/yq
+            elif [ "$EUID" -eq 0 ]; then
+                mv /tmp/yq_new /usr/local/bin/yq
+                chmod +x /usr/local/bin/yq
+            else
+                echo "FATAL: This script requires root privileges. Run as root or install sudo."
+                exit 1
+            fi
         fi
         echo "yq (mikefarah/yq) installed successfully."
     fi
