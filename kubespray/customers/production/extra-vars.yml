@@ -1,0 +1,32 @@
+# 컨테이너 런타임 설정
+container_manager: crio
+
+# CRI-O 이미지 저장 위치
+crio_root: /DATA/data/crio/containers
+
+# CRI-O 레지스트리 설정 (Kubespray 표준 방식)
+crio_registries:
+  - prefix: docker.io
+    location: docker.io
+    unqualified: true
+    insecure: false
+    blocked: false
+
+# kube-vip 설정 (HA Control Plane)
+kube_vip_enabled: true
+kube_vip_arp_enabled: true
+kube_vip_controlplane_enabled: true
+kube_vip_address: 10.61.3.160 # VIP 주소 (환경에 맞게 변경)
+loadbalancer_apiserver:
+  address: "{{ kube_vip_address }}"
+  port: 6443
+kube_vip_interface: "" # 자동 감지 (필요시 인터페이스명 지정)
+kube_vip_services_enabled: true
+kube_vip_dns_mode: first
+kube_vip_lb_fwdmethod: local
+
+# kube-proxy 설정 (kube-vip와 호환성을 위해)
+kube_proxy_strict_arp: true
+
+# 인증서 자동 갱신 설정 (권장)
+auto_renew_certificates: true

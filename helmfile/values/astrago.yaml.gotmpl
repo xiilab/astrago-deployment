@@ -225,6 +225,10 @@ proxy:
     nodePort: {{ .Values.astrago.servicePort  }}
 
 mariadb:
+  image:
+    registry: "{{ .Values.offline.registry | default "docker.io" }}"
+    repository: bitnamilegacy/mariadb
+    tag: 10.11.4-debian-11-r46
   auth:
     rootPassword: {{ .Values.astrago.mariadb.rootPassword }}
     database: astrago
