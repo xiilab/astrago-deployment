@@ -38,4 +38,4 @@ astrago:
 # Keycloak Settings
 keycloak:
   image:
-    tag: "v0.1.2_test"
+    tag: "v1.2.0"
