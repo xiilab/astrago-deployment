@@ -66,23 +66,33 @@ rules:
   verbs:
   - get
   - list
-  - create
   - watch
   - update
   - patch
 - apiGroups:
   - ""
   resources:
-  - pods
-  - pods/eviction
+  - events
   verbs:
   - create
   - get
   - list
   - watch
-  - update
-  - patch
   - delete
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods/eviction
+  verbs:
+  - create
 - apiGroups:
   - apps
   resources:
