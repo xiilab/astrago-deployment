@@ -1,5 +1,11 @@
 global:
   imageRegistry: "{{ .Values.offline.registry | default "" }}"
+  {{- if hasKey .Values.astrago "global" }}
+  {{- if hasKey .Values.astrago.global "imagePullSecrets" }}
+  imagePullSecrets:
+    {{- toYaml .Values.astrago.global.imagePullSecrets | nindent 4 }}
+  {{- end }}
+  {{- end }}
 
 core:
   replicaCount: 3
@@ -7,6 +13,12 @@ core:
     registry: "{{ .Values.astrago.core.registry }}"
     repository: "{{ .Values.astrago.core.repository }}"
     tag: "{{ .Values.astrago.core.imageTag }}"
+  {{- if hasKey .Values.astrago "global" }}
+  {{- if hasKey .Values.astrago.global "imagePullSecrets" }}
+  imagePullSecrets:
+    {{- toYaml .Values.astrago.global.imagePullSecrets | nindent 4 }}
+  {{- end }}
+  {{- end }}
   env:
     - name: SPRING_JPA_HIBERNATE_DDL-AUTO
       value: none
@@ -77,11 +89,26 @@ core:
       value: "5000"   # 5초
     - name: SPRING_DATASOURCE_HIKARI_CONNECTION-TEST-QUERY
       value: "SELECT 1"
+    - name: ASTRAGO_INGRESS_DEFAULT_HOST
+      value: {{ .Values.astrago.ingress.host }}
+    {{- if .Values.astrago.truststore.enabled }}
+    # SSL truststore 설정 (외부 HTTPS 서비스 통신용)
+    - name: JAVA_OPTS
+      value: "-Djavax.net.ssl.trustStore=/opt/truststore/cacerts -Djavax.net.ssl.trustStorePassword=changeit"
+    {{- end }}
+    - name: ASTRAGO_IS_INGRESS
+      value: {{ .Values.ingress.enabled }}
 batch:
   image:
     registry: "{{ .Values.astrago.batch.registry }}"
     repository: "{{ .Values.astrago.batch.repository }}"
     tag: "{{ .Values.astrago.batch.imageTag }}"
+  {{- if hasKey .Values.astrago "global" }}
+  {{- if hasKey .Values.astrago.global "imagePullSecrets" }}
+  imagePullSecrets:
+    {{- toYaml .Values.astrago.global.imagePullSecrets | nindent 4 }}
+  {{- end }}
+  {{- end }}
   env:
     - name: SPRING_JPA_HIBERNATE_DDL-AUTO
       value: none
@@ -150,12 +177,22 @@ batch:
       value: "admin"
     - name: HARBOR_PASSWORD
       value: "{{ .Values.harbor.adminPassword | default "Harbor12345" }}"
-
+    {{- if .Values.astrago.truststore.enabled }}
+    # SSL truststore 설정 (외부 HTTPS 서비스 통신용)
+    - name: JAVA_OPTS
+      value: "-Djavax.net.ssl.trustStore=/opt/truststore/cacerts -Djavax.net.ssl.trustStorePassword=changeit"
+    {{- end }}
 monitor:
   image:
     registry: "{{ .Values.astrago.monitor.registry }}"
     repository: "{{ .Values.astrago.monitor.repository }}"
-    tag: "{{ .Values.astrago.monitor.imageTag }}" 
+    tag: "{{ .Values.astrago.monitor.imageTag }}"
+  {{- if hasKey .Values.astrago "global" }}
+  {{- if hasKey .Values.astrago.global "imagePullSecrets" }}
+  imagePullSecrets:
+    {{- toYaml .Values.astrago.global.imagePullSecrets | nindent 4 }}
+  {{- end }}
+  {{- end }}
   env:
     - name: SPRING_JPA_HIBERNATE_DDL-AUTO
       value: none
@@ -205,14 +242,24 @@ monitor:
       value: {{ .Values.keycloak.adminPassword }}
     - name: ADMIN_INIT-PASSWORD
       value: {{ .Values.astrago.userInitPassword }}
-
+    {{- if .Values.astrago.truststore.enabled }}
+    # SSL truststore 설정 (외부 HTTPS 서비스 통신용)
+    - name: JAVA_OPTS
+      value: "-Djavax.net.ssl.trustStore=/opt/truststore/cacerts -Djavax.net.ssl.trustStorePassword=changeit"
+    {{- end }}
 
 frontend:
   image:
     registry: "{{ .Values.astrago.frontend.registry }}"
     repository: "{{ .Values.astrago.frontend.repository }}"
     pullPolicy: Always
-    tag: "{{ .Values.astrago.frontend.imageTag }}" 
+    tag: "{{ .Values.astrago.frontend.imageTag }}"
+  {{- if hasKey .Values.astrago "global" }}
+  {{- if hasKey .Values.astrago.global "imagePullSecrets" }}
+  imagePullSecrets:
+    {{- toYaml .Values.astrago.global.imagePullSecrets | nindent 4 }}
+  {{- end }}
+  {{- end }}
   env:
     - name: KEYCLOAK_HOST
       {{ if .Values.astrago.keycloak.externalKeycloakUrl }}
@@ -263,6 +310,10 @@ proxy:
     nodePort: {{ .Values.astrago.servicePort  }}
 
 mariadb:
+  image:
+    registry: "{{ .Values.offline.registry | default "docker.io" }}"
+    repository: bitnamilegacy/mariadb
+    tag: 10.11.4-debian-11-r46
   auth:
     rootPassword: {{ .Values.astrago.mariadb.rootPassword }}
     database: astrago
@@ -328,3 +379,42 @@ nfs:
   accessModes:
   - ReadWriteOnce
   storageClassName: {{ .Values.nfs.storageClassName }}
+
+
+# === 환경별 ASTRAGO 설정을 Chart 구조로 변환 ===
+# TLS 인증서는 Manual Secret 방식으로 관리됨
+
+astrago:
+  tls:
+    secretName: "{{ .Values.astrago.tls.secretName | default "astrago-tls-secret" }}"
+
+  ingress:
+    enabled: {{ .Values.astrago.ingress.enabled | default false }}
+    className: "{{ .Values.astrago.ingress.className | default "nginx" }}"
+    host: "{{ .Values.astrago.ingress.host | default .Values.externalIP }}"
+    annotations:
+      {{- if .Values.astrago.ingress.annotations }}
+      {{- toYaml .Values.astrago.ingress.annotations | nindent 6 }}
+      {{- end }}
+    tls:
+      enabled: {{ .Values.astrago.ingress.tls.enabled | default false }}
+
+  truststore:
+    enabled: {{ .Values.astrago.truststore.enabled | default false }}
+
+# Ingress configuration (기존 Chart 구조 유지)
+ingress:
+  enabled: {{ .Values.astrago.ingress.enabled | default false }}
+  className: "{{ .Values.astrago.ingress.className | default "nginx" }}"
+  annotations:
+    {{- if .Values.astrago.ingress.annotations }}
+    {{- toYaml .Values.astrago.ingress.annotations | nindent 4 }}
+    {{- end }}
+  hosts:
+    - host: {{ .Values.astrago.ingress.host | default .Values.externalIP }}
+      paths:
+        - path: /
+          pathType: Prefix
+          service: nginx-service
+          port: 80
+  {{/* TLS 설정은 ingress.yaml 템플릿에서 certificates 시스템을 통해 자동 처리됨 */}}

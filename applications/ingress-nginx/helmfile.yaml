@@ -1,0 +1,10 @@
+releases:
+- name: ingress-nginx
+  namespace: ingress-nginx
+  chart: ingress-nginx
+  wait: true
+  installed: {{ eq .Values.ingress.enabled true }}  # Ingress 모드일 때만 설치
+  labels:
+    app: ingress-nginx
+  values:
+  - values.yaml.gotmpl

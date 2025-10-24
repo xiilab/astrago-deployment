@@ -2,9 +2,10 @@
 export LANG=en_US.UTF-8
 
 # Fixing the environment name
-environment_name="astrago"
+environment_name="prod"
 
-CURRENT_DIR=$(dirname "$(realpath "$0")")
+# Portable alternative to realpath (works on Ubuntu, RedHat, and older systems)
+CURRENT_DIR=$(cd "$(dirname "$0")" && pwd)
 
 # Function to check and install binaries
 install_binary() {
@@ -12,8 +13,17 @@ install_binary() {
     if ! command -v $cmd &> /dev/null; then
         echo "===> Installing $cmd"
         if [[ -f "$CURRENT_DIR/tools/linux/$cmd" ]]; then
-            sudo cp "$CURRENT_DIR/tools/linux/$cmd" /usr/local/bin/
-            sudo chmod +x /usr/local/bin/$cmd
+            # Handle sudo availability (works on both Ubuntu and RedHat)
+            if [ "$EUID" -ne 0 ] && command -v sudo &> /dev/null; then
+                sudo cp "$CURRENT_DIR/tools/linux/$cmd" /usr/local/bin/
+                sudo chmod +x /usr/local/bin/$cmd
+            elif [ "$EUID" -eq 0 ]; then
+                cp "$CURRENT_DIR/tools/linux/$cmd" /usr/local/bin/
+                chmod +x /usr/local/bin/$cmd
+            else
+                echo "FATAL: This script requires root privileges. Run as root or install sudo."
+                exit 1
+            fi
         else
             echo "FATAL: $cmd binary not found in tools folder."
             exit 1
@@ -25,15 +35,19 @@ install_binary() {
 
 # Function to print usage
 print_usage() {
-    echo "Usage: $0 [env|sync|destroy]"
+    echo "Usage: $0 [env|sync|destroy] [OPTIONS]"
     echo ""
     echo "env          : Create a new environment configuration file. Prompts the user for the external connection IP address, NFS server IP address, and base path of NFS."
     echo "sync         : Install (or update) the entire Astrago app for the already configured environment."
     echo "destroy      : Uninstall the entire Astrago app for the already configured environment."
     echo "sync <app name>    : Install (or update) a specific app."
-    echo "                Usage: $0 sync <app name>"
+    echo "                Usage: $0 sync <app name> [--mode=nodeport|ingress]"
     echo "destroy <app name> : Uninstall a specific app."
     echo "                Usage: $0 destroy <app name>"
+    echo ""
+    echo "OPTIONS:"
+    echo "  --mode=nodeport  : Use NodePort access mode (default)"
+    echo "  --mode=ingress   : Use Ingress access mode"
     echo ""
     echo "Available Apps:"
     echo "nfs-provisioner"
@@ -97,10 +111,79 @@ get_base_path() {
 
 # Main function
 main() {
-    case "$1" in
-        "--help")
-            print_usage
-            ;;
+    # Check and install yq (mikefarah/yq) if not available or wrong version
+    YQ_CORRECT=false
+    if command -v yq &> /dev/null; then
+        # Check if it's the correct yq (mikefarah/yq)
+        if yq --version 2>&1 | grep -q "mikefarah"; then
+            YQ_CORRECT=true
+        else
+            echo "Wrong yq version detected (Python yq). Installing correct yq (mikefarah/yq)..."
+        fi
+    else
+        echo "yq not found. Installing yq (mikefarah/yq)..."
+    fi
+
+    if [ "$YQ_CORRECT" = false ]; then
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS
+            brew install mikefarah/tap/yq
+        elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            # Linux - with wget/curl fallback for compatibility
+            YQ_VERSION="v4.35.1"
+            YQ_BINARY="yq_linux_amd64"
+            YQ_URL="https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BINARY}"
+
+            # Download with wget or curl (works on both Ubuntu and RedHat)
+            if command -v wget &> /dev/null; then
+                wget "${YQ_URL}" -O /tmp/yq_new
+            elif command -v curl &> /dev/null; then
+                curl -L "${YQ_URL}" -o /tmp/yq_new
+            else
+                echo "FATAL: Neither wget nor curl found. Please install wget or curl."
+                exit 1
+            fi
+
+            # Handle sudo availability (works on both Ubuntu and RedHat)
+            if [ "$EUID" -ne 0 ] && command -v sudo &> /dev/null; then
+                sudo mv /tmp/yq_new /usr/local/bin/yq
+                sudo chmod +x /usr/local/bin/yq
+            elif [ "$EUID" -eq 0 ]; then
+                mv /tmp/yq_new /usr/local/bin/yq
+                chmod +x /usr/local/bin/yq
+            else
+                echo "FATAL: This script requires root privileges. Run as root or install sudo."
+                exit 1
+            fi
+        fi
+        echo "yq (mikefarah/yq) installed successfully."
+    fi
+
+    # Parse --mode option (default: nodeport)
+    ACCESS_MODE="nodeport"
+    APP_NAME=""
+    COMMAND=""
+
+    for arg in "$@"; do
+        case "$arg" in
+            --mode=*)
+                ACCESS_MODE="${arg#*=}"
+                ;;
+            --help)
+                print_usage
+                ;;
+            env|sync|destroy)
+                COMMAND="$arg"
+                ;;
+            *)
+                if [ -z "$APP_NAME" ] && [ -n "$COMMAND" ]; then
+                    APP_NAME="$arg"
+                fi
+                ;;
+        esac
+    done
+
+    case "$COMMAND" in
         "env")
             # Get the external IP address from the user
             get_ip_address external_ip "Enter the connection URL (e.g. 10.61.3.12)"
@@ -126,12 +209,32 @@ main() {
         "sync" | "destroy")
             if [ ! -d "environments/$environment_name" ]; then
                 echo "Environment is not configured. Please run env first."
-            elif [ -n "$2" ]; then
-                echo "Running helmfile -e $environment_name -l app=$2 $1."
-                helmfile -e "$environment_name" -l "app=$2" "$1"
             else
-                echo "Running helmfile -e $environment_name $1."
-                helmfile -e "$environment_name" "$1"
+                # Update values.yaml based on ACCESS_MODE
+                VALUES_FILE="environments/$environment_name/values.yaml"
+                if [ "$ACCESS_MODE" = "ingress" ]; then
+                    echo "===> Access Mode: Ingress"
+                    echo "Updating $VALUES_FILE for Ingress mode..."
+                    yq -i '.ingress.enabled = true' "$VALUES_FILE"
+                    yq -i '.astrago.ingress.enabled = true' "$VALUES_FILE"
+                    yq -i '.astrago.ingress.tls.enabled = true' "$VALUES_FILE"
+                    yq -i '.astrago.truststore.enabled = true' "$VALUES_FILE"
+                else
+                    echo "===> Access Mode: NodePort (default)"
+                    echo "Updating $VALUES_FILE for NodePort mode..."
+                    yq -i '.ingress.enabled = false' "$VALUES_FILE"
+                    yq -i '.astrago.ingress.enabled = false' "$VALUES_FILE"
+                    yq -i '.astrago.ingress.tls.enabled = false' "$VALUES_FILE"
+                    yq -i '.astrago.truststore.enabled = false' "$VALUES_FILE"
+                fi
+
+                if [ -n "$APP_NAME" ]; then
+                    echo "Running helmfile -e $environment_name -l app=$APP_NAME $COMMAND."
+                    helmfile -e "$environment_name" -l "app=$APP_NAME" "$COMMAND"
+                else
+                    echo "Running helmfile -e $environment_name $COMMAND."
+                    helmfile -e "$environment_name" "$COMMAND"
+                fi
             fi
             ;;
         *)
@@ -145,4 +248,3 @@ for cmd in helm helmfile kubectl; do
     install_binary $cmd
 done
 main "$@"
-

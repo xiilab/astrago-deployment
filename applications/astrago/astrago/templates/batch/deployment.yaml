@@ -28,11 +28,47 @@ spec:
       serviceAccountName: {{ include "common.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.batch.podSecurityContext | nindent 8 }}
+      {{- if .Values.astrago.truststore.enabled }}
+      initContainers:
+        - name: setup-truststore
+          image: "{{ default .Values.batch.image.registry .Values.global.imageRegistry }}/{{ .Values.batch.image.repository }}:{{ .Values.batch.image.tag }}"
+          command: ["/bin/bash"]
+          args:
+            - -c
+            - |
+              echo "Setting up truststore with TLS certificate..."
+              cp $JAVA_HOME/lib/security/cacerts /opt/truststore/cacerts
+              echo "Importing TLS certificate: astrago-cert"
+              keytool -import -alias astrago-cert -file /tmp/certs/tls.crt -keystore /opt/truststore/cacerts -storepass changeit -noprompt
+              echo "TLS certificate imported successfully"
+          volumeMounts:
+            - name: truststore
+              mountPath: /opt/truststore
+            - name: {{ .Values.astrago.tls.secretName | default "astrago-tls-secret" }}
+              mountPath: /tmp/certs
+      {{- else }}
+      {{- with .Values.batch.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.batch.securityContext | nindent 12 }}          
           image: "{{ default .Values.batch.image.registry .Values.global.imageRegistry }}/{{ .Values.batch.image.repository }}:{{ .Values.batch.image.tag }}"          
+          command: ["java"]
+          args:
+          - "-Duser.timezone=Asia/Seoul"
+          {{- if .Values.astrago.truststore.enabled }}
+          - "-Djavax.net.ssl.trustStore=/opt/truststore/cacerts"
+          - "-Djavax.net.ssl.trustStorePassword=changeit"
+          {{- else }}
+          - "-Djavax.net.ssl.trustStore=/root/astrago/cacerts"
+          - "-Djavax.net.ssl.trustStorePassword=changeit"
+          {{- end }}
+          - "-jar"
+          - "/java/app.jar"
           env:
           {{- range $key, $obj := .Values.batch.env }}
             - name: {{ $obj.name }}
@@ -41,6 +77,13 @@ spec:
           volumeMounts:
             - name: astrago-workload-log
               mountPath: /root/astrago
+            {{- if .Values.astrago.truststore.enabled }}
+            - name: truststore
+              mountPath: /opt/truststore
+            {{- end }}
+            {{- with .Values.batch.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
 
           ports:
             - name: http
@@ -52,6 +95,16 @@ spec:
         - name: astrago-workload-log
           persistentVolumeClaim:
             claimName: workload-log-pvc
+        {{- if .Values.astrago.truststore.enabled }}
+        - name: truststore
+          emptyDir: {}
+        - name: {{ .Values.astrago.tls.secretName | default "astrago-tls-secret" }}
+          secret:
+            secretName: {{ .Values.astrago.tls.secretName | default "astrago-tls-secret" }}
+        {{- end }}
+        {{- with .Values.batch.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- with .Values.batch.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

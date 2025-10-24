@@ -1,5 +1,7 @@
-# externalIP:
-externalIP: 10.61.3.91 #변경필요 
+externalIP: 10.61.3.83 #변경필요 
+ingress:
+  enabled: false  # NodePort 모드 기본값 (--mode=ingress로 변경 가능)
+
 gpu_operator:
   driver:
     version: "570.172.08" # 설치된 NVIDIA GPU Driver Version
@@ -9,22 +11,57 @@ gpu_operator:
 # Volume Settings
 nfs:
   storageClassName: astrago-nfs-csi
-  server: 10.61.3.91 #변경필요 
+  server: 10.61.3.83 #변경필요 
   basePath: /nfs-data/astrago
 # Keycloak Settings
 keycloak:
   adminUser: admin
   adminPassword: xiirocks
   servicePort: 30001
+  serviceType: #ClusterIP  # ClusterIP OR NodePort
   image:
     repository: xiilab/astrago-keycloak-theme
     tag: "v1.2.0" # common/values.yaml의 themeVersion과 동기화
     pullPolicy: Always
 # Astrago Settings
 astrago:
-  proxyUrl:
+  proxyUrl: #https://10.61.3.83.nip.io
   servicePort: 30080
   userInitPassword: astrago
+  global:
+    imagePullSecrets:
+      - name: ghcr-pull-secret # GHCR 프라이빗 레지스트리 접근
+
+  # === TLS SSL SET ===
+  tls:
+    secretName: "astrago-tls-secret"  # USED TLS Secret NAME
+  
+  # === Ingress SETTING (Secret create) ===
+  ingress:
+    enabled: false  # NodePort 모드 기본값 (--mode=ingress로 변경 가능)
+    className: "nginx"
+    host: #"10.61.3.83.nip.io"  # externalIP와 일치하도록 수정
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      # limit size (proxy-config.yaml의 client_max_body_size 0)
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+      # proxy buffer size (proxy-config.yaml)
+      nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+      nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
+      nginx.ingress.kubernetes.io/proxy-busy-buffers-size: "256k"  # ← proxy-buffer-size보다 크거나 같아야함.
+      # Timeout set (proxy-config.yaml)
+      nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+      # large header size
+      nginx.ingress.kubernetes.io/large-client-header-buffers: "8 8k"
+    tls:
+      enabled: false  # Ingress 모드일 때만 필요 (NodePort 기본값: false)
+  
+  # === Truststore set (Secret) ===  
+  truststore:
+    enabled: false  # Ingress 모드일 때만 필요 (NodePort 기본값: false)
+
   keycloak:
     externalKeycloakUrl:
     realm: astrago
@@ -37,52 +74,23 @@ astrago:
     password: xiirocks
     maxLifetime: "1800000"
   core:
-    registry: "docker.io"
-    repository: "xiilab/astrago-posco"
-    imageTag: "core-stage-224a"
+    registry: "ghcr.io"
+    repository: "xiilab/astrago-backend"
+    imageTag: "core-stage-1.0-34d86024"
   batch:
-    registry: "docker.io"
-    repository: "xiilab/astrago-posco"
-    imageTag: "batch-stage-224a"
+    registry: "ghcr.io"
+    repository: "xiilab/astrago-backend"
+    imageTag: "batch-stage-1.0-34d86024"
   monitor:
-    registry: "docker.io"
-    repository: "xiilab/astrago-posco"
-    imageTag: "monitor-stage-224a"
+    registry: "ghcr.io"
+    repository: "xiilab/astrago-backend"
+    imageTag: "monitor-stage-1.0-34d86024"
   frontend:
-    registry: "docker.io"
-    repository: "xiilab/astrago-posco"
-    imageTag: frontend-stage-2e50
+    registry: "ghcr.io"
+    repository: "xiilab/astrago-frontend"
+    imageTag: "frontend-stage-1.0-9c31f980"
   oneview:
     enabled: false
-# Loki Settings
-# loki:
-#   replicas: 1
-#   resources:
-#     limits:
-#       cpu: "2000m"
-#       memory: "4Gi"
-#     requests:
-#       cpu: "1000m"
-#       memory: "2Gi"
-#   persistence:
-#     enabled: true
-#     size: "100Gi"
-#     storageClass: "astrago-nfs-csi"
-#   retention:
-#     enabled: true
-#     period: "2160h" # 90 days for production environment
-#     compaction_interval: "10m"
-#     delete_delay: "2h"
-#     delete_worker_count: 150
-# # Promtail Settings
-# promtail:
-#   resources:
-#     limits:
-#       cpu: "500m"
-#       memory: "1Gi"
-#     requests:
-#       cpu: "200m"
-#       memory: "512Mi"
 
 harbor:
   servicePort: 30002
