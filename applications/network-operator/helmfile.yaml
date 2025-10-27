@@ -1,0 +1,16 @@
+#repositories:
+#  - name: nvidia
+#    url: https://helm.ngc.nvidia.com/nvidia
+
+releases:
+  - name: network-operator
+    namespace: network-operator
+    chart: network-operator
+    wait: true
+    createNamespace: true
+    labels:
+      app: network-operator
+      type: infra
+    values:
+    - values.yaml.gotmpl
+

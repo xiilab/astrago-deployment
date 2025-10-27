@@ -1,0 +1,157 @@
+# Node Feature Discovery
+nfd:
+  enabled: true
+
+psp:
+  enabled: false
+
+upgradeCRDs: true
+
+# SR-IOV Network Operator
+sriovNetworkOperator:
+  enabled: true
+  configDaemonNodeSelectorExtra:
+    node-role.kubernetes.io/worker: ""
+
+# Node Feature discovery chart related values
+node-feature-discovery:
+  image:
+    pullPolicy: IfNotPresent
+  nodeFeatureRule:
+    createCRD: false
+  master:
+    instance: "nvidia.networking"
+  worker:
+    tolerations:
+      - key: "node-role.kubernetes.io/master"
+        operator: "Equal"
+        value: ""
+        effect: "NoSchedule"
+      - key: "node-role.kubernetes.io/control-plane"
+        operator: "Equal"
+        value: ""
+        effect: "NoSchedule"
+      - key: "nvidia.com/gpu"
+        operator: "Equal"
+        value: "present"
+        effect: "NoSchedule"
+
+# SR-IOV Network Operator chart related values
+sriov-network-operator:
+  operator:
+    tolerations:
+      - key: "node-role.kubernetes.io/master"
+        operator: "Exists"
+        effect: "NoSchedule"
+      - key: "node-role.kubernetes.io/control-plane"
+        operator: "Exists"
+        effect: "NoSchedule"
+    resourcePrefix: "nvidia.com"
+    enableAdmissionController: false
+    cniBinPath: "/opt/cni/bin"
+    clusterType: "kubernetes"
+  
+  # Image URIs for sriov-network-operator components
+  images:
+    operator: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/mellanox/sriov-network-operator:network-operator-23.5.0
+    sriovConfigDaemon: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/mellanox/sriov-network-operator-config-daemon:network-operator-23.5.0
+    sriovCni: {{ .Values.offline.registry | default "ghcr.io" }}/k8snetworkplumbingwg/sriov-cni:v2.7.0
+    ibSriovCni: {{ .Values.offline.registry | default "ghcr.io" }}/k8snetworkplumbingwg/ib-sriov-cni:v1.0.3
+    sriovDevicePlugin: {{ .Values.offline.registry | default "ghcr.io" }}/k8snetworkplumbingwg/sriov-network-device-plugin:v3.5.1
+    resourcesInjector: {{ .Values.offline.registry | default "ghcr.io" }}/k8snetworkplumbingwg/network-resources-injector:v1.4
+    webhook: {{ .Values.offline.registry | default "ghcr.io" }}/k8snetworkplumbingwg/sriov-network-operator-webhook:v1.1.0
+
+# General Operator related values
+operator:
+  tolerations:
+    - key: "node-role.kubernetes.io/master"
+      operator: "Equal"
+      value: ""
+      effect: "NoSchedule"
+    - key: "node-role.kubernetes.io/control-plane"
+      operator: "Equal"
+      value: ""
+      effect: "NoSchedule"
+  repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
+  image: network-operator
+
+imagePullSecrets: []
+
+# NicClusterPolicy CR values:
+deployCR: false
+
+# OFED Driver
+ofedDriver:
+  deploy: false
+  image: mofed
+  repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/mellanox
+  version: 23.04-0.5.3.3.1
+
+# NV Peer Memory Driver
+nvPeerDriver:
+  deploy: false
+  image: nv-peer-mem-driver
+  repository: {{ .Values.offline.registry | default "nvcr.io" }}/mellanox
+  version: 1.1-0
+  gpuDriverSourcePath: /run/nvidia/driver
+
+# RDMA Shared Device Plugin
+rdmaSharedDevicePlugin:
+  deploy: true
+  image: k8s-rdma-shared-dev-plugin
+  repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
+  version: v1.3.2
+  resources:
+    - name: rdma_shared_device_a
+      vendors: [15b3]
+
+# SR-IOV Device Plugin
+sriovDevicePlugin:
+  deploy: false
+  image: sriov-network-device-plugin
+  repository: {{ .Values.offline.registry | default "ghcr.io" }}/k8snetworkplumbingwg
+  version: v3.5.1
+  resources:
+    - name: hostdev
+      vendors: [15b3]
+
+# IB Kubernetes
+ibKubernetes:
+  deploy: false
+  image: ib-kubernetes
+  repository: {{ .Values.offline.registry | default "ghcr.io" }}/mellanox
+  version: v1.0.2
+  periodicUpdateSeconds: 5
+  pKeyGUIDPoolRangeStart: "02:00:00:00:00:00:00:00"
+  pKeyGUIDPoolRangeEnd: "02:FF:FF:FF:FF:FF:FF:FF"
+
+# NVIDIA IPAM
+nvIpam:
+  deploy: false
+  image: nvidia-k8s-ipam
+  repository: {{ .Values.offline.registry | default "ghcr.io" }}/mellanox
+  version: v0.0.2
+
+# Secondary Network
+secondaryNetwork:
+  deploy: true
+  cniPlugins:
+    deploy: true
+    image: plugins
+    repository: {{ .Values.offline.registry | default "ghcr.io" }}/k8snetworkplumbingwg
+    version: v1.2.0-amd64
+  multus:
+    deploy: true
+    image: multus-cni
+    repository: {{ .Values.offline.registry | default "ghcr.io" }}/k8snetworkplumbingwg
+    version: v3.9.3
+  ipoib:
+    deploy: false
+    image: ipoib-cni
+    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
+    version: v1.1.0
+  ipamPlugin:
+    deploy: true
+    image: whereabouts
+    repository: {{ .Values.offline.registry | default "ghcr.io" }}/k8snetworkplumbingwg
+    version: v0.6.1-amd64

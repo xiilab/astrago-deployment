@@ -1,0 +1,9 @@
+dependencies:
+- name: node-feature-discovery
+  repository: http://kubernetes-sigs.github.io/node-feature-discovery/charts
+  version: 0.8.0
+- name: sriov-network-operator
+  repository: ""
+  version: 0.1.0
+digest: sha256:c453932a070d14414f4e677179b6177fe301f5ea81a764ec09d65cf7795d438b
+generated: "2021-06-09T15:43:22.583410406+03:00"
