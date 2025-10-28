@@ -1,6 +1,0 @@
-# Auto-generated with dependencies on 2025-09-11 15:35:00
-# Source: helmfile template --environment default (with dependencies)
-
-docker.io/mpioperator/mpi-operator:0.3.0
-ghcr.io/cowboysysop/pytest:1.0.35
-

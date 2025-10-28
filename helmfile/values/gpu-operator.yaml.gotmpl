@@ -1,147 +1,146 @@
-gpu-operator:
-  validator:
-    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
-    image: gpu-operator-validator
-    # version: ""
-  operator:
+validator:
+  repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
+  image: gpu-operator-validator
+  version: "v25.3.4"  # 명시적 버전 지정 (오프라인 배포용)
+operator:
+  repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
+  image: gpu-operator  
+  # version: ""    
+  initContainer:
+    image: cuda
     repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
-    image: gpu-operator  
-    # version: ""    
-    initContainer:
-      image: cuda
-      repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
-      # version: 12.6.3-base-ubi9      
+    # version: 12.6.3-base-ubi9      
 
-  dcgmExporter:
+dcgmExporter:
+  enabled: true
+  repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/k8s
+  image: dcgm-exporter
+  # version: 3.3.9-3.6.1-ubuntu22.04
+  imagePullPolicy: IfNotPresent
+  config:
+    name: metrics-config
+  env:
+    - name: DCGM_EXPORTER_LISTEN
+      value: ":9400"
+    - name: DCGM_EXPORTER_KUBERNETES
+      value: "true"
+    - name: DCGM_EXPORTER_COLLECTORS
+      value: "/etc/dcgm-exporter/dcgm-metrics.csv"
+  serviceMonitor:
     enabled: true
-    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/k8s
-    image: dcgm-exporter
-    # version: 3.3.9-3.6.1-ubuntu22.04
-    imagePullPolicy: IfNotPresent
-    config:
-      name: metrics-config
-    env:
-      - name: DCGM_EXPORTER_LISTEN
-        value: ":9400"
-      - name: DCGM_EXPORTER_KUBERNETES
-        value: "true"
-      - name: DCGM_EXPORTER_COLLECTORS
-        value: "/etc/dcgm-exporter/dcgm-metrics.csv"
-    serviceMonitor:
-      enabled: true
-      interval: 15s
-      honorLabels: false
-      additionalLabels: {}
-      relabelings: []
+    interval: 15s
+    honorLabels: false
+    additionalLabels: {}
+    relabelings: []
 
-  dcgm:
-    enabled: true
+dcgm:
+  enabled: true
+  repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
+  image: dcgm
+  imagePullPolicy: IfNotPresent
+
+driver:
+  enabled: true
+  repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
+  image: driver
+  imagePullPolicy: IfNotPresent
+  manager:
+    image: k8s-driver-manager
     repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
-    image: dcgm
-    imagePullPolicy: IfNotPresent
 
-  driver:
-    enabled: true
-    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
-    image: driver
-    imagePullPolicy: IfNotPresent
-    manager:
-      image: k8s-driver-manager
-      repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
+toolkit:
+  enabled: true
+  repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/k8s
+  image: container-toolkit
+  imagePullPolicy: IfNotPresent
 
-  toolkit:
-    enabled: true
-    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/k8s
-    image: container-toolkit
-    imagePullPolicy: IfNotPresent
+devicePlugin:
+  enabled: true
+  repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
+  image: k8s-device-plugin
+  imagePullPolicy: IfNotPresent
+  config:
+    name: nvidia-plugin-config-mps
 
-  devicePlugin:
-    enabled: true
-    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
-    image: k8s-device-plugin
-    imagePullPolicy: IfNotPresent
-    config:
-      name: nvidia-plugin-config-mps
+gfd:
+  enabled: true
+  repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
+  image: k8s-device-plugin
+  imagePullPolicy: IfNotPresent
 
-  gfd:
-    enabled: true
-    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
-    image: k8s-device-plugin
-    imagePullPolicy: IfNotPresent
+migManager:
+  enabled: true
+  repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
+  image: k8s-mig-manager
+  imagePullPolicy: IfNotPresent
+  config:
+    name: "custom-mig-parted-config"
+    default: "all-disabled"
 
-  migManager:
-    enabled: true
-    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
-    image: k8s-mig-manager
-    imagePullPolicy: IfNotPresent
-    config:
-      name: "custom-mig-parted-config"
-      default: "all-disabled"
+nodeStatusExporter:
+  enabled: false
+  repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
+  image: gpu-operator-validator
+  # version: ""
+  imagePullPolicy: IfNotPresent
 
-  nodeStatusExporter:
-    enabled: false
-    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
-    image: gpu-operator-validator
-    # version: ""
-    imagePullPolicy: IfNotPresent
+gds:
+  enabled: false
+  repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
+  image: nvidia-fs
+  # version: "2.20.5"
+  imagePullPolicy: IfNotPresent
 
-  gds:
-    enabled: false
-    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
-    image: nvidia-fs
-    # version: "2.20.5"
-    imagePullPolicy: IfNotPresent
+vgpuManager:
+  enabled: false
+  repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
+  image: vgpu-manager
+  version: ""
+  imagePullPolicy: IfNotPresent
 
-  vgpuManager:
-    enabled: false
-    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
-    image: vgpu-manager
-    version: ""
-    imagePullPolicy: IfNotPresent
+vgpuDeviceManager:
+  enabled: false  
+  repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
+  image: vgpu-device-manager
+  # version: v0.2.8
+  imagePullPolicy: IfNotPresent
 
-  vgpuDeviceManager:
-    enabled: false  
-    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
-    image: vgpu-device-manager
-    # version: v0.2.8
-    imagePullPolicy: IfNotPresent
+sandboxDevicePlugin:
+  enabled: false
+  repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
+  image: kubevirt-gpu-device-plugin
+  # version: v1.2.10
+  imagePullPolicy: IfNotPresent
 
-  sandboxDevicePlugin:
-    enabled: false
-    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia
-    image: kubevirt-gpu-device-plugin
-    # version: v1.2.10
-    imagePullPolicy: IfNotPresent
+kataManager:
+  enabled: false
+  repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
+  image: k8s-kata-manager
+  # version: v0.2.2
+  imagePullPolicy: IfNotPresent
 
-  kataManager:
-    enabled: false
-    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
-    image: k8s-kata-manager
-    # version: v0.2.2
-    imagePullPolicy: IfNotPresent
-
-  ccManager:
-    enabled: false
-    repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
-    image: k8s-cc-manager
-    # version: v0.1.1
-    imagePullPolicy: IfNotPresent
+ccManager:
+  enabled: false
+  repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
+  image: k8s-cc-manager
+  # version: v0.1.1
+  imagePullPolicy: IfNotPresent
 
 node-feature-discovery:
-  master:
-    extraLabelNs:
-      - nvidia.com
-    serviceAccount:
-      name: node-feature-discovery
+master:
+  extraLabelNs:
+    - nvidia.com
+  serviceAccount:
+    name: node-feature-discovery
 
 # Global settings
 imagePullSecrets: []
 tolerations:
-  - key: "node-role.kubernetes.io/master"
-    operator: "Equal"
-    value: ""
-    effect: "NoSchedule"
-  - key: "node-role.kubernetes.io/control-plane"
-    operator: "Equal"
-    value: ""
-    effect: "NoSchedule"
+- key: "node-role.kubernetes.io/master"
+  operator: "Equal"
+  value: ""
+  effect: "NoSchedule"
+- key: "node-role.kubernetes.io/control-plane"
+  operator: "Equal"
+  value: ""
+  effect: "NoSchedule"

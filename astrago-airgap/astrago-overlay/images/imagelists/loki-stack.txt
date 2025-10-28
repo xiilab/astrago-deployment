@@ -1,3 +1,0 @@
-# Auto-generated from helmfile template on #오후
-# Source: helmfile template --environment default
-
