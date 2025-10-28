@@ -1,4 +1,4 @@
-.PHONY: all build build-all clean install test lint fmt deps help
+.PHONY: all build build-all clean install test lint fmt deps help release-prep release-upload download-binaries install-from-release
 
 # 변수 정의
 BINARY_NAME := extract-images
@@ -6,6 +6,8 @@ VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev
 BUILD_TIME := $(shell date -u '+%Y-%m-%d_%H:%M:%S')
 COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "none")
 LDFLAGS := -ldflags "-X main.version=$(VERSION) -X main.commit=$(COMMIT) -X main.date=$(BUILD_TIME)"
+REPO := xiilab/astrago-deployment
+RELEASE_VERSION ?= $(VERSION)
 
 # Go 환경 변수
 GO := go
@@ -92,15 +94,62 @@ clean:
 # 도움말
 help:
 	@echo "Available targets:"
-	@echo "  make build            - Build for current platform"
-	@echo "  make build-all        - Build for all platforms"
-	@echo "  make test             - Run unit tests"
-	@echo "  make test-coverage    - Generate test coverage report (HTML)"
-	@echo "  make test-integration - Run integration tests"
-	@echo "  make bench            - Run benchmarks"
-	@echo "  make lint             - Run linter"
-	@echo "  make fmt              - Format code"
-	@echo "  make deps             - Update dependencies"
-	@echo "  make install          - Install binary to tools directory"
-	@echo "  make clean            - Clean build artifacts"
+	@echo "  make build               - Build for current platform"
+	@echo "  make build-all           - Build for all platforms"
+	@echo "  make test                - Run unit tests"
+	@echo "  make test-coverage       - Generate test coverage report (HTML)"
+	@echo "  make test-integration    - Run integration tests"
+	@echo "  make bench               - Run benchmarks"
+	@echo "  make lint                - Run linter"
+	@echo "  make fmt                 - Format code"
+	@echo "  make deps                - Update dependencies"
+	@echo "  make install             - Install binary to tools directory"
+	@echo "  make clean               - Clean build artifacts"
+	@echo ""
+	@echo "Release targets:"
+	@echo "  make release-prep        - Prepare release artifacts (tar.gz)"
+	@echo "  make release-upload      - Upload to GitHub Release (requires gh CLI)"
+	@echo "  make download-binaries   - Download from GitHub Release (no build needed)"
+	@echo "  make install-from-release - Download and install to /usr/local/bin"
+
+# GitHub Release 관련 명령어
+release-prep: build-all ## GitHub Release용 바이너리 압축
+	@echo "📦 Compressing binaries for release..."
+	@cd bin && \
+	tar -czf astrago-image-extractor-$(RELEASE_VERSION)-linux-amd64.tar.gz $(BINARY_NAME)-linux-amd64 && \
+	tar -czf astrago-image-extractor-$(RELEASE_VERSION)-linux-arm64.tar.gz $(BINARY_NAME)-linux-arm64 && \
+	tar -czf astrago-image-extractor-$(RELEASE_VERSION)-darwin-amd64.tar.gz $(BINARY_NAME)-darwin-amd64 && \
+	tar -czf astrago-image-extractor-$(RELEASE_VERSION)-darwin-arm64.tar.gz $(BINARY_NAME)-darwin-arm64
+	@echo "✅ Release artifacts ready in bin/"
+	@ls -lh bin/*.tar.gz
+
+release-upload: release-prep ## GitHub Release 업로드 (gh CLI 필요)
+	@echo "🚀 Uploading to GitHub Release..."
+	@if ! command -v gh >/dev/null 2>&1; then \
+		echo "❌ GitHub CLI (gh) not installed"; \
+		echo "   Install: https://cli.github.com/"; \
+		exit 1; \
+	fi
+	gh release create $(RELEASE_VERSION) bin/*.tar.gz \
+		--repo $(REPO) \
+		--title "Astrago Image Extractor $(RELEASE_VERSION)" \
+		--notes "Automated release for $(RELEASE_VERSION)"
+
+download-binaries: ## GitHub Release에서 바이너리 다운로드 (원격 서버용)
+	@echo "📥 Downloading binaries from GitHub Release..."
+	@PLATFORM=$$(go env GOOS)-$$(go env GOARCH) && \
+	mkdir -p bin && \
+	cd bin && \
+	curl -L "https://github.com/$(REPO)/releases/latest/download/astrago-image-extractor-$$PLATFORM.tar.gz" -o temp.tar.gz && \
+	tar -xzf temp.tar.gz && \
+	rm -f temp.tar.gz && \
+	chmod +x $(BINARY_NAME)-* && \
+	echo "✅ Downloaded: $(BINARY_NAME)-$$PLATFORM"
+
+install-from-release: download-binaries ## 다운로드 후 PATH에 설치
+	@echo "📍 Installing to /usr/local/bin..."
+	@PLATFORM=$$(go env GOOS)-$$(go env GOARCH) && \
+	sudo cp bin/$(BINARY_NAME)-$$PLATFORM /usr/local/bin/$(BINARY_NAME) && \
+	echo "✅ Installed: /usr/local/bin/$(BINARY_NAME)"
+	@$(BINARY_NAME) --version
 
