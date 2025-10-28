@@ -183,6 +183,23 @@ func removeOverriddenImages(images map[string]bool) map[string]bool {
 	return result
 }
 
+// removeWindowsExporter removes windows-exporter images which are Windows-only
+// and should not be included when windowsMonitoring.enabled=false
+func removeWindowsExporter(images map[string]bool) map[string]bool {
+    result := make(map[string]bool)
+    for img := range images {
+        // 대표 레지스트리 경로들 필터링
+        if strings.Contains(img, "/prometheus-community/windows-exporter:") {
+            log.Debug().
+                Str("image", img).
+                Msg("Windows Exporter 이미지 제외 (windowsMonitoring.disabled)")
+            continue
+        }
+        result[img] = true
+    }
+    return result
+}
+
 // normalizeImage normalizes the image reference
 func normalizeImage(image string) string {
 	// 트림
@@ -267,6 +284,9 @@ func (w *Writer) writeText(images map[string]bool) error {
 	// 커스텀 이미지가 존재할 경우 벤더 기본 이미지 제거
 	imageSet = removeOverriddenImages(imageSet)
 
+    // Windows Exporter 제거 (비활성화된 경우 텍스트/주석에서 감지된 참조 방지)
+    imageSet = removeWindowsExporter(imageSet)
+
 	// set을 slice로 변환
 	imageList := make([]string, 0, len(imageSet))
 	for img := range imageSet {
@@ -326,6 +346,9 @@ func (w *Writer) writeJSON(images map[string]bool) error {
 
 	// 커스텀 이미지가 존재할 경우 벤더 기본 이미지 제거
 	imageSet = removeOverriddenImages(imageSet)
+
+    // Windows Exporter 제거
+    imageSet = removeWindowsExporter(imageSet)
 
 	// set을 slice로 변환
 	imageList := make([]string, 0, len(imageSet))
@@ -389,6 +412,9 @@ func (w *Writer) writeYAML(images map[string]bool) error {
 
 	// 커스텀 이미지가 존재할 경우 벤더 기본 이미지 제거
 	imageSet = removeOverriddenImages(imageSet)
+
+    // Windows Exporter 제거
+    imageSet = removeWindowsExporter(imageSet)
 
 	// set을 slice로 변환
 	imageList := make([]string, 0, len(imageSet))

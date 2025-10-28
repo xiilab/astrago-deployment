@@ -64,3 +64,10 @@ prometheusConfigReloader:
     repository: quay.io/prometheus-operator/prometheus-config-reloader
     tag: v0.75.2
 
+
+# Windows Exporter는 Windows 전용 바이너리로 리눅스 환경에서는 비활성화
+windowsExporter:
+  enabled: false
+prometheus-windows-exporter:
+  enabled: false
+
