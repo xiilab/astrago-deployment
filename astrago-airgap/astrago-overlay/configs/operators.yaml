@@ -1,0 +1,187 @@
+# Operator 차트별 추가 이미지 설정
+# Helm SDK 렌더링으로 추출되지 않는 이미지들을 정의
+
+operators:
+  # GPU Operator
+  gpu-operator:
+    enabled: true
+    images:
+      - path: operator.repository
+        tag_path: operator.version
+      - path: driver.repository
+        tag_path: driver.version
+      # 3필드 구조 (repository + image + version)
+      - path: toolkit.repository
+        image_path: toolkit.image
+        tag_path: toolkit.version
+      - path: devicePlugin.repository
+        image_path: devicePlugin.image
+        tag_path: devicePlugin.version
+      - path: dcgmExporter.repository
+        image_path: dcgmExporter.image
+        tag_path: dcgmExporter.version
+      - path: gfd.repository
+        image_path: gfd.image
+        tag_path: gfd.version
+      - path: migManager.repository
+        image_path: migManager.image
+        tag_path: migManager.version
+      - path: nodeStatusExporter.repository
+        image_path: nodeStatusExporter.image
+        tag_path: nodeStatusExporter.version
+      - path: validator.repository
+        image_path: validator.image
+        tag_path: validator.version
+
+  # Prometheus Operator
+  prometheus:
+    enabled: true
+    aliases: ["kube-prometheus-stack", "prometheus-operator"]
+    images:
+      - path: prometheusOperator.image.repository
+        tag_path: prometheusOperator.image.tag
+      # Prometheus Config Reloader (repository + tag) - 2필드 방식
+      - path: prometheusConfigReloader.image.repository
+        tag_path: prometheusConfigReloader.image.tag
+      - path: prometheus.prometheusSpec.image.repository
+        tag_path: prometheus.prometheusSpec.image.tag
+      - path: alertmanager.alertmanagerSpec.image.repository
+        tag_path: alertmanager.alertmanagerSpec.image.tag
+      - path: grafana.image.repository
+        tag_path: grafana.image.tag
+      - path: kubeStateMetrics.image.repository
+        tag_path: kubeStateMetrics.image.tag
+      - path: nodeExporter.image.repository
+        tag_path: nodeExporter.image.tag
+
+  # MPI Operator
+  mpi-operator:
+    enabled: true
+    images:
+      - path: image.repository
+        tag_path: image.tag
+
+  # Node Feature Discovery
+  nfd:
+    enabled: true
+    aliases: ["node-feature-discovery"]
+    images:
+      - path: image.repository
+        tag_path: image.tag
+      - path: master.image.repository
+        tag_path: master.image.tag
+      - path: worker.image.repository
+        tag_path: worker.image.tag
+
+  # Loki Stack
+  loki-stack:
+    enabled: true
+    images:
+      - path: loki.image.repository
+        tag_path: loki.image.tag
+      - path: promtail.image.repository
+        tag_path: promtail.image.tag
+      - path: grafana.image.repository
+        tag_path: grafana.image.tag
+
+  # Harbor
+  harbor:
+    enabled: true
+    images:
+      - path: core.image.repository
+        tag_path: core.image.tag
+      - path: portal.image.repository
+        tag_path: portal.image.tag
+      - path: jobservice.image.repository
+        tag_path: jobservice.image.tag
+      - path: registry.registry.image.repository
+        tag_path: registry.registry.image.tag
+      - path: registry.controller.image.repository
+        tag_path: registry.controller.image.tag
+      - path: chartmuseum.image.repository
+        tag_path: chartmuseum.image.tag
+      - path: trivy.image.repository
+        tag_path: trivy.image.tag
+      - path: notary.server.image.repository
+        tag_path: notary.server.image.tag
+      - path: notary.signer.image.repository
+        tag_path: notary.signer.image.tag
+      - path: database.internal.image.repository
+        tag_path: database.internal.image.tag
+      - path: redis.internal.image.repository
+        tag_path: redis.internal.image.tag
+      - path: exporter.image.repository
+        tag_path: exporter.image.tag
+
+  # Gap #4: Additional Operator naming conventions (7개 누락 이미지)
+
+  # NVIDIA GPU Operator - Driver Manager
+  gpu-operator-driver-manager:
+    enabled: true
+    parent: gpu-operator
+    images:
+      - path: driver.manager.repository
+        tag_path: driver.manager.version
+      - path: driver.manager.env.DRIVER_BRANCH
+        tag_path: driver.version
+
+  # NVIDIA DCGM (Data Center GPU Manager)
+  dcgm:
+    enabled: true
+    parent: gpu-operator
+    aliases: ["nvidia-dcgm", "dcgm-exporter"]
+    images:
+      - path: dcgm.repository
+        tag_path: dcgm.version
+      - path: dcgmExporter.repository
+        tag_path: dcgmExporter.version
+
+  # NVIDIA Container Toolkit
+  nvidia-container-toolkit:
+    enabled: true
+    parent: gpu-operator
+    images:
+      - path: toolkit.repository
+        tag_path: toolkit.version
+      - path: toolkit.env.TOOLKIT_VERSION
+        tag_path: toolkit.version
+
+  # Prometheus Node Exporter
+  prometheus-node-exporter:
+    enabled: true
+    parent: prometheus
+    aliases: ["node-exporter"]
+    images:
+      - path: nodeExporter.image.repository
+        tag_path: nodeExporter.image.tag
+      - path: prometheus-node-exporter.image.repository
+        tag_path: prometheus-node-exporter.image.tag
+
+  # Kube State Metrics
+  kube-state-metrics:
+    enabled: true
+    parent: prometheus
+    images:
+      - path: kubeStateMetrics.image.repository
+        tag_path: kubeStateMetrics.image.tag
+      - path: kube-state-metrics.image.repository
+        tag_path: kube-state-metrics.image.tag
+
+  # NFD (Node Feature Discovery) Topology Updater
+  nfd-topology-updater:
+    enabled: true
+    parent: nfd
+    images:
+      - path: topologyUpdater.image.repository
+        tag_path: topologyUpdater.image.tag
+
+  # MPI Operator Kubectl Delivery
+  mpi-operator-kubectl-delivery:
+    enabled: true
+    parent: mpi-operator
+    images:
+      - path: kubectlDelivery.image.repository
+        tag_path: kubectlDelivery.image.tag
+      - path: kubectl.repository
+        tag_path: kubectl.tag
+
