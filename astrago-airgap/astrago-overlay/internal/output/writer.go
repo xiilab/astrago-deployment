@@ -76,6 +76,15 @@ func isValidImage(image string) bool {
 		return false
 	}
 
+	// NVCR 잘못된 루트/조직 레벨 참조 제거
+	// 예: nvcr.io/nvidia:latest, nvcr.io/nvidia
+	if strings.HasPrefix(image, "nvcr.io/nvidia") && !strings.Contains(image, "/") {
+		return false
+	}
+	if strings.HasPrefix(image, "nvcr.io/nvidia:") {
+		return false
+	}
+
 	return true
 }
 
@@ -139,6 +148,35 @@ func removeLegacyReplacements(images map[string]bool) map[string]bool {
 				Msg("Bitnami 이미지 제외 (bitnamilegacy로 대체됨)")
 			continue
 		}
+		result[img] = true
+	}
+
+	return result
+}
+
+// removeOverriddenImages removes vendor images when a custom replacement exists
+// 현재 규칙:
+// - xiilab/astrago-keycloak-theme 가 있으면 bitnami/keycloak 제거
+func removeOverriddenImages(images map[string]bool) map[string]bool {
+	result := make(map[string]bool)
+
+	hasCustomKeycloak := false
+	for img := range images {
+		if strings.Contains(img, "xiilab/astrago-keycloak-theme:") {
+			hasCustomKeycloak = true
+			break
+		}
+	}
+
+	for img := range images {
+		// Keycloak: custom 이미지가 있으면 bitnami 기본 이미지는 제외
+		if hasCustomKeycloak && (strings.Contains(img, "/bitnami/keycloak:") || strings.HasPrefix(img, "bitnami/keycloak:")) {
+			log.Debug().
+				Str("bitnami_image", img).
+				Msg("Keycloak 기본 이미지 제외 (custom 이미지 존재)")
+			continue
+		}
+
 		result[img] = true
 	}
 
@@ -226,6 +264,9 @@ func (w *Writer) writeText(images map[string]bool) error {
 	// bitnami → bitnamilegacy 대체 처리
 	imageSet = removeLegacyReplacements(imageSet)
 
+	// 커스텀 이미지가 존재할 경우 벤더 기본 이미지 제거
+	imageSet = removeOverriddenImages(imageSet)
+
 	// set을 slice로 변환
 	imageList := make([]string, 0, len(imageSet))
 	for img := range imageSet {
@@ -282,6 +323,9 @@ func (w *Writer) writeJSON(images map[string]bool) error {
 
 	// bitnami → bitnamilegacy 대체 처리
 	imageSet = removeLegacyReplacements(imageSet)
+
+	// 커스텀 이미지가 존재할 경우 벤더 기본 이미지 제거
+	imageSet = removeOverriddenImages(imageSet)
 
 	// set을 slice로 변환
 	imageList := make([]string, 0, len(imageSet))
@@ -342,6 +386,9 @@ func (w *Writer) writeYAML(images map[string]bool) error {
 	imageSet = removeLegacyReplacements(imageSet)
 	// 태그 없는 중복 제거
 	imageSet = removeDuplicatesWithoutTag(imageSet)
+
+	// 커스텀 이미지가 존재할 경우 벤더 기본 이미지 제거
+	imageSet = removeOverriddenImages(imageSet)
 
 	// set을 slice로 변환
 	imageList := make([]string, 0, len(imageSet))

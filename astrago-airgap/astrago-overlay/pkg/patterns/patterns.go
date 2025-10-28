@@ -239,6 +239,13 @@ func ExtractFromManifest(manifest string) []string {
 	docs := strings.Split(manifest, "---")
 
 	for _, doc := range docs {
+		// Skip non-Kubernetes resource documents (e.g., Chart.yaml metadata)
+		// Only process documents with 'kind:' field (actual K8s resources)
+		// Chart.yaml has 'apiVersion: v2' but no 'kind:' field
+		if !strings.Contains(doc, "kind:") {
+			continue
+		}
+
 		// Gap #5: 확장된 regex 패턴들
 		patterns := []struct {
 			name    string
@@ -320,6 +327,18 @@ func ExtractFromManifest(manifest string) []string {
 				},
 			},
 			{
+				// Pattern 4-1: 컨테이너 args 내 reloader 이미지 플래그
+				// 예: --prometheus-config-reloader=quay.io/prometheus-operator/prometheus-config-reloader:v0.75.2
+				name:  "arg_reloader_image",
+				regex: regexp.MustCompile(`(?m)--prometheus-config-reloader=([^\s"']+)`),
+				extract: func(match []string) string {
+					if len(match) > 1 {
+						return match[1]
+					}
+					return ""
+				},
+			},
+			{
 				// Pattern 5: ConfigMap/Secret 데이터 내 이미지
 				name:  "configmap_image",
 				regex: regexp.MustCompile(`(?m)^\s*[a-z0-9\-\.]+:\s*\|\s*\n\s+([a-z0-9\-\.]+/[^\s]+:[^\s]+)`),
@@ -334,14 +353,26 @@ func ExtractFromManifest(manifest string) []string {
 
 		// 모든 패턴으로 이미지 추출
 		for _, p := range patterns {
+			// Chart.yaml 등 메타데이터에 있는 안내용 repository 문자열을 피하기 위해
+			// 표준 image: 패턴 외에는 tag 또는 digest가 반드시 포함된 경우만 허용한다
 			matches := p.regex.FindAllStringSubmatch(doc, -1)
 			for _, match := range matches {
 				img := p.extract(match)
-				if img != "" {
-					img = strings.Trim(img, `"'`)
-					if isValidImage(img) {
-						images[img] = true
+				if img == "" {
+					continue
+				}
+				img = strings.Trim(img, `"'`)
+
+				// 표준 image: 필드가 아닌 경우는 안전장치로 tag/digest 필수
+				if p.name != "standard_image" {
+					if !strings.Contains(img, ":") && !strings.Contains(img, "@") {
+						// 태그/다이제스트 없는 repository 문자열은 스킵
+						continue
 					}
+				}
+
+				if isValidImage(img) {
+					images[img] = true
 				}
 			}
 		}

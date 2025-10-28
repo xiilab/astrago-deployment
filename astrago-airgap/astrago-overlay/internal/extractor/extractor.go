@@ -38,6 +38,9 @@ func (e *Extractor) Extract(results []*renderer.RenderResult, charts []*discover
 
 	log.Info().Msg("이미지 추출 시작")
 
+	// Track successfully rendered charts
+	successfulCharts := make(map[string]bool)
+
 	// Extract from manifests
 	for _, result := range results {
 		if result.Error != nil {
@@ -62,6 +65,9 @@ func (e *Extractor) Extract(results []*renderer.RenderResult, charts []*discover
 			continue
 		}
 
+		// Mark as successfully rendered
+		successfulCharts[result.Chart.Name] = true
+
 		// Extract from manifests
 		manifestImages := patterns.ExtractFromManifest(result.Manifests)
 		mu.Lock()
@@ -76,8 +82,16 @@ func (e *Extractor) Extract(results []*renderer.RenderResult, charts []*discover
 			Msg("Manifest에서 이미지 추출")
 	}
 
-	// Supplement with values.yaml extraction
+	// Supplement with values.yaml extraction (only for charts without successful manifest rendering)
 	for _, chart := range charts {
+		// Skip if chart was successfully rendered
+		if successfulCharts[chart.Name] {
+			log.Debug().
+				Str("chart", chart.Name).
+				Msg("Manifest 렌더링 성공, Values 보조 추출 skip")
+			continue
+		}
+
 		if chart.Values != nil {
 			valuesImages := patterns.ExtractFromValues(chart.Values)
 			mu.Lock()
@@ -89,7 +103,7 @@ func (e *Extractor) Extract(results []*renderer.RenderResult, charts []*discover
 			log.Debug().
 				Str("chart", chart.Name).
 				Int("count", len(valuesImages)).
-				Msg("Values에서 추가 이미지 추출")
+				Msg("Values에서 보조 이미지 추출")
 		}
 	}
 
