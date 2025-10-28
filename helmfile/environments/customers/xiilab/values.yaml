@@ -14,7 +14,7 @@ externalAccess:
       secretName: "astrago-tls-cert"
 # Customer-specific network settings
 nfs:
-  server: 10.61.3.2 # xiilab NFS 서버
+  server: 10.61.3.2 # xiilab NFS 서버 (base 설정 override)
 # Astrago Settings - xiilab 전용 설정
 astrago:
   baseUrl: https://demo.astrago.ai # 외부 접근 URL

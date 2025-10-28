@@ -20,6 +20,7 @@ nfs:
   storageClassName: astrago-nfs-csi
   server: 
   basePath: /kube_storage
+  size: "10Gi" # PVC 기본 크기
   
 # Keycloak Settings
 keycloak:

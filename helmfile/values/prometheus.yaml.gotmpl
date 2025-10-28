@@ -58,3 +58,9 @@ prometheus:
             requests:
               storage: 50Gi
 
+# Prometheus Config Reloader - 명시적 버전 지정 (오프라인 배포용)
+prometheusConfigReloader:
+  image:
+    repository: quay.io/prometheus-operator/prometheus-config-reloader
+    tag: v0.75.2
+

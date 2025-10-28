@@ -1,11 +1,9 @@
 global:
   imageRegistry: "{{ .Values.offline.registry | default "" }}"
-  {{- if hasKey .Values.astrago "global" }}
-  {{- if hasKey .Values.astrago.global "imagePullSecrets" }}
+{{- if and (hasKey .Values "astrago") (hasKey .Values.astrago "global") (hasKey .Values.astrago.global "imagePullSecrets") }}
   imagePullSecrets:
-    {{- toYaml .Values.astrago.global.imagePullSecrets | nindent 4 }}
-  {{- end }}
-  {{- end }}
+{{ toYaml .Values.astrago.global.imagePullSecrets | nindent 4 }}
+{{- end }}
 
 core:
   replicaCount: 3
@@ -321,7 +319,7 @@ ingress:
     {{- end }}
 
 nfs:
-  size: 10Gi
+  size: {{ .Values.nfs.size }}
   accessModes:
   - ReadWriteOnce
   storageClassName: {{ .Values.nfs.storageClassName }}
