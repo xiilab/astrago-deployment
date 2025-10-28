@@ -60,11 +60,6 @@ func (i *ImageInfo) Normalize() string {
 	// Remove quotes
 	img = strings.Trim(img, `"'`)
 
-	// Add default tag if missing
-	if !strings.Contains(img, ":") {
-		img += ":latest"
-	}
-
 	return img
 }
 
@@ -129,14 +124,16 @@ func tryExtractImage(m map[string]interface{}) string {
 	// Pattern A: repository + image + tag
 	if repo, ok := m["repository"].(string); ok {
 		if image, ok := m["image"].(string); ok {
-			tag := getStringOrDefault(m, "tag", "latest")
-			return fmt.Sprintf("%s/%s:%s", repo, image, tag)
+            if tag, ok := m["tag"].(string); ok && tag != "" {
+                return fmt.Sprintf("%s/%s:%s", repo, image, tag)
+            }
+            return ""
 		}
 	}
 
 	// Pattern B: repository + tag
 	if repo, ok := m["repository"].(string); ok {
-		if tag, ok := m["tag"].(string); ok {
+        if tag, ok := m["tag"].(string); ok && tag != "" {
 			return fmt.Sprintf("%s:%s", repo, tag)
 		}
 	}
@@ -144,8 +141,10 @@ func tryExtractImage(m map[string]interface{}) string {
 	// Pattern C: registry + image + tag
 	if registry, ok := m["registry"].(string); ok {
 		if image, ok := m["image"].(string); ok {
-			tag := getStringOrDefault(m, "tag", "latest")
-			return fmt.Sprintf("%s/%s:%s", registry, image, tag)
+            if tag, ok := m["tag"].(string); ok && tag != "" {
+                return fmt.Sprintf("%s/%s:%s", registry, image, tag)
+            }
+            return ""
 		}
 	}
 

@@ -66,15 +66,24 @@ func isValidImage(image string) bool {
 		return false
 	}
 
-	// 태그나 digest가 없는 이미지는 오프라인 배포에서 사용 불가
-	// (latest를 pull하게 되어 정확한 버전 관리 불가)
-	if !strings.Contains(image, ":") && !strings.Contains(image, "@") {
+    // 태그나 digest가 없는 이미지는 오프라인 배포에서 사용 불가
+    // (latest를 pull하게 되어 정확한 버전 관리 불가)
+    if !strings.Contains(image, ":") && !strings.Contains(image, "@") {
 		log.Debug().
 			Str("image", image).
 			Str("reason", "no tag or digest").
 			Msg("태그 없는 이미지 제외 (오프라인 배포 불가)")
 		return false
 	}
+
+    // latest 태그는 오프라인 배포에서 고정 버전 관리가 어려워 제외
+    if strings.HasSuffix(image, ":latest") && !strings.Contains(image, "@") {
+        log.Debug().
+            Str("image", image).
+            Str("reason", "latest tag disallowed").
+            Msg("latest 태그 이미지 제외")
+        return false
+    }
 
 	// NVCR 잘못된 루트/조직 레벨 참조 제거
 	// 예: nvcr.io/nvidia:latest, nvcr.io/nvidia
@@ -186,18 +195,18 @@ func removeOverriddenImages(images map[string]bool) map[string]bool {
 // removeWindowsExporter removes windows-exporter images which are Windows-only
 // and should not be included when windowsMonitoring.enabled=false
 func removeWindowsExporter(images map[string]bool) map[string]bool {
-    result := make(map[string]bool)
-    for img := range images {
-        // 대표 레지스트리 경로들 필터링
-        if strings.Contains(img, "/prometheus-community/windows-exporter:") {
-            log.Debug().
-                Str("image", img).
-                Msg("Windows Exporter 이미지 제외 (windowsMonitoring.disabled)")
-            continue
-        }
-        result[img] = true
-    }
-    return result
+	result := make(map[string]bool)
+	for img := range images {
+		// 대표 레지스트리 경로들 필터링
+		if strings.Contains(img, "/prometheus-community/windows-exporter:") {
+			log.Debug().
+				Str("image", img).
+				Msg("Windows Exporter 이미지 제외 (windowsMonitoring.disabled)")
+			continue
+		}
+		result[img] = true
+	}
+	return result
 }
 
 // normalizeImage normalizes the image reference
@@ -284,8 +293,8 @@ func (w *Writer) writeText(images map[string]bool) error {
 	// 커스텀 이미지가 존재할 경우 벤더 기본 이미지 제거
 	imageSet = removeOverriddenImages(imageSet)
 
-    // Windows Exporter 제거 (비활성화된 경우 텍스트/주석에서 감지된 참조 방지)
-    imageSet = removeWindowsExporter(imageSet)
+	// Windows Exporter 제거 (비활성화된 경우 텍스트/주석에서 감지된 참조 방지)
+	imageSet = removeWindowsExporter(imageSet)
 
 	// set을 slice로 변환
 	imageList := make([]string, 0, len(imageSet))
@@ -347,8 +356,8 @@ func (w *Writer) writeJSON(images map[string]bool) error {
 	// 커스텀 이미지가 존재할 경우 벤더 기본 이미지 제거
 	imageSet = removeOverriddenImages(imageSet)
 
-    // Windows Exporter 제거
-    imageSet = removeWindowsExporter(imageSet)
+	// Windows Exporter 제거
+	imageSet = removeWindowsExporter(imageSet)
 
 	// set을 slice로 변환
 	imageList := make([]string, 0, len(imageSet))
@@ -413,8 +422,8 @@ func (w *Writer) writeYAML(images map[string]bool) error {
 	// 커스텀 이미지가 존재할 경우 벤더 기본 이미지 제거
 	imageSet = removeOverriddenImages(imageSet)
 
-    // Windows Exporter 제거
-    imageSet = removeWindowsExporter(imageSet)
+	// Windows Exporter 제거
+	imageSet = removeWindowsExporter(imageSet)
 
 	// set을 slice로 변환
 	imageList := make([]string, 0, len(imageSet))

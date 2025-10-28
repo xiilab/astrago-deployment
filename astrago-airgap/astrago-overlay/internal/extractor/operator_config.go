@@ -107,10 +107,11 @@ func ExtractImagesFromSpec(spec *OperatorSpec, values map[string]interface{}) []
 			continue
 		}
 
-		tag := utils.GetNestedValue(values, imgSpec.TagPath)
-		if tag == "" {
-			tag = "latest"
-		}
+    tag := utils.GetNestedValue(values, imgSpec.TagPath)
+    if tag == "" {
+        // 태그가 없으면 오프라인 배포 안정성을 위해 스킵
+        continue
+    }
 
 		// GPU Operator 3필드 구조 지원: repository + image + version
 		// 예: nvcr.io/nvidia/cloud-native + gpu-operator-validator + v25.3.4
