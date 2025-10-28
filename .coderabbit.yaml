@@ -1,7 +1,8 @@
-system_language: ko-KR
+language: "ko-KR"
 early_access: false
+
 reviews:
-  profile: chill
+  profile: "chill"
   request_changes_workflow: true
   high_level_summary: true
   poem: false
@@ -9,6 +10,27 @@ reviews:
   collapse_walkthrough: false
   auto_review:
     enabled: true
+    auto_incremental_review: true
     drafts: false
+    base_branches:
+      - "main"
+      - "release/.*"
+      - "stabilize/.*"
+    ignore_title_keywords:
+      - "DO NOT REVIEW"
+  path_filters:
+    - "!dist/**"
+    - "!build/**"
+    - "!node_modules/**"
+    - "!*.min.js"
+    - "!*.map"
+  tools:
+    gitleaks:
+      enabled: true
 chat:
   auto_reply: true
+
+knowledge_base:
+  opt_out: false
+  code_guidelines:
+    enabled: true
