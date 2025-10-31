@@ -15,6 +15,7 @@
 ## 📋 목차
 
 - [사전 확인사항](#-사전-확인사항)
+- [설치 준비사항](#-설치-준비사항)
 - [설치 진행](#-설치-진행)
 - [문제 해결](#-문제-해결)
 - [확인 및 접속](#-확인-및-접속)
@@ -76,6 +77,76 @@ ls -lh airgap/kubespray-offline/outputs/files/gpu-driver/
 
 # Fabric Manager 설치 필요 여부 확인 (A100/H100 GPU 사용 시)
 systemctl status nvidia-fabricmanager
+```
+
+---
+
+## 📦 설치 준비사항
+
+설치에 필요한 컨테이너 이미지와 패키지를 다운로드합니다.
+
+> **⚠️ 주의**: 이 단계는 **인터넷이 연결된 환경**에서 수행해야 합니다.
+
+### 1️⃣ 컨테이너 이미지 준비
+
+새로운 애플리케이션 추가 시, 필요한 컨테이너 이미지를 등록합니다.
+
+#### 📝 이미지 목록 파일 위치
+```
+airgap/kubespray-offline/imagelists/
+├── astrago.txt           # Astrago 애플리케이션 이미지
+├── csi-driver-nfs.txt    # NFS CSI Driver 이미지
+├── gpu-operator.txt      # GPU Operator 이미지
+├── harbor.txt            # Harbor 레지스트리 이미지
+├── keycloak.txt          # Keycloak 인증 서버 이미지
+├── network-operator.txt  # Network Operator 이미지
+└── prometheus.txt        # Prometheus 모니터링 이미지
+```
+
+#### ✏️ 이미지 추가 방법
+
+1. **해당하는 txt 파일 편집**
+   ```bash
+   # 예: Network Operator 이미지 추가
+   vi airgap/kubespray-offline/imagelists/network-operator.txt
+   ```
+
+2. **이미지 전체 경로 기입** (한 줄에 하나씩)
+   ```
+   nvcr.io/nvidia/cloud-native/network-operator:v23.5.0
+   ghcr.io/k8snetworkplumbingwg/sriov-cni:v2.7.0
+   ghcr.io/mellanox/ib-kubernetes:v1.0.2
+   ```
+
+3. **다운로드 스크립트 실행**
+   ```bash
+   # 모든 이미지 다운로드
+   cd airgap
+   ./download-all.sh
+   ```
+
+**⏳ 소요 시간**: 이미지 크기에 따라 30분 ~ 2시간
+
+#### ✅ 다운로드 결과 확인
+
+```bash
+# 다운로드된 이미지 확인
+ls -lh airgap/kubespray-offline/outputs/images/
+
+# 압축 파일 생성 확인
+ls -lh astrago-deployment.tar.gz
+```
+
+### 2️⃣ 폐쇄망 서버로 전송
+
+다운로드가 완료되면 압축 파일을 폐쇄망 환경의 Master 노드로 전송합니다.
+
+```bash
+# 압축 파일 생성
+tar -czf astrago-deployment.tar.gz astrago-deployment/
+
+# 폐쇄망 Master 노드로 전송
+scp astrago-deployment.tar.gz root@<MASTER_IP>:/root/
 ```
 
 ---
