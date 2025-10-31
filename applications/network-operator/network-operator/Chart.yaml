@@ -3,11 +3,11 @@ appVersion: v23.5.0
 dependencies:
 - condition: nfd.enabled
   name: node-feature-discovery
-  repository: http://kubernetes-sigs.github.io/node-feature-discovery/charts
+  repository: file://charts/node-feature-discovery
   version: 0.10.1
 - condition: sriovNetworkOperator.enabled
   name: sriov-network-operator
-  repository: ""
+  repository: file://charts/sriov-network-operator
   version: 0.1.0
 description: Nvidia network operator
 home: https://mellanox.github.io/network-operator

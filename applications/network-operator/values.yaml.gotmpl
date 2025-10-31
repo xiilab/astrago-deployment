@@ -16,6 +16,8 @@ sriovNetworkOperator:
 # Node Feature discovery chart related values
 node-feature-discovery:
   image:
+    repository: {{ .Values.offline.registry | default "registry.k8s.io" }}/nfd/node-feature-discovery
+    tag: v0.10.1
     pullPolicy: IfNotPresent
   nodeFeatureRule:
     createCRD: false
@@ -74,6 +76,7 @@ operator:
       effect: "NoSchedule"
   repository: {{ .Values.offline.registry | default "nvcr.io" }}/nvidia/cloud-native
   image: network-operator
+  tag: v23.5.0
 
 imagePullSecrets: []
 
@@ -107,7 +110,7 @@ rdmaSharedDevicePlugin:
 
 # SR-IOV Device Plugin
 sriovDevicePlugin:
-  deploy: false
+  deploy: true
   image: sriov-network-device-plugin
   repository: {{ .Values.offline.registry | default "ghcr.io" }}/k8snetworkplumbingwg
   version: v3.5.1
@@ -117,13 +120,14 @@ sriovDevicePlugin:
 
 # IB Kubernetes
 ibKubernetes:
-  deploy: false
+  deploy: true
   image: ib-kubernetes
   repository: {{ .Values.offline.registry | default "ghcr.io" }}/mellanox
   version: v1.0.2
   periodicUpdateSeconds: 5
   pKeyGUIDPoolRangeStart: "02:00:00:00:00:00:00:00"
   pKeyGUIDPoolRangeEnd: "02:FF:FF:FF:FF:FF:FF:FF"
+  ufmSecret: ib-kubernetes-ufm-secret
 
 # NVIDIA IPAM
 nvIpam:

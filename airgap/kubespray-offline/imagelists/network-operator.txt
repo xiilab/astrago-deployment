@@ -1,0 +1,30 @@
+# Network Operator v23.5.0
+# Main Operator
+nvcr.io/nvidia/cloud-native/network-operator:v23.5.0
+
+# SR-IOV Network Operator Components (sriovNetworkOperator.enabled: true)
+nvcr.io/nvidia/mellanox/sriov-network-operator:network-operator-23.5.0
+nvcr.io/nvidia/mellanox/sriov-network-operator-config-daemon:network-operator-23.5.0
+ghcr.io/k8snetworkplumbingwg/sriov-cni:v2.7.0
+ghcr.io/k8snetworkplumbingwg/ib-sriov-cni:v1.0.3
+ghcr.io/k8snetworkplumbingwg/sriov-network-device-plugin:v3.5.1
+ghcr.io/k8snetworkplumbingwg/network-resources-injector:v1.4
+ghcr.io/k8snetworkplumbingwg/sriov-network-operator-webhook:v1.1.0
+
+# RDMA Shared Device Plugin (rdmaSharedDevicePlugin.deploy: true)
+nvcr.io/nvidia/cloud-native/k8s-rdma-shared-dev-plugin:v1.3.2
+
+# IB Kubernetes (ibKubernetes.deploy: true)
+ghcr.io/mellanox/ib-kubernetes:v1.0.2
+
+# Secondary Network - CNI Plugins (secondaryNetwork.cniPlugins.deploy: true)
+ghcr.io/k8snetworkplumbingwg/plugins:v1.2.0-amd64
+
+# Secondary Network - Multus CNI (secondaryNetwork.multus.deploy: true)
+ghcr.io/k8snetworkplumbingwg/multus-cni:v3.9.3
+
+# Secondary Network - Whereabouts IPAM (secondaryNetwork.ipamPlugin.deploy: true)
+ghcr.io/k8snetworkplumbingwg/whereabouts:v0.6.1-amd64
+
+# Node Feature Discovery (nfd.enabled: true)
+registry.k8s.io/nfd/node-feature-discovery:v0.10.1
